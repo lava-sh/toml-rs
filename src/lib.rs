@@ -7,6 +7,7 @@ use pyo3::{
 };
 use toml_datetime::Offset;
 
+#[cfg(not(all(target_arch = "aarch64", target_os = "linux")))]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
