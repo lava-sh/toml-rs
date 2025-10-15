@@ -133,10 +133,15 @@ fn create_timezone_from_offset<'py>(
     }
 }
 
+fn normalize_line_endings(s: String) -> String {
+    s.replace("\r\n", "\n")
+}
+
 #[pyfunction]
 fn _loads(py: Python, s: &str, parse_float: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
+    let normalized = normalize_line_endings(s.to_string());
     let value = py
-        .detach(|| toml::from_str(s))
+        .detach(|| toml::from_str(&normalized))
         .map_err(|err| TOMLDecodeError::new_err(format!("{}", err)))?;
     convert_toml(py, value, parse_float.as_ref())
 }
@@ -148,7 +153,9 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Py<PyAny>>) -> PyResult<
     let content_obj = read.call0()?;
 
     if let Ok(bytes) = content_obj.cast::<PyBytes>() {
-        match toml::from_slice(bytes.as_bytes()) {
+        let s = String::from_utf8_lossy(bytes.as_bytes()).to_string();
+        let normalized = normalize_line_endings(s);
+        match toml::from_str(&normalized) {
             Ok(value) => convert_toml(py, value, parse_float.as_ref()),
             Err(e) => Err(TOMLDecodeError::new_err(format!("{}", e))),
         }
@@ -168,4 +175,17 @@ fn _toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("_version", env!("CARGO_PKG_VERSION"))?;
     m.add("TOMLDecodeError", m.py().get_type::<TOMLDecodeError>())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_basic_crlf() {
+        let input = "line1\r\nline2\r\nline3".to_string();
+        let expected = "line1\nline2\nline3";
+        let result = normalize_line_endings(input);
+        assert_eq!(result, expected);
+    }
 }
