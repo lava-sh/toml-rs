@@ -57,11 +57,16 @@ jobs:
         shell: bash
         run: |
           uv venv .venv --python ${{ matrix.python-version }}
-          source .venv/bin/activate || .venv\Scripts\activate
+  
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            source .venv/Scripts/activate
+          else
+            source .venv/bin/activate
+          fi
+  
           uv pip install maturin
           maturin develop --release
           python -m unittest
-
   zizmor:
     name: Zizmor Check
     runs-on: ubuntu-latest
