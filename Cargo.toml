@@ -1,0 +1,24 @@
+[package]
+name = "toml-rs"
+version = "0.0.1"
+edition = "2024"
+license = "Unlicense"
+repository = "https://github.com/lava-sh/toml-rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "_toml_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.26.0" }
+toml = {version = "0.9", features = ["fast_hash"]}
+toml_datetime = "0.7.3"
+
+[target.'cfg(not(any(all(target_os = "linux", target_arch = "aarch64"), all(target_os = "linux", target_arch = "arm"), all(target_os = "linux", target_arch = "s390x"), all(target_os = "linux", target_arch = "powerpc64"))))'.dependencies]
+mimalloc = { version = "0.1", features = ["v3"] }
+
+[profile.release]
+lto = "fat"
+strip = true
+codegen-units = 1
