@@ -1,9 +1,8 @@
-use pyo3::types::PyBytes;
 use pyo3::{
     IntoPyObjectExt,
     exceptions::{PyTypeError, PyValueError},
     prelude::*,
-    types::{PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
+    types::{PyBytes, PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
 use toml_datetime::Offset;
 
@@ -133,10 +132,38 @@ fn create_timezone_from_offset<'py>(
     }
 }
 
+fn normalize_line_ending(mut s: String) -> String {
+    let bytes = unsafe { s.as_bytes_mut() };
+    let mut write = 0;
+    let mut i = 0;
+
+    while i < bytes.len() {
+        if bytes[i] == b'\r' {
+            if i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
+                bytes[write] = b'\n';
+                write += 1;
+                i += 2;
+            } else {
+                bytes[write] = b'\r';
+                write += 1;
+                i += 1;
+            }
+        } else {
+            bytes[write] = bytes[i];
+            write += 1;
+            i += 1;
+        }
+    }
+
+    s.truncate(write);
+    s
+}
+
 #[pyfunction]
 fn _loads(py: Python, s: &str, parse_float: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
+    let normalized = normalize_line_ending(s.to_string());
     let value = py
-        .detach(|| toml::from_str(s))
+        .detach(|| toml::from_str(&normalized))
         .map_err(|err| TOMLDecodeError::new_err(format!("{}", err)))?;
     convert_toml(py, value, parse_float.as_ref())
 }
@@ -147,18 +174,17 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Py<PyAny>>) -> PyResult<
     let read = bound.getattr("read")?;
     let content_obj = read.call0()?;
 
-    if let Ok(bytes) = content_obj.cast::<PyBytes>() {
-        match toml::from_slice(bytes.as_bytes()) {
-            Ok(value) => convert_toml(py, value, parse_float.as_ref()),
-            Err(e) => Err(TOMLDecodeError::new_err(format!("{}", e))),
-        }
+    let s = if let Ok(bytes) = content_obj.cast::<PyBytes>() {
+        String::from_utf8_lossy(bytes.as_bytes()).into_owned()
     } else if let Ok(s) = content_obj.extract::<&str>() {
-        _loads(py, s, parse_float)
+        s.to_string()
     } else {
-        Err(PyErr::new::<PyTypeError, _>(
+        return Err(PyErr::new::<PyTypeError, _>(
             "Expected str or bytes-like object",
-        ))
-    }
+        ));
+    };
+
+    _loads(py, &s, parse_float)
 }
 
 #[pymodule]
