@@ -78,6 +78,7 @@ jobs:
         run: zizmor .github
 
   linux:
+    needs: [tests, lint, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -115,6 +116,7 @@ jobs:
           path: dist
 
   musllinux:
+    needs: [tests, lint, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -148,6 +150,7 @@ jobs:
           path: dist
 
   windows:
+    needs: [tests, lint, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -177,6 +180,7 @@ jobs:
           path: dist
 
   macos:
+    needs: [tests, lint, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -205,6 +209,7 @@ jobs:
           path: dist
 
   sdist:
+    needs: [tests, lint, zizmor]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
