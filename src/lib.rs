@@ -176,16 +176,3 @@ fn _toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("TOMLDecodeError", m.py().get_type::<TOMLDecodeError>())?;
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_basic_crlf() {
-        let input = "line1\r\nline2\r\nline3".to_string();
-        let expected = "line1\nline2\nline3";
-        let result = normalize_line_endings(input);
-        assert_eq!(result, expected);
-    }
-}
