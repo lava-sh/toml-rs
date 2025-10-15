@@ -10,6 +10,8 @@ features = ["pyo3/extension-module"]
 [project]
 name = "toml-rs"
 dynamic = ["version"]
+license = "UNLICENSE"
+readme = "README.md"
 description = "High-performance TOML parser for Python, written in Rust"
 requires-python = ">=3.10"
 authors = [
@@ -29,6 +31,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
 ]
 
 [dependency-groups]
