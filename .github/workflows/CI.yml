@@ -51,7 +51,7 @@ jobs:
           sccache: false
           before-script-linux: |
             if command -v yum &> /dev/null; then
-                yum update -y && yum install -y perl-core openssl openssl-devel pkgconfig libatomic glibc-devel.i686 libgcc.i686
+                yum update -y && yum install -y perl-core openssl openssl-devel pkgconfig libatomic glibc-devel.i686 libgcc.i686 gcc-multilib
 
                 if [[ ! -d "/usr/lib64" ]]; then
                     ln -s /usr/lib/libatomic.so.1 /usr/lib/libatomic.so
