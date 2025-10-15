@@ -152,20 +152,17 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Py<PyAny>>) -> PyResult<
     let read = bound.getattr("read")?;
     let content_obj = read.call0()?;
 
-    if let Ok(bytes) = content_obj.cast::<PyBytes>() {
-        let s = String::from_utf8_lossy(bytes.as_bytes()).to_string();
-        let normalized = normalize_line_endings(s);
-        match toml::from_str(&normalized) {
-            Ok(value) => convert_toml(py, value, parse_float.as_ref()),
-            Err(e) => Err(TOMLDecodeError::new_err(format!("{}", e))),
-        }
+    let s = if let Ok(bytes) = content_obj.cast::<PyBytes>() {
+        String::from_utf8_lossy(bytes.as_bytes()).into_owned()
     } else if let Ok(s) = content_obj.extract::<&str>() {
-        _loads(py, s, parse_float)
+        s.to_string()
     } else {
-        Err(PyErr::new::<PyTypeError, _>(
+        return Err(PyErr::new::<PyTypeError, _>(
             "Expected str or bytes-like object",
-        ))
-    }
+        ));
+    };
+
+    _loads(py, &s, parse_float)
 }
 
 #[pymodule]
