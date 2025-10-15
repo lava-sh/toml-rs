@@ -1,0 +1,20 @@
+[package]
+name = "toml-rs"
+version = "0.0.1"
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "_toml_rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.26.0" }
+mimalloc = { version = "0.1", features = ["v3"] }
+toml = {version = "0.9", features = ["fast_hash"]}
+toml_datetime = "0.7.3"
+
+[profile.release]
+lto = "fat"
+strip = true
+codegen-units = 1
