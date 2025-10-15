@@ -12,7 +12,10 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.26.0" }
 toml = {version = "0.9", features = ["fast_hash"]}
 toml_datetime = "0.7.3"
-mimalloc = { version = "0.1", features = ["v3"] }
+mimalloc = { version = "0.1", features = ["v3"], optional = true }
+
+[features]
+malloc = ["mimalloc"]
 
 [profile.release]
 lto = "fat"
