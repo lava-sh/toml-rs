@@ -40,11 +40,8 @@ jobs:
       - name: Build wheels
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
         with:
-          rust-toolchain: stable
           target: ${{ matrix.platform.target }}
-          args: >
-            --release --out dist --find-interpreter
-            ${{ matrix.platform.target == 'x86' || matrix.platform.target == 'x86_64' && '--features malloc' || '' }}
+          args: --release --out dist --find-interpreter
           sccache: false
           manylinux: auto
       - name: Upload wheels
