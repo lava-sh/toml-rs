@@ -49,6 +49,21 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
           sccache: false
+          before-script-linux: |
+            if command -v yum &> /dev/null; then
+                yum update -y && yum install -y perl-core openssl openssl-devel pkgconfig libatomic glibc-devel.i686 libgcc.i686
+
+                if [[ ! -d "/usr/lib64" ]]; then
+                    ln -s /usr/lib/libatomic.so.1 /usr/lib/libatomic.so
+                fi
+            else
+                # Debian/Ubuntu
+                apt update -y && apt-get install -y libssl-dev openssl pkg-config libc6-dev libc6-dev-i386 gcc-multilib g++-multilib
+
+            fi
+
+            export CFLAGS="$CFLAGS -Wno-error=date-time"
+            export CXXFLAGS="$CXXFLAGS -Wno-error=date-time"
       - name: Upload wheels
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
