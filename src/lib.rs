@@ -133,13 +133,32 @@ fn create_timezone_from_offset<'py>(
     }
 }
 
-fn normalize_line_endings(s: String) -> String {
-    s.replace("\r\n", "\n")
+fn normalize_line_ending(mut s: String) -> String {
+    let bytes = unsafe { s.as_bytes_mut() };
+    let mut write = 0;
+    let mut i = 0;
+
+    while i < bytes.len() {
+        if bytes[i] == b'\r' {
+            bytes[write] = b'\n';
+            write += 1;
+            if i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
+                i += 1;
+            }
+        } else {
+            bytes[write] = bytes[i];
+            write += 1;
+        }
+        i += 1;
+    }
+
+    s.truncate(write);
+    s
 }
 
 #[pyfunction]
 fn _loads(py: Python, s: &str, parse_float: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
-    let normalized = normalize_line_endings(s.to_string());
+    let normalized = normalize_line_ending(s.to_string());
     let value = py
         .detach(|| toml::from_str(&normalized))
         .map_err(|err| TOMLDecodeError::new_err(format!("{}", err)))?;
