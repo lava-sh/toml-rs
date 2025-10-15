@@ -28,6 +28,59 @@ jobs:
       - name: Run rustfmt
         run: cargo fmt -- --check
 
+  tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-13
+        python-version:
+          - 3.10
+          - 3.11
+          - 3.12
+          - 3.13
+          - 3.14
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+        with:
+          enable-cache: false
+      - name: Create virtualenv and run tests
+        shell: bash
+        run: |
+          uv venv .venv --python ${{ matrix.python-version }}
+          source .venv/bin/activate || .venv\Scripts\activate
+          uv pip install maturin
+          maturin develop --release
+          python -m unittest
+
+  zizmor:
+    name: Zizmor Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
+        with:
+          python-version: 3.13
+      - name: Install uv
+        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
+        with:
+          enable-cache: false
+      - name: Install Zizmor
+        run: uv pip install --group dev --system
+      - name: Run Zizmor
+        run: zizmor .github
+
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -172,68 +225,11 @@ jobs:
           name: wheels-sdist
           path: dist
 
-  tests:
-    runs-on: ${{ matrix.os }}
-    needs: [linux, musllinux, windows, macos]
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-          - macos-13
-        python-version:
-          - 3.10
-          - 3.11
-          - 3.12
-          - 3.13
-          - 3.14
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-      - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
-        with:
-          enable-cache: false
-      - name: Download wheel
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          name: ${{ matrix.os == 'ubuntu-latest' && 'wheels-linux-x86_64' || matrix.os == 'windows-latest' && 'wheels-windows-x64' || 'wheels-macos-x86_64' }}
-          path: dist
-      - name: Install wheel
-        run: uv pip install dist/*.whl --system
-      - name: Run Python tests
-        run: python -m unittest
-
-  zizmor:
-    name: Zizmor Check
-    runs-on: ubuntu-latest
-    needs: [linux, musllinux, windows, macos, sdist]
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
-        with:
-          python-version: 3.13
-      - name: Install uv
-        uses: astral-sh/setup-uv@b75a909f75acd358c2196fb9a5f1299a9a8868a4 # v6.7.0
-        with:
-          enable-cache: false
-      - name: Install Zizmor
-        run: uv pip install --group dev --system
-      - name: Run Zizmor
-        run: zizmor .github
-
   release:
     name: Release
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
-    needs: [linux, musllinux, windows, macos, sdist]
+    needs: [linux, musllinux, windows, macos, sdist, zizmor, tests]
     permissions:
       # Use to sign the release artifacts
       id-token: write
