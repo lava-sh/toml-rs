@@ -1,9 +1,8 @@
-use pyo3::types::PyBytes;
 use pyo3::{
-    IntoPyObjectExt,
     exceptions::{PyTypeError, PyValueError},
     prelude::*,
-    types::{PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
+    types::{PyBytes, PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
+    IntoPyObjectExt,
 };
 use toml_datetime::Offset;
 
