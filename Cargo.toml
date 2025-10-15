@@ -12,7 +12,15 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.26.0" }
 toml = {version = "0.9", features = ["fast_hash"]}
 toml_datetime = "0.7.3"
-mimalloc = { version = "0.1", features = ["v3"]}
+
+[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))'.dependencies]
+mimalloc = { version = "0.1", features = ["v3"] }
+[target.'cfg(all(target_os = "linux", target_arch = "arm"))'.dependencies]
+mimalloc = { version = "0.1", features = ["v3"] }
+[target.'cfg(all(target_os = "linux", target_arch = "s390x"))'.dependencies]
+mimalloc = { version = "0.1", features = ["v3"] }
+[target.'cfg(all(target_os = "linux", target_arch = "powerpc64"))'.dependencies]
+mimalloc = { version = "0.1", features = ["v3"] }
 
 [profile.release]
 lto = "fat"
