@@ -139,16 +139,20 @@ fn normalize_line_ending(mut s: String) -> String {
 
     while i < bytes.len() {
         if bytes[i] == b'\r' {
-            bytes[write] = b'\n';
-            write += 1;
             if i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
+                bytes[write] = b'\n';
+                write += 1;
+                i += 2;
+            } else {
+                bytes[write] = b'\r';
+                write += 1;
                 i += 1;
             }
         } else {
             bytes[write] = bytes[i];
             write += 1;
+            i += 1;
         }
-        i += 1;
     }
 
     s.truncate(write);
