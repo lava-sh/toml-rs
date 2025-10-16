@@ -4,6 +4,7 @@ use pyo3::{
     prelude::*,
     types::{PyBytes, PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
+use std::borrow::Cow;
 use toml_datetime::Offset;
 
 #[cfg(not(any(
@@ -124,9 +125,9 @@ fn create_timezone_from_offset<'py>(
     }
 }
 
-fn normalize_line_ending(s: &str) -> String {
+fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
     if !s.contains('\r') {
-        return s.to_string();
+        return Cow::Borrowed(s);
     }
 
     let mut r = s.to_string();
@@ -153,7 +154,7 @@ fn normalize_line_ending(s: &str) -> String {
     }
 
     r.truncate(write);
-    r
+    Cow::Owned(r)
 }
 
 pyo3::import_exception!(toml_rs, TOMLDecodeError);
@@ -163,7 +164,7 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
     let normalized = normalize_line_ending(s);
     let value = py
         .detach(|| toml::from_str(&normalized))
-        .map_err(|err| TOMLDecodeError::new_err((err.to_string(), normalized.clone(), 0)))?;
+        .map_err(|err| TOMLDecodeError::new_err((err.to_string(), normalized.to_string(), 0)))?;
 
     let result = convert_toml(py, value, parse_float.as_ref())?;
     Ok(result.unbind())
