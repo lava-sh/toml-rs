@@ -34,7 +34,7 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> Py
 
     let s = if let Ok(bytes) = content_obj.cast::<PyBytes>() {
         match std::str::from_utf8(bytes.as_bytes()) {
-            Ok(valid_str) => valid_str.to_string(),
+            Ok(valid) => valid.to_string(),
             Err(_) => String::from_utf8_lossy(bytes.as_bytes()).into_owned(),
         }
     } else if content_obj.extract::<&str>().is_ok() {
