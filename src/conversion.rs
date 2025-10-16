@@ -6,16 +6,17 @@ use pyo3::{
     prelude::*,
     types::{PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
+use toml::Value;
 use toml_datetime::Offset;
 
 const MAX_RECURSION_DEPTH: usize = 999;
 
 #[derive(Clone, Debug, Default)]
-struct RecursionCheck {
+struct Recursion {
     current: usize,
 }
 
-impl RecursionCheck {
+impl Recursion {
     fn enter(&mut self) -> PyResult<()> {
         self.current += 1;
         if MAX_RECURSION_DEPTH <= self.current {
@@ -33,54 +34,54 @@ impl RecursionCheck {
 
 pub(crate) fn convert_toml<'py>(
     py: Python<'py>,
-    value: toml::Value,
+    value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    let mut recursion_check = RecursionCheck::default();
+    let mut recursion_check = Recursion::default();
     _convert_toml(py, value, parse_float, &mut recursion_check)
 }
 
 fn _convert_toml<'py>(
     py: Python<'py>,
-    value: toml::Value,
+    value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
-    recursion_check: &mut RecursionCheck,
+    recursion: &mut Recursion,
 ) -> PyResult<Bound<'py, PyAny>> {
-    recursion_check.enter()?;
+    recursion.enter()?;
 
     let toml = match value {
-        toml::Value::String(str) => str.into_bound_py_any(py),
-        toml::Value::Integer(int) => int.into_bound_py_any(py),
-        toml::Value::Float(float) => {
-            if let Some(parse_float) = parse_float {
-                let result = parse_float.call1((float.to_string(),))?;
-                if result.is_instance_of::<PyDict>() || result.is_instance_of::<PyList>() {
+        Value::String(str) => str.into_bound_py_any(py),
+        Value::Integer(int) => int.into_bound_py_any(py),
+        Value::Float(float) => {
+            if let Some(f) = parse_float {
+                let py_call = f.call1((float.to_string(),))?;
+                if py_call.cast::<PyDict>().is_ok() || py_call.cast::<PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
                 }
-                Ok(result)
+                Ok(py_call)
             } else {
                 float.into_bound_py_any(py)
             }
         }
-        toml::Value::Boolean(bool) => bool.into_bound_py_any(py),
-        toml::Value::Array(array) => {
-            let mut values = Vec::with_capacity(array.len());
+        Value::Boolean(bool) => bool.into_bound_py_any(py),
+        Value::Array(array) => {
+            let mut vec = Vec::with_capacity(array.len());
             for item in array {
-                values.push(_convert_toml(py, item, parse_float, recursion_check)?);
+                vec.push(_convert_toml(py, item, parse_float, recursion)?);
             }
-            Ok(PyList::new(py, values)?.into_any())
+            Ok(PyList::new(py, vec)?.into_any())
         }
-        toml::Value::Table(table) => {
-            let dict = PyDict::new(py);
+        Value::Table(table) => {
+            let py_dict = PyDict::new(py);
             for (k, v) in table {
-                let value = _convert_toml(py, v, parse_float, recursion_check)?;
-                dict.set_item(k, value)?;
+                let value = _convert_toml(py, v, parse_float, recursion)?;
+                py_dict.set_item(k, value)?;
             }
-            Ok(dict.into_any())
+            Ok(py_dict.into_any())
         }
-        toml::Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
+        Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let py_datetime = PyDateTime::new(
                     py,
@@ -127,7 +128,7 @@ fn _convert_toml<'py>(
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
     };
-    recursion_check.exit();
+    recursion.exit();
     toml
 }
 
@@ -146,8 +147,8 @@ fn create_timezone_from_offset<'py>(
             } else {
                 (0, seconds)
             };
-            let delta = PyDelta::new(py, days, seconds, 0, false)?;
-            PyTzInfo::fixed_offset(py, delta)
+            let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
+            PyTzInfo::fixed_offset(py, py_delta)
         }
     }
 }
