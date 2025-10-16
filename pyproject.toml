@@ -41,6 +41,14 @@ dev = [
     "pytest ~= 8.4.2",
     "zizmor ~= 1.15.2",
 ]
+bench = [
+    "pytomlpp",
+    "toml",
+    "tomlkit",
+    "qtoml",
+    "rtoml",
+    "tomli ; python_version<'3.11'",
+]
 
 [project.urls]
 Source = "https://github.com/lava-sh/toml-rs"

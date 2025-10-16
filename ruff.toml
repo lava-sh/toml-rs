@@ -21,6 +21,7 @@ ignore = [
     "S101",
     "ARG001",
     "PLR6201",
+    "PLR2004",
 ]
 
 [lint.pycodestyle]

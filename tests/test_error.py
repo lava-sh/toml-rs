@@ -76,3 +76,19 @@ def test_invalid_parse_float():
         with pytest.raises(ValueError, match=err_msg) as exc:
             tomllib.loads("f=0.1", parse_float=invalid_parse_float)
         assert str(exc.value) == err_msg
+
+
+def test_tomldecodeerror_attributes():
+    msg = "error parsing"
+    doc = "v=1\n[table]\nv='val'"
+    pos = 13
+    formatted_msg = "error parsing (at line 3, column 2)"
+
+    e = tomllib.TOMLDecodeError(msg, doc, pos)
+    assert e.args == (formatted_msg,)
+    assert str(e) == formatted_msg
+    assert e.msg == msg
+    assert e.doc == doc
+    assert e.pos == pos
+    assert e.lineno == 3
+    assert e.colno == 2

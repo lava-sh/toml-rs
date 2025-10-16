@@ -15,27 +15,19 @@ use toml_datetime::Offset;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
-pyo3::create_exception!(
-    toml_rs,
-    TOMLDecodeError,
-    PyValueError,
-    "An error raised if a document is not valid TOML."
-);
-
-fn convert_toml(
-    py: Python,
+fn convert_toml<'py>(
+    py: Python<'py>,
     value: toml::Value,
-    parse_float: Option<&Py<PyAny>>,
-) -> PyResult<Py<PyAny>> {
+    parse_float: Option<&Bound<'py, PyAny>>,
+) -> PyResult<Bound<'py, PyAny>> {
     match value {
-        toml::Value::String(str) => Ok(str.into_py_any(py)?),
-        toml::Value::Integer(int) => Ok(int.into_py_any(py)?),
+        toml::Value::String(str) => str.into_bound_py_any(py),
+        toml::Value::Integer(int) => int.into_bound_py_any(py),
         toml::Value::Float(float) => {
-            if let Some(_parse_float) = parse_float {
-                let result = _parse_float.call1(py, (float.to_string(),))?;
-                let bound = result.bind(py);
+            if let Some(parse_float) = parse_float {
+                let result = parse_float.call1((float.to_string(),))?;
 
-                if bound.is_instance_of::<PyDict>() || bound.is_instance_of::<PyList>() {
+                if result.is_instance_of::<PyDict>() || result.is_instance_of::<PyList>() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
@@ -43,16 +35,16 @@ fn convert_toml(
 
                 Ok(result)
             } else {
-                Ok(float.into_py_any(py)?)
+                float.into_bound_py_any(py)
             }
         }
-        toml::Value::Boolean(bool) => Ok(bool.into_py_any(py)?),
+        toml::Value::Boolean(bool) => bool.into_bound_py_any(py),
         toml::Value::Array(array) => {
             let mut values = Vec::with_capacity(array.len());
             for item in array {
                 values.push(convert_toml(py, item, parse_float)?);
             }
-            Ok(PyList::new(py, values)?.into())
+            Ok(PyList::new(py, values)?.into_any())
         }
         toml::Value::Table(table) => {
             let dict = PyDict::new(py);
@@ -60,7 +52,7 @@ fn convert_toml(
                 let value = convert_toml(py, v, parse_float)?;
                 dict.set_item(k, value)?;
             }
-            Ok(dict.into())
+            Ok(dict.into_any())
         }
         toml::Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
@@ -75,7 +67,7 @@ fn convert_toml(
                     time.nanosecond / 1000,
                     Some(&create_timezone_from_offset(py, &offset)?),
                 )?;
-                Ok(py_datetime.into())
+                Ok(py_datetime.into_any())
             }
             (Some(date), Some(time), None) => {
                 let py_datetime = PyDateTime::new(
@@ -89,11 +81,11 @@ fn convert_toml(
                     time.nanosecond / 1000,
                     None,
                 )?;
-                Ok(py_datetime.into())
+                Ok(py_datetime.into_any())
             }
             (Some(date), None, None) => {
                 let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
-                Ok(py_date.into())
+                Ok(py_date.into_any())
             }
             (None, Some(time), None) => {
                 let py_time = PyTime::new(
@@ -104,7 +96,7 @@ fn convert_toml(
                     time.nanosecond / 1000,
                     None,
                 )?;
-                Ok(py_time.into())
+                Ok(py_time.into_any())
             }
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
@@ -116,7 +108,7 @@ fn create_timezone_from_offset<'py>(
     offset: &Offset,
 ) -> PyResult<Bound<'py, PyTzInfo>> {
     match offset {
-        Offset::Z => Ok(PyTzInfo::utc(py)?.to_owned()),
+        Offset::Z => PyTzInfo::utc(py).map(|utc| utc.to_owned()),
         Offset::Custom { minutes } => {
             let seconds = *minutes as i32 * 60;
             let (days, seconds) = if seconds < 0 {
@@ -132,8 +124,13 @@ fn create_timezone_from_offset<'py>(
     }
 }
 
-fn normalize_line_ending(mut s: String) -> String {
-    let bytes = unsafe { s.as_bytes_mut() };
+fn normalize_line_ending(s: &str) -> String {
+    if !s.contains('\r') {
+        return s.to_string();
+    }
+
+    let mut r = s.to_string();
+    let bytes = unsafe { r.as_bytes_mut() };
     let mut write = 0;
     let mut i = 0;
 
@@ -155,21 +152,31 @@ fn normalize_line_ending(mut s: String) -> String {
         }
     }
 
-    s.truncate(write);
-    s
+    r.truncate(write);
+    r
 }
 
+pyo3::import_exception!(toml_rs, TOMLDecodeError);
+
 #[pyfunction]
-fn _loads(py: Python, s: &str, parse_float: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
-    let normalized = normalize_line_ending(s.to_string());
+fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+    let normalized = normalize_line_ending(s);
     let value = py
         .detach(|| toml::from_str(&normalized))
-        .map_err(|err| TOMLDecodeError::new_err(format!("{}", err)))?;
-    convert_toml(py, value, parse_float.as_ref())
+        .map_err(|err| {
+            TOMLDecodeError::new_err((
+                err.to_string(),
+                normalized.clone(),
+                0,
+            ))
+        })?;
+
+    let result = convert_toml(py, value, parse_float.as_ref())?;
+    Ok(result.unbind())
 }
 
 #[pyfunction]
-fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Py<PyAny>>) -> PyResult<Py<PyAny>> {
+fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let bound = fp.bind(py);
     let read = bound.getattr("read")?;
     let content_obj = read.call0()?;
@@ -192,6 +199,5 @@ fn _toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(_load, m)?)?;
     m.add_function(wrap_pyfunction!(_loads, m)?)?;
     m.add("_version", env!("CARGO_PKG_VERSION"))?;
-    m.add("TOMLDecodeError", m.py().get_type::<TOMLDecodeError>())?;
     Ok(())
 }
