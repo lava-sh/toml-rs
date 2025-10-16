@@ -18,10 +18,13 @@ pyo3::import_exception!(toml_rs, TOMLDecodeError);
 #[pyfunction]
 fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
-    let value = py
-        .detach(|| toml::from_str(&normalized))
-        .map_err(|err| TOMLDecodeError::new_err((err.to_string(), normalized.to_string(), 0)))?;
-
+    let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
+        TOMLDecodeError::new_err((
+            err.to_string(),
+            normalized.to_string(),
+            err.span().map(|s| s.start).unwrap_or(0),
+        ))
+    })?;
     let result = convert_toml(py, value, parse_float.as_ref())?;
     Ok(result.unbind())
 }

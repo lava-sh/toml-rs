@@ -28,28 +28,16 @@ def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, 
 
 
 class TOMLDecodeError(ValueError):
-    def __init__(
-        self,
-        msg: str,
-        doc: str,
-        pos: int,
-        *args: Any,
-    ):
+    def __init__(self, msg: str, doc: str, pos: int, *args: Any):
+        msg = msg.rstrip()
+        super().__init__(msg)
         lineno = doc.count("\n", 0, pos) + 1
         if lineno == 1:
             colno = pos + 1
         else:
             colno = pos - doc.rindex("\n", 0, pos)
-
-        if pos >= len(doc):
-            coord_repr = "end of document"
-        else:
-            coord_repr = f"line {lineno}, column {colno}"
-        errmsg = f"{msg} (at {coord_repr})"
-        ValueError.__init__(self, errmsg)
-
         self.msg = msg
         self.doc = doc
         self.pos = pos
-        self.lineno = lineno
         self.colno = colno
+        self.lineno = lineno
