@@ -163,13 +163,7 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
     let normalized = normalize_line_ending(s);
     let value = py
         .detach(|| toml::from_str(&normalized))
-        .map_err(|err| {
-            TOMLDecodeError::new_err((
-                err.to_string(),
-                normalized.clone(),
-                0,
-            ))
-        })?;
+        .map_err(|err| TOMLDecodeError::new_err((err.to_string(), normalized.clone(), 0)))?;
 
     let result = convert_toml(py, value, parse_float.as_ref())?;
     Ok(result.unbind())
