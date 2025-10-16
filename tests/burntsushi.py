@@ -1,15 +1,9 @@
-# SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
-# Licensed to PSF under a Contributor Agreement.
-
-"""Utilities for tests that are in the "burntsushi" format."""
-
 import datetime
 from typing import Any
 
 # Aliases for converting TOML compliance format [1] to BurntSushi format [2]
-# [1] https://github.com/toml-lang/compliance/blob/db7c3211fda30ff9ddb10292f4aeda7e2e10abc4/docs/json-encoding.md  # noqa: E501
-# [2] https://github.com/BurntSushi/toml-test/blob/4634fdf3a6ecd6aaea5f4cdcd98b2733c2694993/README.md  # noqa: E501
+# [1] https://github.com/toml-lang/compliance/blob/db7c3211fda30ff9ddb10292f4aeda7e2e10abc4/docs/json-encoding.md
+# [2] https://github.com/BurntSushi/toml-test/blob/4634fdf3a6ecd6aaea5f4cdcd98b2733c2694993/README.md
 _aliases = {
     "boolean": "bool",
     "offset datetime": "datetime",
@@ -19,35 +13,36 @@ _aliases = {
 }
 
 
-def convert(obj):  # noqa: C901
+def convert(obj: Any):  # noqa: C901, PLR0911
     if isinstance(obj, str):
         return {"type": "string", "value": obj}
-    elif isinstance(obj, bool):
+    if isinstance(obj, bool):
         return {"type": "bool", "value": str(obj).lower()}
-    elif isinstance(obj, int):
+    if isinstance(obj, int):
         return {"type": "integer", "value": str(obj)}
-    elif isinstance(obj, float):
+    if isinstance(obj, float):
         return {"type": "float", "value": _normalize_float_str(str(obj))}
-    elif isinstance(obj, datetime.datetime):
+    if isinstance(obj, datetime.datetime):
         val = _normalize_datetime_str(obj.isoformat())
         if obj.tzinfo:
             return {"type": "datetime", "value": val}
         return {"type": "datetime-local", "value": val}
-    elif isinstance(obj, datetime.time):
+    if isinstance(obj, datetime.time):
         return {
             "type": "time-local",
             "value": _normalize_localtime_str(str(obj)),
         }
-    elif isinstance(obj, datetime.date):
+    if isinstance(obj, datetime.date):
         return {
             "type": "date-local",
             "value": str(obj),
         }
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [convert(i) for i in obj]  # type: ignore[no-untyped-call]
-    elif isinstance(obj, dict):
+    if isinstance(obj, dict):
         return {k: convert(v) for k, v in obj.items()}  # type: ignore[no-untyped-call]
-    raise Exception("unsupported type")
+    msg = "unsupported type"
+    raise Exception(msg)  # noqa: TRY002
 
 
 def normalize(obj: Any) -> Any:
@@ -79,7 +74,8 @@ def normalize(obj: Any) -> Any:
                 return [normalize(item) for item in value]
             return {"type": norm_type, "value": norm_value}
         return {k: normalize(v) for k, v in obj.items()}
-    raise AssertionError("Burntsushi fixtures should be dicts/lists only")
+    msg = "Burntsushi fixtures should be dicts/lists only"
+    raise AssertionError(msg)
 
 
 def _normalize_datetime_str(dt_str: str) -> str:

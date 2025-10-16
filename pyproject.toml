@@ -36,7 +36,18 @@ classifiers = [
 
 [dependency-groups]
 dev = [
+    "ruff ~= 0.14.0",
+    "maturin ~= 1.9",
+    "pytest ~= 8.4.2",
     "zizmor ~= 1.15.2",
+]
+bench = [
+    "pytomlpp",
+    "toml",
+    "tomlkit",
+    "qtoml",
+    "rtoml",
+    "tomli ; python_version<'3.11'",
 ]
 
 [project.urls]

@@ -4,77 +4,91 @@
 
 from __future__ import annotations
 
-import unittest
 from typing import Any
 
-from . import tomllib
+import pytest
+import toml_rs as tomllib
 
 
-class TestError(unittest.TestCase):
-    def test_line_and_col(self):
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads("val=.")
-        msg = str(exc_info.exception)
-        self.assertIn("line 1, column 5", msg)
-        self.assertIn("invalid mantissa", msg)
+def test_line_and_col():
+    # invalid mantissa
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("val=.")
+    msg = str(exc.value)
+    assert "line 1, column 5" in msg
+    assert "invalid mantissa" in msg
 
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads(".")
-        msg = str(exc_info.exception)
-        self.assertIn("line 1, column", msg)
-        self.assertIn("missing value", msg)
+    # missing value
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads(".")
+    msg = str(exc.value)
+    assert "line 1, column" in msg
+    assert "missing value" in msg
 
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads("\n\nval=.")
-        msg = str(exc_info.exception)
-        self.assertIn("line 3, column 5", msg)
-        self.assertIn("invalid mantissa", msg)
+    # multiple newlines
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("\n\nval=.")
+    msg = str(exc.value)
+    assert "line 3, column 5" in msg
+    assert "invalid mantissa" in msg
 
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads("\n\n.")
-        msg = str(exc_info.exception)
-        self.assertIn("line 3, column", msg)
-        self.assertIn("missing value", msg)
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("\n\n.")
+    msg = str(exc.value)
+    assert "line 3, column" in msg
+    assert "missing value" in msg
 
-    def test_missing_value(self):
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads("\n\nfwfw=")
-        msg = str(exc_info.exception)
-        self.assertIn("line 3, column 6", msg)
-        self.assertIn("string values must be quoted", msg)
 
-    def test_invalid_char_quotes(self):
-        with self.assertRaises(tomllib.TOMLDecodeError) as exc_info:
-            tomllib.loads("v = '\n'")
-        self.assertRegex(str(exc_info.exception), r"key with no value, expected `=`")
+def test_missing_value():
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("\n\nfwfw=")
+    msg = str(exc.value)
+    assert "line 3, column 6" in msg
+    assert "string values must be quoted" in msg
 
-    def test_type_error(self):
-        with self.assertRaises(TypeError) as exc_info:
-            tomllib.loads(b"v = 1")  # type: ignore[arg-type]
-        # Mypyc extension leads to different message than pure Python
-        self.assertIn(
-            str(exc_info.exception),
-            ("Expected str object, not 'bytes'", "str object expected; got bytes"),
-        )
 
-        with self.assertRaises(TypeError) as exc_info:
-            tomllib.loads(False)  # type: ignore[arg-type]
-        # Mypyc extension leads to different message than pure Python
-        self.assertIn(
-            str(exc_info.exception),
-            ("Expected str object, not 'bool'", "str object expected; got bool"),
-        )
+def test_invalid_char_quotes():
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("v = '\n'")
+    assert "key with no value, expected `=`" in str(exc.value)
 
-    def test_invalid_parse_float(self):
-        def dict_returner(s: str) -> dict[Any, Any]:
-            return {}
 
-        def list_returner(s: str) -> list[Any]:
-            return []
+def test_type_error():
+    with pytest.raises(TypeError) as exc:
+        tomllib.loads(b"v = 1")  # type: ignore[arg-type]
+    assert str(exc.value) in ("Expected str object, not 'bytes'", "str object expected; got bytes")
 
-        for invalid_parse_float in (dict_returner, list_returner):
-            with self.assertRaises(ValueError) as exc_info:
-                tomllib.loads("f=0.1", parse_float=invalid_parse_float)
-            self.assertEqual(
-                str(exc_info.exception), "parse_float must not return dicts or lists"
-            )
+    with pytest.raises(TypeError) as exc:
+        tomllib.loads(False)  # type: ignore[arg-type]  # noqa: FBT003
+    assert str(exc.value) in ("Expected str object, not 'bool'", "str object expected; got bool")
+
+
+def test_invalid_parse_float():
+    def dict_returner(s: str) -> dict[Any, Any]:
+        return {}
+
+    def list_returner(s: str) -> list[Any]:
+        return []
+
+    err_msg = "parse_float must not return dicts or lists"
+
+    for invalid_parse_float in (dict_returner, list_returner):
+        with pytest.raises(ValueError, match=err_msg) as exc:
+            tomllib.loads("f=0.1", parse_float=invalid_parse_float)
+        assert str(exc.value) == err_msg
+
+
+def test_tomldecodeerror_attributes():
+    msg = "error parsing"
+    doc = "v=1\n[table]\nv='val'"
+    pos = 13
+    formatted_msg = "error parsing (at line 3, column 2)"
+
+    e = tomllib.TOMLDecodeError(msg, doc, pos)
+    assert e.args == (formatted_msg,)
+    assert str(e) == formatted_msg
+    assert e.msg == msg
+    assert e.doc == doc
+    assert e.pos == pos
+    assert e.lineno == 3
+    assert e.colno == 2

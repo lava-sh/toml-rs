@@ -64,9 +64,10 @@ jobs:
         run: |
           uv venv .venv --python ${{ matrix.python-version }}
           source .venv/bin/activate
-          uv pip install maturin
+          uv pip install --group dev
           maturin develop --release
-          python -m unittest
+          ruff check
+          pytest tests/
 
   zizmor:
     name: "zizmor .github/"
