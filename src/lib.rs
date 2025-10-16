@@ -182,11 +182,11 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> Py
         }
     } else if content_obj.extract::<&str>().is_ok() {
         return Err(PyErr::new::<PyTypeError, _>(
-            "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+            "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`",
         ));
     } else {
         return Err(PyErr::new::<PyTypeError, _>(
-            "Expected bytes-like object from .read()"
+            "Expected bytes-like object from .read()",
         ));
     };
 
