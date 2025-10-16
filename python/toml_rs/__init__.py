@@ -19,7 +19,15 @@ __version__: str = _version
 
 
 def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
-    return _load(fp, parse_float=parse_float)
+    b = fp.read()
+    try:
+        s = b.decode("utf-8")
+    except AttributeError:
+        raise TypeError(
+            "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+        ) from None
+
+    return _loads(s, parse_float=parse_float)
 
 
 def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:

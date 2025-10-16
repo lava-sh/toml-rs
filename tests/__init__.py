@@ -1,9 +1,14 @@
-# SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
-# Licensed to PSF under a Contributor Agreement.
+__all__ = (
+    "_init_only",
+    "tests_path",
+)
 
-__all__ = ("tomllib",)
+from pathlib import Path
 
-# By changing this one line, we can run the tests against
-# a different module name.
-import toml_rs as tomllib
+_init_only = {
+    "eq": False,
+    "repr": False,
+    "match_args": False,
+}
+
+tests_path = Path(__file__).resolve().parent

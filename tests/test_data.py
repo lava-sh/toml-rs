@@ -1,23 +1,29 @@
-# SPDX-License-Identifier: MIT
-# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
-# Licensed to PSF under a Contributor Agreement.
-
 import json
+from dataclasses import dataclass
 from pathlib import Path
-import unittest
 
-from . import burntsushi, tomllib
+import pytest
+import toml_rs as tomllib
+
+from tests import _init_only, tests_path
+from .burntsushi import (
+    convert as burntsushi_convert,
+    normalize as burntsushi_normalize,
+)
 
 
+@dataclass(**_init_only)
 class MissingFile:
-    def __init__(self, path: Path):
-        self.path = path
+    path: Path
 
 
-DATA_DIR = Path(__file__).parent / "data"
+DATA_DIR = tests_path / "data"
 
 VALID_FILES = tuple((DATA_DIR / "valid").glob("**/*.toml"))
 assert VALID_FILES, "Valid TOML test files not found"
+
+INVALID_FILES = tuple((DATA_DIR / "invalid").glob("**/*.toml"))
+assert INVALID_FILES, "Invalid TOML test files not found"
 
 _expected_files = []
 for p in VALID_FILES:
@@ -29,36 +35,38 @@ for p in VALID_FILES:
     _expected_files.append(text)
 VALID_FILES_EXPECTED = tuple(_expected_files)
 
-INVALID_FILES = tuple((DATA_DIR / "invalid").glob("**/*.toml"))
-assert INVALID_FILES, "Invalid TOML test files not found"
+
+@pytest.mark.parametrize("invalid", INVALID_FILES, ids=lambda p: p.stem)
+def test_invalid(invalid):
+    toml_bytes = invalid.read_bytes()
+    try:
+        toml_str = toml_bytes.decode()
+    except UnicodeDecodeError:
+        # Some BurntSushi tests are not valid UTF-8. Skip those.
+        pytest.skip(f"Invalid UTF-8: {invalid}")
+    with pytest.raises(tomllib.TOMLDecodeError):
+        tomllib.loads(toml_str)
 
 
-class TestData(unittest.TestCase):
-    def test_invalid(self):
-        for invalid in INVALID_FILES:
-            with self.subTest(msg=invalid.stem):
-                toml_bytes = invalid.read_bytes()
-                try:
-                    toml_str = toml_bytes.decode()
-                except UnicodeDecodeError:
-                    # Some BurntSushi tests are not valid UTF-8. Skip those.
-                    continue
-                with self.assertRaises(tomllib.TOMLDecodeError):
-                    tomllib.loads(toml_str)
+VALID_PAIRS = list(zip(VALID_FILES, VALID_FILES_EXPECTED, strict=False))
 
-    def test_valid(self):
-        for valid, expected in zip(VALID_FILES, VALID_FILES_EXPECTED):
-            with self.subTest(msg=valid.stem):
-                if isinstance(expected, MissingFile):
-                    # For a poor man's xfail, assert that this is one of the
-                    # test cases where expected data is known to be missing.
-                    assert valid.stem in {
-                        "qa-array-inline-nested-1000",
-                        "qa-table-inline-nested-1000",
-                    }
-                    continue
-                toml_str = valid.read_bytes().decode()
-                actual = tomllib.loads(toml_str)
-                actual = burntsushi.convert(actual)  # type: ignore[no-untyped-call]
-                expected = burntsushi.normalize(expected)
-                self.assertEqual(actual, expected)
+
+@pytest.mark.parametrize(
+    ("valid_file", "expected"),
+    VALID_PAIRS,
+    ids=[p[0].stem for p in VALID_PAIRS],
+)
+def test_valid(valid_file, expected):
+    if isinstance(expected, MissingFile):
+        # For a poor man's xfail, assert that this is one of the
+        # test cases where expected data is known to be missing.
+        assert valid_file.stem in {
+            "qa-array-inline-nested-1000",
+            "qa-table-inline-nested-1000",
+        }
+        pytest.xfail(f"Expected JSON missing for {valid_file.stem}")
+    toml_str = valid_file.read_bytes().decode()
+    actual = tomllib.loads(toml_str)
+    actual = burntsushi_convert(actual)
+    expected_normalized = burntsushi_normalize(expected)
+    assert actual == expected_normalized
