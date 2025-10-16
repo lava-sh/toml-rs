@@ -79,16 +79,23 @@ def test_invalid_parse_float():
 
 
 def test_tomldecodeerror_attributes():
-    msg = "error parsing"
-    doc = "v=1\n[table]\nv='val'"
-    pos = 13
-    formatted_msg = "error parsing (at line 3, column 2)"
+    data = """\
+title = "TOML Example"
 
-    e = tomllib.TOMLDecodeError(msg, doc, pos)
-    assert e.args == (formatted_msg,)
-    assert str(e) == formatted_msg
-    assert e.msg == msg
-    assert e.doc == doc
-    assert e.pos == pos
-    assert e.lineno == 3
-    assert e.colno == 2
+[owner]
+name = "Tom Preston-Werner"
+dob = 1979-05-27T07:32:00-08:00
+
+x =
+"""
+    with pytest.raises(tomllib.TOMLDecodeError) as exc_info:
+        tomllib.loads(data)
+
+    exc = exc_info.value
+
+    assert exc.msg.startswith("TOML parse error")
+    assert exc.doc == data
+    assert exc.pos == 96
+    assert exc.lineno == 7
+    assert exc.colno == 4
+    assert f"line {exc.lineno}, column {exc.colno}" in str(exc)
