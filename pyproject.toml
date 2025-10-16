@@ -12,7 +12,7 @@ name = "toml-rs"
 dynamic = ["version"]
 license = "UNLICENSE"
 readme = "README.md"
-description = "High-performance TOML parser for Python, written in Rust"
+description = "A High-Performance TOML Parser for Python written in Rust"
 requires-python = ">=3.10"
 authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
