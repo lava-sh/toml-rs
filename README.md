@@ -1,4 +1,4 @@
-# 🦀 `toml_rs` — A High-Performance TOML Parser for Python
+# `toml-rs` — A High-Performance TOML Parser for Python
 
 ## Features
 
