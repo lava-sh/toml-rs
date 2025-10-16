@@ -1,32 +1,42 @@
 name: CI
 
+permissions: {}
+
 on:
   push:
-    branches:
-      - main
-    tags:
-      - "*"
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
-permissions:
-  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  cargo-fmt:
+    name: "cargo fmt"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@6d653acede28d24f02e3cd41383119e8b1b35921 # stable
+      - name: "Install Rust toolchain"
+        run: rustup component add rustfmt
+      - run: cargo fmt --all --check
+
+  cargo-clippy:
+    name: "cargo clippy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          toolchain: stable
-          components: rustfmt, clippy
-      - name: Run clippy
+          persist-credentials: false
+      - name: "Install Rust toolchain"
+        run: rustup component add clippy
+      - name: "Clippy"
         run: cargo clippy --all-targets --all-features -- -D warnings -W clippy::style -D clippy::perf
-      - name: Run rustfmt
-        run: cargo fmt -- --check
 
   tests:
     runs-on: ubuntu-latest
@@ -41,7 +51,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install uv
@@ -77,7 +87,7 @@ jobs:
         run: zizmor .github
 
   linux:
-    needs: [tests, lint, zizmor]
+    needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -115,7 +125,7 @@ jobs:
           path: dist
 
   musllinux:
-    needs: [tests, lint, zizmor]
+    needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -149,7 +159,7 @@ jobs:
           path: dist
 
   windows:
-    needs: [tests, lint, zizmor]
+    needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -179,7 +189,7 @@ jobs:
           path: dist
 
   macos:
-    needs: [tests, lint, zizmor]
+    needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -208,7 +218,7 @@ jobs:
           path: dist
 
   sdist:
-    needs: [tests, lint, zizmor]
+    needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -224,30 +234,3 @@ jobs:
         with:
           name: wheels-sdist
           path: dist
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
-    needs: [linux, musllinux, windows, macos, sdist, zizmor, tests]
-    permissions:
-      # Use to sign the release artifacts
-      id-token: write
-      # Used to upload release artifacts
-      contents: write
-      # Used to generate artifact attestation
-      attestations: write
-    steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
-        with:
-          subject-path: 'wheels-*/*'
-      - name: Publish to PyPI
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
-        with:
-          command: upload
-          args: --non-interactive --skip-existing wheels-*/*
