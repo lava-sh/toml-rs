@@ -31,13 +31,13 @@ class TOMLDecodeError(ValueError):
     def __init__(self, msg: str, doc: str, pos: int, *args: Any):
         msg = msg.rstrip()
         super().__init__(msg)
-        self.msg = msg
-        self.doc = doc
-        self.pos = pos
         lineno = doc.count("\n", 0, pos) + 1
         if lineno == 1:
             colno = pos + 1
         else:
             colno = pos - doc.rindex("\n", 0, pos)
+        self.msg = msg
+        self.doc = doc
+        self.pos = pos
         self.colno = colno
         self.lineno = lineno
