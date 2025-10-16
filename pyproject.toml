@@ -38,6 +38,7 @@ classifiers = [
 dev = [
     "zizmor ~= 1.15.2",
 ]
+
 [project.urls]
 Source = "https://github.com/lava-sh/toml-rs"
 Homepage = "https://github.com/lava-sh/toml-rs"
