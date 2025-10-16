@@ -176,12 +176,17 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> Py
     let content_obj = read.call0()?;
 
     let s = if let Ok(bytes) = content_obj.cast::<PyBytes>() {
-        String::from_utf8_lossy(bytes.as_bytes()).into_owned()
-    } else if let Ok(s) = content_obj.extract::<&str>() {
-        s.to_string()
+        match std::str::from_utf8(bytes.as_bytes()) {
+            Ok(valid_str) => valid_str.to_string(),
+            Err(_) => String::from_utf8_lossy(bytes.as_bytes()).into_owned(),
+        }
+    } else if content_obj.extract::<&str>().is_ok() {
+        return Err(PyErr::new::<PyTypeError, _>(
+            "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+        ));
     } else {
         return Err(PyErr::new::<PyTypeError, _>(
-            "Expected str or bytes-like object",
+            "Expected bytes-like object from .read()"
         ));
     };
 

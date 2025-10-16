@@ -18,15 +18,7 @@ __version__: str = _version
 
 
 def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
-    b = fp.read()
-    try:
-        s = b.decode("utf-8")
-    except AttributeError:
-        raise TypeError(
-            "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
-        ) from None
-
-    return _loads(s, parse_float=parse_float)
+    return _load(fp, parse_float=parse_float)
 
 
 def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
@@ -36,17 +28,6 @@ def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, 
 
 
 class TOMLDecodeError(ValueError):
-    """
-    An error raised if a document is not valid TOML.
-
-    Adds the following attributes to ValueError:
-    msg: The unformatted error message
-    doc: The TOML document being parsed
-    pos: The index of doc where parsing failed
-    lineno: The line corresponding to pos
-    colno: The column corresponding to pos
-    """
-
     def __init__(
         self,
         msg: str,
