@@ -2,18 +2,53 @@ use std::borrow::Cow;
 
 use pyo3::{
     IntoPyObjectExt,
-    exceptions::PyValueError,
+    exceptions::{PyRecursionError, PyValueError},
     prelude::*,
     types::{PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
 use toml_datetime::Offset;
+
+const MAX_RECURSION_DEPTH: usize = 999;
+
+#[derive(Clone, Debug, Default)]
+struct RecursionCheck {
+    current: usize,
+}
+
+impl RecursionCheck {
+    fn enter(&mut self) -> PyResult<()> {
+        self.current += 1;
+        if MAX_RECURSION_DEPTH <= self.current {
+            return Err(PyRecursionError::new_err(
+                "max recursion depth met".to_string(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn exit(&mut self) {
+        self.current -= 1;
+    }
+}
 
 pub(crate) fn convert_toml<'py>(
     py: Python<'py>,
     value: toml::Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    match value {
+    let mut recursion_check = RecursionCheck::default();
+    _convert_toml(py, value, parse_float, &mut recursion_check)
+}
+
+fn _convert_toml<'py>(
+    py: Python<'py>,
+    value: toml::Value,
+    parse_float: Option<&Bound<'py, PyAny>>,
+    recursion_check: &mut RecursionCheck,
+) -> PyResult<Bound<'py, PyAny>> {
+    recursion_check.enter()?;
+
+    let toml = match value {
         toml::Value::String(str) => str.into_bound_py_any(py),
         toml::Value::Integer(int) => int.into_bound_py_any(py),
         toml::Value::Float(float) => {
@@ -33,14 +68,14 @@ pub(crate) fn convert_toml<'py>(
         toml::Value::Array(array) => {
             let mut values = Vec::with_capacity(array.len());
             for item in array {
-                values.push(convert_toml(py, item, parse_float)?);
+                values.push(_convert_toml(py, item, parse_float, recursion_check)?);
             }
             Ok(PyList::new(py, values)?.into_any())
         }
         toml::Value::Table(table) => {
             let dict = PyDict::new(py);
             for (k, v) in table {
-                let value = convert_toml(py, v, parse_float)?;
+                let value = _convert_toml(py, v, parse_float, recursion_check)?;
                 dict.set_item(k, value)?;
             }
             Ok(dict.into_any())
@@ -91,7 +126,9 @@ pub(crate) fn convert_toml<'py>(
             }
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
-    }
+    };
+    recursion_check.exit();
+    toml
 }
 
 fn create_timezone_from_offset<'py>(

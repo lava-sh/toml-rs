@@ -1,5 +1,6 @@
 import copy
 import datetime
+import sys
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -94,3 +95,17 @@ def test_deepcopy():
         },
     }
     assert obj_copy == expected_obj
+
+
+def test_inline_array_recursion_limit():
+    nest_count = 470
+    recursive_array_toml = "arr = " + nest_count * "[" + nest_count * "]"
+    tomllib.loads(recursive_array_toml)
+
+    nest_count = sys.getrecursionlimit() + 2
+    recursive_array_toml = "arr = " + nest_count * "[" + nest_count * "]"
+    with pytest.raises(
+        RecursionError,
+        match=r"max recursion depth met",
+    ):
+        tomllib.loads(recursive_array_toml)
