@@ -2,7 +2,11 @@ mod conversion;
 
 use crate::conversion::{convert_toml, normalize_line_ending};
 
-use pyo3::{exceptions::PyTypeError, prelude::*, types::PyBytes};
+use pyo3::{
+    exceptions::PyTypeError,
+    prelude::*,
+    types::PyBytes,
+};
 
 #[cfg(not(any(
     all(target_os = "linux", target_arch = "aarch64"),
@@ -18,9 +22,9 @@ pyo3::import_exception!(toml_rs, TOMLDecodeError);
 #[pyfunction]
 fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
-    let value = py
-        .detach(|| toml::from_str(&normalized))
-        .map_err(|err| TOMLDecodeError::new_err((err.to_string(), normalized.to_string(), 0)))?;
+    let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
+        TOMLDecodeError::new_err((err.to_string(), normalized.to_string(), 0))
+    })?;
 
     let result = convert_toml(py, value, parse_float.as_ref())?;
     Ok(result.unbind())
