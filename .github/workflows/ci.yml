@@ -212,7 +212,7 @@ jobs:
           - {
               runner: windows-latest,
               target: x86,
-              interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.10 pypy3.11"
+              interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t"
             }
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
