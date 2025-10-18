@@ -143,7 +143,7 @@ jobs:
         if: matrix.platform.target == 'armv7'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libatomic1
+          sudo apt-get install -y libatomic-ops-dev:armhf
       - name: "Set build args"
         id: set_args
         run: |
