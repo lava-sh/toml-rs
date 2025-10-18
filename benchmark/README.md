@@ -26,4 +26,4 @@ python benchmark/run.py
 ```
 
 ## Results
-<img src="benchmark.svg" alt="TOML parser benchmark" width="600">
+<img src="benchmark.svg" alt="TOML parser benchmark">
