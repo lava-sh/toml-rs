@@ -18,7 +18,7 @@ toml_datetime = "0.7"
 [target.'cfg(not(all(target_os = "linux", target_arch = "arm")))'.dependencies]
 [target.'cfg(not(all(target_os = "linux", target_arch = "s390x")))'.dependencies]
 [target.'cfg(not(all(target_os = "linux", target_arch = "powerpc64")))'.dependencies]
-mimalloc = { version = "*", features = ["v3"] }
+mimalloc = { version = "0.1", features = ["v3"] }
 
 [profile.release]
 lto = "fat"
