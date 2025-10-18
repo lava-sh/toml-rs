@@ -48,6 +48,10 @@ bench = [
     "qtoml",
     "rtoml",
     "tomli ; python_version<'3.11'",
+    "polars ~= 1.34.0",
+    "altair ~= 5.5.0",
+    "vl-convert-python == 1.8.0",
+    "py-cpuinfo == 9.0.0",
 ]
 
 [project.urls]
