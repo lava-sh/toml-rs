@@ -140,16 +140,20 @@ jobs:
         with:
           python-version: 3.x
       - name: "Install dependencies for cross compilation"
-        if: matrix.platform.target == 'armv7'
+        if: matrix.platform.target == 'armv7' || matrix.platform.target == 'powerpc64le'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libatomic-ops-dev
+          if [[ "${{ matrix.platform.target }}" == "armv7" ]]; then
+            sudo apt-get install -y libatomic-ops-dev
+          elif [[ "${{ matrix.platform.target }}" == "powerpc64le" ]]; then
+            sudo apt-get install -y libc6-dev-powerpc64le-cross
+          fi
       - name: "Set build args"
         id: set_args
         run: |
           TARGET="${{ matrix.platform.target }}"
           ARGS="--release --out dist --interpreter ${{ matrix.platform.interpreter }}"
-          if [[ "$TARGET" != "x86" && "$TARGET" != "x86_64" ]]; then
+          if [[ "$TARGET" == "aarch64" || "$TARGET" == "armv7" ]]; then
             ARGS="$ARGS --zig"
           fi
           echo "args=$ARGS" >> $GITHUB_OUTPUT
