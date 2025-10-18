@@ -9,6 +9,8 @@ use pyo3::{
 use toml::Value;
 use toml_datetime::Offset;
 
+use crate::create_py_datetime;
+
 const MAX_RECURSION_DEPTH: usize = 999;
 
 #[derive(Clone, Debug, Default)]
@@ -83,32 +85,11 @@ fn _convert_toml<'py>(
         }
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
-                let py_datetime = PyDateTime::new(
-                    py,
-                    date.year as i32,
-                    date.month,
-                    date.day,
-                    time.hour,
-                    time.minute,
-                    time.second,
-                    time.nanosecond / 1000,
-                    Some(&create_timezone_from_offset(py, &offset)?),
-                )?;
-                Ok(py_datetime.into_any())
+                let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
+                Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
-                let py_datetime = PyDateTime::new(
-                    py,
-                    date.year as i32,
-                    date.month,
-                    date.day,
-                    time.hour,
-                    time.minute,
-                    time.second,
-                    time.nanosecond / 1000,
-                    None,
-                )?;
-                Ok(py_datetime.into_any())
+                Ok(create_py_datetime!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
                 let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
