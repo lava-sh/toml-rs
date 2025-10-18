@@ -1,8 +1,8 @@
-# `toml-rs` — A High-Performance TOML Parser for Python
+# `toml-rs` — A High-Performance TOML Parser for Python written in Rust
 
 ## Features
 
-• Fast parsing using [`Rust’s toml crate`](https://github.com/toml-rs/toml)
+• The fastest TOML parser in Python (see [benchmarks](https://github.com/lava-sh/toml-rs/tree/main/benchmark))
 
 • Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases
 

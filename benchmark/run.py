@@ -1,10 +1,12 @@
-from __future__ import annotations
-
+import platform
 import sys
-import timeit
+import time
 from collections.abc import Callable
 from pathlib import Path
 
+import altair as alt
+import cpuinfo
+import polars as pl
 import pytomlpp
 import qtoml
 import rtoml
@@ -17,60 +19,84 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
+N = 10_000
 
-def benchmark(
-    name: str,
-    run_count: int,
-    func: Callable,
-    col_width: tuple,
-) -> float:
-    placeholder = "Running..."
-    print(f"{name:>{col_width[0]}} | {placeholder}", end="", flush=True)
-    time_taken = timeit.timeit(func, number=run_count)
-    print("\b" * len(placeholder), end="")
-    time_suffix = " s"
-    print(f"{time_taken:{col_width[1] - len(time_suffix)}.3g}{time_suffix}")
-    return time_taken
+
+def benchmark(func: Callable, count: int) -> float:
+    start = time.perf_counter()
+    for _ in range(count):
+        func()
+    end = time.perf_counter()
+    return end - start
 
 
 def run(run_count: int) -> None:
-    data_path = Path(__file__).resolve().parent.parent / "tests" / "data" / "example.toml"
-    test_data = data_path.read_bytes().decode()
-
-    # qtoml has a bug making it crash without this newline normalization
-    test_data = test_data.replace("\r\n", "\n")
-
-    col_width = (10, 10, 28)
-    col_head = ("parser", "exec time", "performance (more is better)")
-    print(f"Parsing data.toml {run_count} times:")
-    print("-" * col_width[0] + "---" + "-" * col_width[1] + "---" + col_width[2] * "-")
-    print(
-        f"{col_head[0]:>{col_width[0]}} | {col_head[1]:>{col_width[1]}} | {col_head[2]}"
-    )
-    print("-" * col_width[0] + "-+-" + "-" * col_width[1] + "-+-" + col_width[2] * "-")
+    file_path = Path(__file__).resolve().parent
+    path = file_path.parent / "tests" / "data" / "example.toml"
+    data = path.read_bytes().decode()
+    fixed_data = data.replace("\r\n", "\n")
 
     parsers = {
-        "toml_rs": lambda: toml_rs.loads(test_data),
-        "rtoml": lambda: rtoml.loads(test_data),
-        "pytomlpp": lambda: pytomlpp.loads(test_data),
-        "tomllib": lambda: tomllib.loads(test_data),
-        "toml": lambda: toml.loads(test_data),
-        "qtoml": lambda: qtoml.loads(test_data),
-        "tomlkit": lambda: tomlkit.parse(test_data),
+        "toml_rs": lambda: toml_rs.loads(data),
+        "rtoml": lambda: rtoml.loads(data),
+        "pytomlpp": lambda: pytomlpp.loads(data),
+        "tomllib": lambda: tomllib.loads(data),
+        "toml": lambda: toml.loads(data),
+        "qtoml": lambda: qtoml.loads(fixed_data),
+        "tomlkit": lambda: tomlkit.parse(data),
     }
 
-    results = {}
-    for name, func in parsers.items():
-        results[name] = benchmark(name, run_count, func, col_width)
-    fastest_name = min(results, key=results.get)
-    fastest_time = results[fastest_name]
-    print(f"\nFastest parser: {fastest_name} ({fastest_time:.5f} s)\n")
+    results = {name: benchmark(func, run_count) for name, func in parsers.items()}
 
-    print("Performance relative to fastest parser:")
-    for name, time_taken in results.items():
-        delta = fastest_time / time_taken
-        print(f"{name:>{col_width[0]}} | {delta:.2%}")
+    df = pl.DataFrame({
+        "parser": list(results.keys()),
+        "exec_time": list(results.values()),
+    }).sort("exec_time")
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
+        .encode(
+            x=alt.X(
+                "parser:N",
+                sort=None,
+                title="Libraries",
+                axis=alt.Axis(labelAngle=0),
+            ),
+            y=alt.Y(
+                "exec_time:Q",
+                title="Execution Time (seconds, lower=better)",
+                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.1)),
+            ),
+            color=alt.Color("parser:N", legend=None, scale=alt.Scale(scheme="viridis")),
+            tooltip=[
+                alt.Tooltip("parser:N", title=""),
+                alt.Tooltip("exec_time:Q", title="Execution Time (s)", format=".4f"),
+            ],
+        )
+    )
+    text = (
+        chart.mark_text(
+            align="center",
+            baseline="bottom",
+            dy=-5,
+            fontSize=14,
+        )
+        .transform_calculate(label='format(datum.exec_time, ".4f") + " s"')
+        .encode(text="label:N")
+    )
+    os = f"{platform.system()} {platform.release()}"
+    cpu = cpuinfo.get_cpu_info()["brand_raw"]
+    py = platform.python_version()
+    (chart + text).properties(
+        width=600,
+        height=400,
+        title={
+            "text": "TOML parsers benchmark",
+            "subtitle": f"Python: {py} ({os}) | CPU: {cpu}",
+        },
+    ).save(file_path / "benchmark.svg")
 
 
 if __name__ == "__main__":
-    run(10_000)
+    run(N)
