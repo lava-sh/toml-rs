@@ -4,7 +4,10 @@ use crate::conversion::{convert_toml, normalize_line_ending};
 
 use pyo3::{exceptions::PyTypeError, prelude::*, types::PyBytes};
 
-#[cfg(not(all(target_os = "linux", any(target_arch = "s390x", target_arch = "powerpc64"))))]
+#[cfg(not(all(
+    target_os = "linux",
+    any(target_arch = "s390x", target_arch = "powerpc64")
+)))]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
