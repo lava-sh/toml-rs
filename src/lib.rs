@@ -1,4 +1,5 @@
 mod conversion;
+mod macros;
 
 use crate::conversion::{convert_toml, normalize_line_ending};
 
@@ -14,8 +15,8 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 pyo3::import_exception!(toml_rs, TOMLDecodeError);
 
-#[pyfunction]
-fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+#[pyfunction(name = "_loads")]
+fn loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
     let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
         TOMLDecodeError::new_err((
@@ -28,8 +29,8 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
     Ok(result.unbind())
 }
 
-#[pyfunction]
-fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+#[pyfunction(name = "_load")]
+fn load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let bound = fp.bind(py);
     let read = bound.getattr("read")?;
     let content_obj = read.call0()?;
@@ -49,13 +50,13 @@ fn _load(py: Python, fp: Py<PyAny>, parse_float: Option<Bound<'_, PyAny>>) -> Py
         ));
     };
 
-    _loads(py, &s, parse_float)
+    loads(py, &s, parse_float)
 }
 
-#[pymodule]
-fn _toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(_load, m)?)?;
-    m.add_function(wrap_pyfunction!(_loads, m)?)?;
+#[pymodule(name = "_toml_rs")]
+fn toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(load, m)?)?;
+    m.add_function(wrap_pyfunction!(loads, m)?)?;
     m.add("_version", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
