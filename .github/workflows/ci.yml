@@ -153,7 +153,7 @@ jobs:
         run: |
           TARGET="${{ matrix.platform.target }}"
           ARGS="--release --out dist --interpreter ${{ matrix.platform.interpreter }}"
-          if [[ "$TARGET" == "aarch64" || "$TARGET" == "armv7" ]]; then
+          if [[ "$TARGET" == "aarch64" || "$TARGET" == "armv7" || "$TARGET" == "powerpc64le" ]]; then
             ARGS="$ARGS --zig"
           fi
           echo "args=$ARGS" >> $GITHUB_OUTPUT
