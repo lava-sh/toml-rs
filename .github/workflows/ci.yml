@@ -141,10 +141,9 @@ jobs:
           python-version: 3.x
       - name: "Install dependencies for cross compilation"
         if: matrix.platform.target == 'armv7'
-        run: sudo apt-get update && sudo apt-get install -y \
-             gcc-arm-linux-gnueabihf \
-             libatomic1 \
-             libatomic-ops-dev
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabi g++-arm-linux-gnueabi libatomic1
       - name: "Set build args"
         id: set_args
         run: |
