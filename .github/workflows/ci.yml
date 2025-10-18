@@ -139,7 +139,12 @@ jobs:
         with:
           python-version: 3.x
       - name: Install cross-compiler
-        run: sudo apt-get update && sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+        run: sudo apt-get update && sudo apt-get install -y \
+             gcc-arm-linux-gnueabihf \ 
+             g++-arm-linux-gnueabihf \
+             crossbuild-essential-armhf \
+             crossbuild-essential-arm64 \
+             crossbuild-essential-i386
 
       - name: "Build wheels"
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
