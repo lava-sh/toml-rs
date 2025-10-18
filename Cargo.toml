@@ -11,12 +11,10 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.26.0", features = ["generate-import-lib"] }
+pyo3 = { version = "0.26", features = ["generate-import-lib"] }
 toml = { version = "0.9", features = ["fast_hash", "unbounded"] }
-toml_datetime = "0.7.3"
-
-
-mimalloc = { version = "0.1", features = ["v3"] }
+toml_datetime = "0.7"
+mimalloc = { version = "*", features = ["v3"] }
 
 [profile.release]
 lto = "fat"

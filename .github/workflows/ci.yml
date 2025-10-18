@@ -140,6 +140,11 @@ jobs:
           python-version: 3.x
       - name: "Build wheels"
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+        env:
+          CFLAGS_aarch64_unknown_linux_gnu: ""
+          CFLAGS_arm_unknown_linux_gnueabihf: ""
+          CFLAGS_s390x_unknown_linux_gnu: ""
+          CFLAGS_powerpc64_unknown_linux_gnu: ""
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --interpreter ${{ matrix.platform.interpreter }}
