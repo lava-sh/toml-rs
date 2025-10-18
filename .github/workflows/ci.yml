@@ -139,43 +139,15 @@ jobs:
       - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6.0.0
         with:
           python-version: 3.x
-      - name: Install cross-compilers
-        run: |
-          sudo apt-get update
-          case "${{ matrix.platform.target }}" in
-            x86)
-              sudo apt-get install -y gcc-multilib g++-multilib crossbuild-essential-i386
-              ;;
-            armv7)
-              sudo apt-get install -y crossbuild-essential-armhf
-              ;;
-            aarch64)
-              sudo apt-get install -y crossbuild-essential-arm64
-              ;;
-            s390x)
-              sudo apt-get install -y crossbuild-essential-s390x
-              ;;
-            ppc64le)
-              sudo apt-get install -y crossbuild-essential-ppc64el
-              ;;
-            *)
-              echo "Unknown target: ${{ matrix.platform.target }}"
-              ;;
-          esac
-
       - name: "Build wheels"
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --interpreter ${{ matrix.platform.interpreter }}
+          args: ${{ (matrix.platform.target == 'x86_64' || matrix.platform.target == 'x86')
+                  ? '--release --out dist --interpreter ${{ matrix.platform.interpreter }}'
+            : '--release --out dist --interpreter ${{ matrix.platform.interpreter }} --zig' } }
           sccache: false
           manylinux: auto
-        env:
-          CC: ${{ matrix.platform.target == 'x86' && 'i686-linux-gnu-gcc' || matrix.platform.target == 'aarch64' && 'aarch64-linux-gnu-gcc' || matrix.platform.target == 'armv7' && 'arm-linux-gnueabihf-gcc' || '' }}
-          CXX: ${{ matrix.platform.target == 'x86' && 'i686-linux-gnu-g++' || matrix.platform.target == 'aarch64' && 'aarch64-linux-gnu-g++' || matrix.platform.target == 'armv7' && 'arm-linux-gnueabihf-g++' || '' }}
-          CARGO_TARGET_I686_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.platform.target == 'x86' && 'i686-linux-gnu-g++' || '' }}
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.platform.target == 'aarch64' && 'aarch64-linux-gnu-g++' || '' }}
-          CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: ${{ matrix.platform.target == 'armv7' && 'arm-linux-gnueabihf-g++' || '' }}
       - name: "Upload wheels"
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
