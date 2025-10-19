@@ -20,5 +20,5 @@ mimalloc = { version = "*", features = ["v3"] }
 
 [profile.release]
 lto = "fat"
-strip = true
+strip = "symbols"
 codegen-units = 1
