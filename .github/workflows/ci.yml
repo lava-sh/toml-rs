@@ -98,7 +98,6 @@ jobs:
   linux:
     needs: [tests, cargo-fmt, cargo-clippy, zizmor]
     runs-on: ${{ matrix.platform.runner }}
-    continue-on-error: true
     strategy:
       matrix:
         platform:
