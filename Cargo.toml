@@ -19,6 +19,7 @@ toml = { version = "0.9", features = [
     "preserve_order",
 ] }
 toml_datetime = "0.7"
+memchr = { version = "2", default-features = false }
 mimalloc = { version = "*", features = ["v3"], optional = true }
 
 [features]

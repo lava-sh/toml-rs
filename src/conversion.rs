@@ -136,33 +136,33 @@ fn create_timezone_from_offset<'py>(
 
 #[must_use]
 pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
-    if !s.contains('\r') {
+    if memchr::memchr(b'\r', s.as_bytes()).is_none() {
         return Cow::Borrowed(s);
     }
 
-    let mut s = s.to_string();
-    let bytes = unsafe { s.as_bytes_mut() };
-    let mut i = 0;
-    let mut write = 0;
+    let mut buf = s.to_string().into_bytes();
+    let mut gap_len = 0;
+    let mut tail = buf.as_mut_slice();
 
-    while i < bytes.len() {
-        if bytes[i] == b'\r' {
-            if i + 1 < bytes.len() && bytes[i + 1] == b'\n' {
-                bytes[write] = b'\n';
-                write += 1;
-                i += 2;
-            } else {
-                bytes[write] = b'\r';
-                write += 1;
-                i += 1;
-            }
-        } else {
-            bytes[write] = bytes[i];
-            write += 1;
-            i += 1;
+    let finder = memchr::memmem::Finder::new(b"\r\n");
+
+    loop {
+        let idx = match finder.find(&tail[gap_len..]) {
+            None => tail.len(),
+            Some(idx) => idx + gap_len,
+        };
+        tail.copy_within(gap_len..idx, 0);
+        tail = &mut tail[idx - gap_len..];
+
+        if tail.len() == gap_len {
+            break;
         }
+        gap_len += 1;
     }
 
-    s.truncate(write);
-    Cow::Owned(s)
+    unsafe {
+        let new_len = buf.len() - gap_len;
+        buf.set_len(new_len);
+        Cow::Owned(String::from_utf8_unchecked(buf))
+    }
 }

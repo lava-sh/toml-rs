@@ -81,6 +81,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "memchr"
+version = "2.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
+
+[[package]]
 name = "memoffset"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -271,6 +277,7 @@ dependencies = [
 name = "toml-rs"
 version = "0.0.6"
 dependencies = [
+ "memchr",
  "mimalloc",
  "pyo3",
  "toml",
