@@ -134,9 +134,7 @@ jobs:
             target: armv7,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin-args: "--release --out dist --zig",
-            install-args: |
-              sudo apt-get update
-              sudo apt-get install -y gcc-4.9 g++-4.9
+            install-args: "sudo apt-get update && sudo apt-get install -y gcc-4.9 g++-4.9"
           }
           - {
             runner: ubuntu-latest,
