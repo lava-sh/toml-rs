@@ -12,7 +12,12 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.27", features = ["generate-import-lib", "extension-module"] }
-toml = { version = "0.9", features = ["fast_hash", "unbounded"] }
+toml = { version = "0.9", features = [
+    "fast_hash", # uses `foldhash`
+    "unbounded", # disables default recursion limit (https://github.com/toml-rs/toml/blob/toml-v0.9.8/crates/toml/src/de/parser/mod.rs#L71)
+                 # to set own limit (999)
+    "preserve_order",
+] }
 toml_datetime = "0.7"
 
 [target.'cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(target_os = "linux", target_arch = "s390x"), all(target_os = "linux", target_arch = "powerpc64"))))'.dependencies]
