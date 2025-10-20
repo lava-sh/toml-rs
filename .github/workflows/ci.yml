@@ -102,6 +102,7 @@ jobs:
         run: zizmor .github
 
   linux:
+    name: "linux (${{ matrix.platform.runner }} / ${{ matrix.platform.target }})"
     needs: [ tests, cargo-fmt, cargo-clippy, zizmor ]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
