@@ -134,7 +134,11 @@ jobs:
             target: armv7,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin-args: "--release --out dist --zig",
-            install-args: "sudo apt-get update"
+            install-args: "sudo apt-get update && \
+                           sudo apt-get install -y \
+                           gcc-arm-linux-gnueabihf \ 
+                           libatomic1-armhf-cross \
+                           zig"
           }
           - {
             runner: ubuntu-latest,
@@ -160,6 +164,12 @@ jobs:
       - name: "Install dependencies for correctly build with mimalloc"
         if: ${{ matrix.platform.install-args != '' }}
         run: ${{ matrix.platform.install-args }}
+      - name: "Setup ARM cross-compilation"
+        if: ${{ matrix.platform.target == 'armv7' }}
+        run: |
+          echo '[target.armv7-unknown-linux-gnueabihf]' >> ~/.cargo/config.toml
+          echo 'linker = "arm-linux-gnueabihf-gcc"' >> ~/.cargo/config.toml
+          echo 'rustflags = ["-C", "link-arg=-latomic"]' >> ~/.cargo/config.toml
       - name: "Build wheels"
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
         with:
