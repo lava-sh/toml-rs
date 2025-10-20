@@ -165,6 +165,7 @@ jobs:
           path: dist
 
   musllinux:
+    name: "musllinux (${{ matrix.platform.runner }} / ${{ matrix.platform.target }})"
     needs: [ tests, cargo-fmt, cargo-clippy, zizmor ]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -212,6 +213,7 @@ jobs:
           path: dist
 
   windows:
+    name: "windows (${{ matrix.platform.runner }} / ${{ matrix.platform.target }})"
     needs: [ tests, cargo-fmt, cargo-clippy, zizmor ]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -248,6 +250,7 @@ jobs:
           path: dist
 
   macos:
+    name: "macos (${{ matrix.platform.runner }} / ${{ matrix.platform.target }})"
     needs: [ tests, cargo-fmt, cargo-clippy, zizmor ]
     runs-on: ${{ matrix.platform.runner }}
     strategy:
