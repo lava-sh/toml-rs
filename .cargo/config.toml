@@ -1,8 +1,0 @@
-[target.'cfg(all(target_os = "linux", target_arch = "arm"))']
-rustflags = ["--cfg", "no_default_features"]
-
-[target.'cfg(all(target_os = "linux", target_arch = "s390x"))']
-rustflags = ["--cfg", "no_default_features"]
-
-[target.'cfg(all(target_os = "linux", target_arch = "powerpc64"))']
-rustflags = ["--cfg", "no_default_features"]
