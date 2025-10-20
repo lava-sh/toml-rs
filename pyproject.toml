@@ -5,7 +5,6 @@ build-backend = "maturin"
 [tool.maturin]
 python-source = "python"
 module-name = "toml_rs._toml_rs"
-features = ["pyo3/extension-module"]
 
 [project]
 name = "toml-rs"
