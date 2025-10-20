@@ -11,7 +11,7 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.27", features = ["generate-import-lib"] }
+pyo3 = { version = "0.27", features = ["generate-import-lib", "extension-module"] }
 toml = { version = "0.9", features = ["fast_hash", "unbounded"] }
 toml_datetime = "0.7"
 
