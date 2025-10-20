@@ -2,6 +2,7 @@ import platform
 import sys
 import time
 from collections.abc import Callable
+from importlib.metadata import version
 from pathlib import Path
 
 import altair as alt
@@ -20,6 +21,12 @@ else:
     import tomli as tomllib
 
 N = 10_000
+
+
+def get_lib_version(lib: str) -> str:
+    if lib == "tomllib":
+        return "built-in"
+    return version(lib)
 
 
 def benchmark(func: Callable, count: int) -> float:
@@ -49,7 +56,7 @@ def run(run_count: int) -> None:
     results = {name: benchmark(func, run_count) for name, func in parsers.items()}
 
     df = pl.DataFrame({
-        "parser": list(results.keys()),
+        "parser": [f"{name} ({get_lib_version(name)})" for name in results],
         "exec_time": list(results.values()),
     }).sort("exec_time")
 
