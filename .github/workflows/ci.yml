@@ -9,6 +9,8 @@ on:
     tags:
       - "*"
   pull_request:
+    paths-ignore:
+      - "benchmark/**"
   workflow_dispatch:
 
 concurrency:
