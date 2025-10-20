@@ -19,9 +19,10 @@ toml = { version = "0.9", features = [
     "preserve_order",
 ] }
 toml_datetime = "0.7"
+mimalloc = { version = "*", features = ["v3"], optional = true }
 
-[target.'cfg(not(any(all(target_os = "linux", target_arch = "arm"), all(target_os = "linux", target_arch = "s390x"), all(target_os = "linux", target_arch = "powerpc64"))))'.dependencies]
-mimalloc = { version = "*", features = ["v3"] }
+[features]
+default = ["dep:mimalloc"]
 
 [profile.release]
 lto = "fat"
