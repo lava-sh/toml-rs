@@ -11,8 +11,8 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.27", features = ["generate-import-lib", "extension-module"] }
-toml = { version = "0.9", features = [
+pyo3 = { version = "0.27.1", features = ["generate-import-lib", "extension-module"] }
+toml = { version = "0.9.8", features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit (https://github.com/toml-rs/toml/blob/toml-v0.9.8/crates/toml/src/de/parser/mod.rs#L71)
                  # to set own limit (999)
