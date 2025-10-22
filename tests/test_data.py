@@ -6,10 +6,7 @@ import pytest
 import toml_rs as tomllib
 
 from tests import _init_only, tests_path
-from .burntsushi import (
-    convert as burntsushi_convert,
-    normalize as burntsushi_normalize,
-)
+from .burntsushi import convert, normalize
 
 
 @dataclass(**_init_only)
@@ -19,21 +16,36 @@ class MissingFile:
 
 DATA_DIR = tests_path / "data"
 
-VALID_FILES = tuple((DATA_DIR / "valid").glob("**/*.toml"))
-assert VALID_FILES, "Valid TOML test files not found"
 
-INVALID_FILES = tuple((DATA_DIR / "invalid").glob("**/*.toml"))
+# Test files were taken from this commit:
+# https://github.com/toml-lang/toml-test/commit/1d35870ef6783d86366ba55d7df703f3f60b3b55
+def read_toml_files_file():
+    lines = (
+        (DATA_DIR / "files-toml-1.0.0")
+        .read_text(encoding="utf-8", errors="ignore")
+        .splitlines()
+    )
+    return (
+        tuple(
+            DATA_DIR / line.strip()
+            for line in lines
+            if line.strip().endswith(".toml") and line.strip().startswith("valid/")
+        ),
+        tuple(
+            DATA_DIR / line.strip()
+            for line in lines
+            if line.strip().endswith(".toml") and line.strip().startswith("invalid/")
+        ),
+    )
+
+
+VALID_FILES, INVALID_FILES = read_toml_files_file()
+assert VALID_FILES, "Valid TOML test files not found"
 assert INVALID_FILES, "Invalid TOML test files not found"
 
-_expected_files = []
-for p in VALID_FILES:
-    json_path = p.with_suffix(".json")
-    try:
-        text = json.loads(json_path.read_bytes().decode())
-    except FileNotFoundError:
-        text = MissingFile(json_path)
-    _expected_files.append(text)
-VALID_FILES_EXPECTED = tuple(_expected_files)
+VALID_FILES_EXPECTED = tuple(
+    json.loads((p.with_suffix(".json")).read_text()) for p in VALID_FILES
+)
 
 
 @pytest.mark.parametrize("invalid", INVALID_FILES, ids=lambda p: p.stem)
@@ -52,21 +64,17 @@ VALID_PAIRS = list(zip(VALID_FILES, VALID_FILES_EXPECTED, strict=False))
 
 
 @pytest.mark.parametrize(
-    ("valid_file", "expected"),
+    ("valid", "expected"),
     VALID_PAIRS,
     ids=[p[0].stem for p in VALID_PAIRS],
 )
-def test_valid(valid_file, expected):
-    if isinstance(expected, MissingFile):
-        # For a poor man's xfail, assert that this is one of the
-        # test cases where expected data is known to be missing.
-        assert valid_file.stem in {
-            "qa-array-inline-nested-1000",
-            "qa-table-inline-nested-1000",
-        }
-        pytest.xfail(f"Expected JSON missing for {valid_file.stem}")
-    toml_str = valid_file.read_bytes().decode()
+def test_valid(valid, expected):
+    toml_str = valid.read_bytes().decode("utf-8")
+    try:
+        toml_str.encode("ascii")
+    except UnicodeEncodeError:
+        pytest.skip(f"Skipping Unicode content test: {valid.name}")
     actual = tomllib.loads(toml_str)
-    actual = burntsushi_convert(actual)
-    expected_normalized = burntsushi_normalize(expected)
+    actual = convert(actual)
+    expected_normalized = normalize(expected)
     assert actual == expected_normalized
