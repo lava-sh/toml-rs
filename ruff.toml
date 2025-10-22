@@ -8,6 +8,7 @@ include = ["src/**.py", "tests/**.py"]
 force-wrap-aliases = true
 combine-as-imports = true
 no-lines-before = ["local-folder"]
+extra-standard-library = ["tomllib"]
 
 [lint]
 preview = true
