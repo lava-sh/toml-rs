@@ -160,8 +160,10 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
         gap_len += 1;
     }
 
+    // Account for removed `\r`.
+    let new_len = buf.len() - gap_len;
     unsafe {
-        let new_len = buf.len() - gap_len;
+        // SAFETY: After `set_len`, `buf` is guaranteed to contain utf-8 again.
         buf.set_len(new_len);
         Cow::Owned(String::from_utf8_unchecked(buf))
     }
