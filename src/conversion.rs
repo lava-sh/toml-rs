@@ -56,7 +56,9 @@ fn _convert_toml<'py>(
         Value::Integer(int) => int.into_bound_py_any(py),
         Value::Float(float) => {
             if let Some(f) = parse_float {
-                let py_call = f.call1((float.to_string(),))?;
+                let mut buf = ryu::Buffer::new();
+                let to_str = buf.format(float);
+                let py_call = f.call1((to_str,))?;
                 if py_call.cast::<PyDict>().is_ok() || py_call.cast::<PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
@@ -69,11 +71,11 @@ fn _convert_toml<'py>(
         }
         Value::Boolean(bool) => bool.into_bound_py_any(py),
         Value::Array(array) => {
-            let mut vec = Vec::with_capacity(array.len());
+            let py_list = PyList::empty(py);
             for item in array {
-                vec.push(_convert_toml(py, item, parse_float, recursion)?);
+                py_list.append(_convert_toml(py, item, parse_float, recursion)?)?;
             }
-            Ok(PyList::new(py, vec)?.into_any())
+            Ok(py_list.into_any())
         }
         Value::Table(table) => {
             let py_dict = PyDict::new(py);
