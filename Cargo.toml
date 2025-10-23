@@ -15,7 +15,7 @@ pyo3 = { version = "0.27.1", features = ["generate-import-lib", "extension-modul
 toml = { version = "0.9.8", features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)
-    "preserve_order", # save
+    "preserve_order", # save order
 ] }
 ryu = "1.0.20"
 toml_datetime = "0.7"
