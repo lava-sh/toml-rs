@@ -161,7 +161,6 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
         }
         gap_len += 1;
     }
-
     // Account for removed `\r`.
     let new_len = buf.len() - gap_len;
     unsafe {
