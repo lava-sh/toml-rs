@@ -57,8 +57,7 @@ fn _convert_toml<'py>(
         Value::Float(float) => {
             if let Some(f) = parse_float {
                 let mut buf = ryu::Buffer::new();
-                let to_str = buf.format(float);
-                let py_call = f.call1((to_str,))?;
+                let py_call = f.call1((buf.format(float),))?;
                 if py_call.cast::<PyDict>().is_ok() || py_call.cast::<PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
