@@ -14,11 +14,11 @@ use crate::create_py_datetime;
 const MAX_RECURSION_DEPTH: usize = 999;
 
 #[derive(Clone, Debug, Default)]
-struct Recursion {
+struct RecursionGuard {
     current: usize,
 }
 
-impl Recursion {
+impl RecursionGuard {
     fn enter(&mut self) -> PyResult<()> {
         self.current += 1;
         if MAX_RECURSION_DEPTH <= self.current {
@@ -39,15 +39,15 @@ pub(crate) fn convert_toml<'py>(
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    let mut recursion_check = Recursion::default();
-    _convert_toml(py, value, parse_float, &mut recursion_check)
+    let mut guard = RecursionGuard::default();
+    _convert_toml(py, value, parse_float, &mut guard)
 }
 
 fn _convert_toml<'py>(
     py: Python<'py>,
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
-    recursion: &mut Recursion,
+    recursion: &mut RecursionGuard,
 ) -> PyResult<Bound<'py, PyAny>> {
     recursion.enter()?;
 
