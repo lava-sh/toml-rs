@@ -8,9 +8,12 @@ on:
       - main
     tags:
       - "*"
+    paths-ignore:
+      - "README.md"
   pull_request:
     paths-ignore:
       - "benchmark/**"
+      - "README.md"
   workflow_dispatch:
 
 concurrency:

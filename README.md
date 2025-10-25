@@ -1,10 +1,10 @@
-# `toml-rs` — A High-Performance TOML Parser for Python written in Rust
+# toml-rs — A High-Performance TOML Parser for Python written in Rust
 
 ## Features
 
-• The fastest TOML parser in Python (see [benchmarks](https://github.com/lava-sh/toml-rs/tree/main/benchmark))
+* The fastest TOML parser in Python (see [benchmarks](https://github.com/lava-sh/toml-rs/tree/main/benchmark))
 
-• Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases
+* Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases ([see below](#differences-with-tomllib))
 
 ## Installation
 ```bash
@@ -53,4 +53,60 @@ print("tomllib:")
 pprint(tomllib_loads)
 print("toml_rs:")
 pprint(toml_rs_loads)
+```
+
+## Differences with [`tomllib`](https://docs.python.org/3/library/tomllib.html)
+
+1. More understandable errors
+
+```python
+import tomllib
+
+t = """\
+x = 1
+y = 2
+v = 
+"""
+print(tomllib.loads(t))
+# tomllib.TOMLDecodeError: Invalid value (at line 3, column 5)
+```
+```python
+import toml_rs
+
+t = """\
+x = 1
+y = 2
+v = 
+"""
+print(toml_rs.loads(t))
+# toml_rs.TOMLDecodeError: TOML parse error at line 3, column 5
+#   |
+# 3 | v = 
+#   |     ^
+# string values must be quoted, expected literal string
+```
+
+2. Strict compliance with TOML v1.0.0
+
+From [TOML spec](https://toml.io/en/v1.0.0#integer):
+
+> Arbitrary 64-bit signed integers (from `−2^63` to `2^63−1`) should be accepted and handled losslessly. If an integer cannot be represented losslessly, an error must be thrown.
+
+```python
+import tomllib
+
+t = "x = 999_999_999_999_999_999_999_999"
+print(tomllib.loads(t))
+# {'x': 999999999999999999999999} <== speс violation
+```
+```python
+import toml_rs
+
+t = "x = 999_999_999_999_999_999_999_999"
+print(toml_rs.loads(t))
+# toml_rs.TOMLDecodeError: TOML parse error at line 1, column 5
+#   |
+# 1 | x = 999_999_999_999_999_999_999_999
+#   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# invalid type: integer `999999999999999999999999` as i128, expected any valid TOML value
 ```
