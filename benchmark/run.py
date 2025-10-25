@@ -55,10 +55,16 @@ def run(run_count: int) -> None:
 
     results = {name: benchmark(func, run_count) for name, func in parsers.items()}
 
-    df = pl.DataFrame({
-        "parser": [f"{name} ({get_lib_version(name)})" for name in results],
-        "exec_time": list(results.values()),
-    }).sort("exec_time")
+    df = (
+        pl.DataFrame({
+            "parser": [f"{name} ({get_lib_version(name)})" for name in results],
+            "exec_time": list(results.values()),
+        })
+        .sort("exec_time")
+        .with_columns([
+            (pl.col("exec_time") / pl.col("exec_time").min()).alias("slowdown"),
+        ])
+    )
 
     chart = (
         alt.Chart(df)
@@ -75,10 +81,15 @@ def run(run_count: int) -> None:
                 title="Execution Time (seconds, lower=better)",
                 scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.1)),
             ),
-            color=alt.Color("parser:N", legend=None, scale=alt.Scale(scheme="viridis")),
+            color=alt.Color(
+                "parser:N",
+                legend=None,
+                scale=alt.Scale(scheme="dark2"),
+            ),
             tooltip=[
                 alt.Tooltip("parser:N", title=""),
                 alt.Tooltip("exec_time:Q", title="Execution Time (s)", format=".4f"),
+                alt.Tooltip("slowdown:Q", title="Slowdown", format=".2f"),
             ],
         )
     )
@@ -86,10 +97,14 @@ def run(run_count: int) -> None:
         chart.mark_text(
             align="center",
             baseline="bottom",
-            dy=-5,
-            fontSize=14,
+            dy=-2,
+            fontSize=9,
+            fontWeight="bold",
         )
-        .transform_calculate(label='format(datum.exec_time, ".4f") + " s"')
+        .transform_calculate(
+            label='format(datum.exec_time, ".4f") + '
+            '"s (x" + format(datum.slowdown, ".2f") + ")"',
+        )
         .encode(text="label:N")
     )
     os = f"{platform.system()} {platform.release()}"
