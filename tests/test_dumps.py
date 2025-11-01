@@ -1,0 +1,75 @@
+import re
+from datetime import datetime, timedelta, timezone
+
+import pytest
+import toml_rs
+
+
+@pytest.mark.parametrize(
+    ("v", "pattern"),
+    [
+        (
+            pytest.param(
+                type("_Class", (), {}),
+                r"Cannot serialize <class '.*_Class'",
+                id="class",
+            )
+        ),
+        (
+            {"x": lambda x: x},
+            r"Cannot serialize <function .*<lambda>",
+        ),
+        (
+            {"x": 1 + 2j},
+            re.escape("Cannot serialize (1+2j)"),
+        ),
+        (
+            {"set": {1, 2, 3}},
+            r"Cannot serialize {1, 2, 3}",
+        ),
+        (
+            {"valid": {"invalid": object()}},
+            r"Cannot serialize <object object at",
+        ),
+        (
+            {42: "value"},
+            r"TOML table keys must be strings, got 42",
+        ),
+        (
+            {"n": float("nan")},
+            r"TOML does not support non-finite floats",
+        ),
+    ],
+)
+def test_incorrect_dumps(v, pattern):
+    with pytest.raises(toml_rs.TOMLEncodeError, match=pattern):
+        toml_rs.dumps(v)
+
+
+def test_dumps():
+    obj = {
+        "title": "TOML Example",
+        "owner": {
+            "dob": datetime(1979, 5, 27, 7, 32, tzinfo=timezone(timedelta(hours=-8))),
+            "name": "Tom Preston-Werner",
+        },
+        "database": {
+            "connection_max": 5000,
+            "enabled": True,
+            "ports": [8001, 8001, 8002],
+            "server": "192.168.1.1",
+        },
+    }
+    assert toml_rs.dumps(obj) == """\
+title = "TOML Example"
+
+[owner]
+dob = 1979-05-27T07:32:00-08:00
+name = "Tom Preston-Werner"
+
+[database]
+connection_max = 5000
+enabled = true
+ports = [8001, 8001, 8002]
+server = "192.168.1.1"
+"""

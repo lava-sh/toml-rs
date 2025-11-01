@@ -3,13 +3,15 @@ use std::borrow::Cow;
 use pyo3::{
     IntoPyObjectExt,
     exceptions::{PyRecursionError, PyValueError},
+    intern,
     prelude::*,
-    types::{PyDate, PyDateTime, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
+    types::{
+        PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
+        PyList, PyString, PyTime, PyTimeAccess, PyTzInfo, PyTzInfoAccess,
+    },
 };
 use toml::Value;
 use toml_datetime::Offset;
-
-use crate::create_py_datetime;
 
 const MAX_RECURSION_DEPTH: usize = 999;
 
@@ -19,6 +21,7 @@ struct RecursionGuard {
 }
 
 impl RecursionGuard {
+    #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
         self.current += 1;
         if MAX_RECURSION_DEPTH <= self.current {
@@ -29,21 +32,25 @@ impl RecursionGuard {
         Ok(())
     }
 
+    #[inline(always)]
     fn exit(&mut self) {
         self.current -= 1;
     }
 }
 
-pub(crate) fn convert_toml<'py>(
+pub(crate) fn python_to_toml<'py>(py: Python<'py>, obj: &Bound<'py, PyAny>) -> PyResult<Value> {
+    _python_to_toml(py, obj, &mut RecursionGuard::default())
+}
+
+pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    let mut guard = RecursionGuard::default();
-    _convert_toml(py, value, parse_float, &mut guard)
+    _toml_to_python(py, value, parse_float, &mut RecursionGuard::default())
 }
 
-fn _convert_toml<'py>(
+fn _toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
@@ -72,14 +79,14 @@ fn _convert_toml<'py>(
         Value::Array(array) => {
             let py_list = PyList::empty(py);
             for item in array {
-                py_list.append(_convert_toml(py, item, parse_float, recursion)?)?;
+                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
             }
             Ok(py_list.into_any())
         }
         Value::Table(table) => {
             let py_dict = PyDict::new(py);
             for (k, v) in table {
-                let value = _convert_toml(py, v, parse_float, recursion)?;
+                let value = _toml_to_python(py, v, parse_float, recursion)?;
                 py_dict.set_item(k, value)?;
             }
             Ok(py_dict.into_any())
@@ -87,10 +94,10 @@ fn _convert_toml<'py>(
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
-                Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
+                Ok(crate::create_py_datetime!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
-                Ok(create_py_datetime!(py, date, time, None)?.into_any())
+                Ok(crate::create_py_datetime!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
                 let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
@@ -167,4 +174,109 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
         buf.set_len(new_len);
         Cow::Owned(String::from_utf8_unchecked(buf))
     }
+}
+
+#[inline]
+fn _python_to_toml<'py>(
+    py: Python<'py>,
+    obj: &Bound<'py, PyAny>,
+    recursion: &mut RecursionGuard,
+) -> PyResult<Value> {
+    recursion.enter()?;
+
+    let value = if let Ok(str) = obj.cast::<PyString>() {
+        Value::String(str.to_string())
+    } else if let Ok(bool) = obj.cast::<PyBool>() {
+        Value::Boolean(bool.is_true())
+    } else if let Ok(int) = obj.cast::<PyInt>() {
+        Value::Integer(int.extract()?)
+    } else if let Ok(float) = obj.cast::<PyFloat>() {
+        let value = float.value();
+        if !value.is_finite() {
+            return Err(crate::TOMLEncodeError::new_err(
+                "TOML does not support non-finite floats (nan, inf, -inf)".to_string(),
+            ));
+        }
+        Value::Float(value)
+    } else if let Ok(dict) = obj.cast::<PyDict>() {
+        let mut table = toml::map::Map::with_capacity(dict.len());
+        for (k, v) in dict.iter() {
+            let key = k
+                .cast::<PyString>()
+                .map_err(|_| {
+                    crate::TOMLEncodeError::new_err((
+                        format!(
+                            "TOML table keys must be strings, got {}",
+                            crate::get_repr!(k)
+                        ),
+                        Some(k.clone().unbind()),
+                    ))
+                })?
+                .to_string();
+            table.insert(key, _python_to_toml(py, &v, recursion)?);
+        }
+        Value::Table(table)
+    } else if let Ok(list) = obj.cast::<PyList>() {
+        let mut vec = Vec::with_capacity(list.len());
+        for item in list.iter() {
+            vec.push(_python_to_toml(py, &item, recursion)?);
+        }
+        Value::Array(vec)
+    } else if let Ok(dt) = obj.cast::<PyDateTime>() {
+        Value::Datetime(toml_datetime::Datetime {
+            date: Some(toml_datetime::Date {
+                year: dt.get_year() as u16,
+                month: dt.get_month(),
+                day: dt.get_day(),
+            }),
+            time: Some(toml_datetime::Time {
+                hour: dt.get_hour(),
+                minute: dt.get_minute(),
+                second: dt.get_second(),
+                nanosecond: dt.get_microsecond() * 1000,
+            }),
+            offset: if let Some(tzinfo) = dt.get_tzinfo() {
+                let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
+                if utc_offset.is_none() {
+                    None
+                } else {
+                    let delta = utc_offset.cast::<PyDelta>()?;
+                    let total_seconds = delta.get_days() * 86400 + delta.get_seconds();
+                    Some(Offset::Custom {
+                        minutes: (total_seconds / 60) as i16,
+                    })
+                }
+            } else {
+                None
+            },
+        })
+    } else if let Ok(date) = obj.cast::<PyDate>() {
+        Value::Datetime(toml_datetime::Datetime {
+            date: Some(toml_datetime::Date {
+                year: date.get_year() as u16,
+                month: date.get_month(),
+                day: date.get_day(),
+            }),
+            time: None,
+            offset: None,
+        })
+    } else if let Ok(time) = obj.cast::<PyTime>() {
+        Value::Datetime(toml_datetime::Datetime {
+            date: None,
+            time: Some(toml_datetime::Time {
+                hour: time.get_hour(),
+                minute: time.get_minute(),
+                second: time.get_second(),
+                nanosecond: time.get_microsecond() * 1000,
+            }),
+            offset: None,
+        })
+    } else {
+        return Err(crate::TOMLEncodeError::new_err((
+            format!("Cannot serialize {} to TOML", crate::get_repr!(obj)),
+            Some(obj.clone().unbind()),
+        )));
+    };
+    recursion.exit();
+    Ok(value)
 }

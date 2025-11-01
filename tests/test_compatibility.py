@@ -4,11 +4,9 @@ from pathlib import Path
 import pytest
 import toml_rs
 
-from tests import tests_path
+from tests import TOML
 from .burntsushi import convert, normalize
 from .test_data import VALID_PAIRS
-
-TOML = tests_path / "data" / "example.toml"
 
 
 def test_toml():

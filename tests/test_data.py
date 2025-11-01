@@ -78,3 +78,5 @@ def test_valid(valid, expected):
     actual = convert(actual)
     expected_normalized = normalize(expected)
     assert actual == expected_normalized
+    # Ensure that parsed toml's can be serialized back without error
+    tomllib.dumps(actual)

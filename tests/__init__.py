@@ -1,4 +1,5 @@
 __all__ = (
+    "TOML",
     "_init_only",
     "tests_path",
 )
@@ -12,3 +13,4 @@ _init_only = {
 }
 
 tests_path = Path(__file__).resolve().parent
+TOML = tests_path / "data" / "example.toml"

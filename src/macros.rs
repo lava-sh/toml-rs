@@ -14,3 +14,12 @@ macro_rules! create_py_datetime {
         )
     };
 }
+
+#[macro_export]
+macro_rules! get_repr {
+    ($obj:expr) => {
+        $obj.repr()
+            .map(|s| s.to_string())
+            .unwrap_or_else(|_| "<unknown>".to_string())
+    };
+}
