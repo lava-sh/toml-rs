@@ -191,11 +191,29 @@ fn _python_to_toml<'py>(
     } else if let Ok(int) = obj.cast::<PyInt>() {
         Value::Integer(int.extract()?)
     } else if let Ok(float) = obj.cast::<PyFloat>() {
-        Value::Float(float.value())
+        let value = float.value();
+        if !value.is_finite() {
+            return Err(crate::TOMLEncodeError::new_err((
+                "TOML does not support non-finite floats (nan, inf, -inf)".to_string(),
+                Some(obj.clone().unbind()),
+            )));
+        }
+        Value::Float(value)
     } else if let Ok(dict) = obj.cast::<PyDict>() {
         let mut table = toml::map::Map::with_capacity(dict.len());
         for (k, v) in dict.iter() {
-            let key = k.cast::<PyString>()?.to_string();
+            let key = k
+                .cast::<PyString>()
+                .map_err(|_| {
+                    crate::TOMLEncodeError::new_err((
+                        format!(
+                            "TOML table keys must be strings, got {}",
+                            crate::get_repr!(k)
+                        ),
+                        Some(k.clone().unbind()),
+                    ))
+                })?
+                .to_string();
             table.insert(key, _python_to_toml(py, &v, recursion)?);
         }
         Value::Table(table)
@@ -255,13 +273,8 @@ fn _python_to_toml<'py>(
             offset: None,
         })
     } else {
-        let repr = obj
-            .repr()
-            .map(|s| s.to_string())
-            .unwrap_or_else(|_| "<unknown>".to_string());
-
         return Err(crate::TOMLEncodeError::new_err((
-            format!("Cannot serialize {} to TOML", repr),
+            format!("Cannot serialize {} to TOML", crate::get_repr!(obj)),
             Some(obj.clone().unbind()),
         )));
     };
