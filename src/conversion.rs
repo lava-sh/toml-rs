@@ -37,9 +37,11 @@ impl RecursionGuard {
         self.current -= 1;
     }
 }
+
 pub(crate) fn python_to_toml<'py>(py: Python<'py>, obj: &Bound<'py, PyAny>) -> PyResult<Value> {
     _python_to_toml(py, obj, &mut RecursionGuard::default())
 }
+
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
