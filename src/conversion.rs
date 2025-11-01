@@ -6,11 +6,10 @@ use pyo3::{
     intern,
     prelude::*,
     types::{
-        PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyList, PyTime,
-        PyTimeAccess, PyTzInfo, PyTzInfoAccess,
+        PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
+        PyList, PyString, PyTime, PyTimeAccess, PyTzInfo, PyTzInfoAccess,
     },
 };
-
 use toml::Value;
 use toml_datetime::Offset;
 
@@ -21,6 +20,7 @@ struct RecursionGuard {
     current: usize,
 }
 impl RecursionGuard {
+    #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
         self.current += 1;
         if MAX_RECURSION_DEPTH <= self.current {
@@ -31,6 +31,7 @@ impl RecursionGuard {
         Ok(())
     }
 
+    #[inline(always)]
     fn exit(&mut self) {
         self.current -= 1;
     }
@@ -181,6 +182,7 @@ fn _extract_date(year: i32, month: u8, day: u8) -> toml_datetime::Date {
     }
 }
 
+#[inline]
 fn _python_to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
@@ -188,27 +190,27 @@ fn _python_to_toml<'py>(
 ) -> PyResult<Value> {
     recursion.enter()?;
 
-    let value = if let Ok(str) = obj.extract::<String>() {
-        Value::String(str)
-    } else if let Ok(bool) = obj.extract::<bool>() {
-        Value::Boolean(bool)
-    } else if let Ok(int) = obj.extract::<i64>() {
-        Value::Integer(int)
-    } else if let Ok(float) = obj.extract::<f64>() {
-        Value::Float(float)
+    let value = if let Ok(dict) = obj.cast::<PyDict>() {
+        let mut table = toml::map::Map::with_capacity(dict.len());
+        for (k, v) in dict.iter() {
+            let key = k.cast::<PyString>()?.to_str()?.to_owned();
+            table.insert(key, _python_to_toml(py, &v, recursion)?);
+        }
+        Value::Table(table)
     } else if let Ok(list) = obj.cast::<PyList>() {
         let mut vec = Vec::with_capacity(list.len());
         for item in list.iter() {
             vec.push(_python_to_toml(py, &item, recursion)?);
         }
         Value::Array(vec)
-    } else if let Ok(dict) = obj.cast::<PyDict>() {
-        let mut table = toml::map::Map::with_capacity(dict.len());
-        for (k, v) in dict.iter() {
-            let key = k.extract::<String>()?;
-            table.insert(key, _python_to_toml(py, &v, recursion)?);
-        }
-        Value::Table(table)
+    } else if let Ok(bool) = obj.cast::<PyBool>() {
+        Value::Boolean(bool.is_true())
+    } else if let Ok(int) = obj.cast::<PyInt>() {
+        Value::Integer(int.extract()?)
+    } else if let Ok(str) = obj.cast::<PyString>() {
+        Value::String(str.to_string())
+    } else if let Ok(float) = obj.cast::<PyFloat>() {
+        Value::Float(float.value())
     } else if let Ok(dt) = obj.cast::<PyDateTime>() {
         let date = _extract_date(dt.get_year(), dt.get_month(), dt.get_day());
         let time = toml_datetime::Time {
