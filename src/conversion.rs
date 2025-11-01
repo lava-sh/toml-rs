@@ -174,15 +174,6 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
 }
 
 #[inline]
-fn _extract_date(year: i32, month: u8, day: u8) -> toml_datetime::Date {
-    toml_datetime::Date {
-        year: year as u16,
-        month,
-        day,
-    }
-}
-
-#[inline]
 fn _python_to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
@@ -193,7 +184,7 @@ fn _python_to_toml<'py>(
     let value = if let Ok(dict) = obj.cast::<PyDict>() {
         let mut table = toml::map::Map::with_capacity(dict.len());
         for (k, v) in dict.iter() {
-            let key = k.cast::<PyString>()?.to_str()?.to_owned();
+            let key = k.cast::<PyString>()?.to_string();
             table.insert(key, _python_to_toml(py, &v, recursion)?);
         }
         Value::Table(table)
@@ -212,49 +203,52 @@ fn _python_to_toml<'py>(
     } else if let Ok(float) = obj.cast::<PyFloat>() {
         Value::Float(float.value())
     } else if let Ok(dt) = obj.cast::<PyDateTime>() {
-        let date = _extract_date(dt.get_year(), dt.get_month(), dt.get_day());
-        let time = toml_datetime::Time {
-            hour: dt.get_hour(),
-            minute: dt.get_minute(),
-            second: dt.get_second(),
-            nanosecond: dt.get_microsecond() * 1000,
-        };
-        let offset = if let Some(tzinfo) = dt.get_tzinfo() {
-            let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
-            if utc_offset.is_none() {
-                None
-            } else {
-                let delta = utc_offset.cast::<PyDelta>()?;
-                let total_seconds = delta.get_days() * 86400 + delta.get_seconds();
-                Some(Offset::Custom {
-                    minutes: (total_seconds / 60) as i16,
-                })
-            }
-        } else {
-            None
-        };
         Value::Datetime(toml_datetime::Datetime {
-            date: Some(date),
-            time: Some(time),
-            offset,
+            date: Some(toml_datetime::Date {
+                year: dt.get_year() as u16,
+                month: dt.get_month(),
+                day: dt.get_day(),
+            }),
+            time: Some(toml_datetime::Time {
+                hour: dt.get_hour(),
+                minute: dt.get_minute(),
+                second: dt.get_second(),
+                nanosecond: dt.get_microsecond() * 1000,
+            }),
+            offset: if let Some(tzinfo) = dt.get_tzinfo() {
+                let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
+                if utc_offset.is_none() {
+                    None
+                } else {
+                    let delta = utc_offset.cast::<PyDelta>()?;
+                    let total_seconds = delta.get_days() * 86400 + delta.get_seconds();
+                    Some(Offset::Custom {
+                        minutes: (total_seconds / 60) as i16,
+                    })
+                }
+            } else {
+                None
+            },
         })
     } else if let Ok(date) = obj.cast::<PyDate>() {
-        let date = _extract_date(date.get_year(), date.get_month(), date.get_day());
         Value::Datetime(toml_datetime::Datetime {
-            date: Some(date),
+            date: Some(toml_datetime::Date {
+                year: date.get_year() as u16,
+                month: date.get_month(),
+                day: date.get_day(),
+            }),
             time: None,
             offset: None,
         })
     } else if let Ok(time) = obj.cast::<PyTime>() {
-        let time = toml_datetime::Time {
-            hour: time.get_hour(),
-            minute: time.get_minute(),
-            second: time.get_second(),
-            nanosecond: time.get_microsecond() * 1000,
-        };
         Value::Datetime(toml_datetime::Datetime {
             date: None,
-            time: Some(time),
+            time: Some(toml_datetime::Time {
+                hour: time.get_hour(),
+                minute: time.get_minute(),
+                second: time.get_second(),
+                nanosecond: time.get_microsecond() * 1000,
+            }),
             offset: None,
         })
     } else {
