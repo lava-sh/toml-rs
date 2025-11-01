@@ -1,14 +1,19 @@
 __all__ = (
     "TOMLDecodeError",
+    "TOMLEncodeError",
     "__version__",
+    "dump",
+    "dumps",
     "load",
     "loads",
 )
 
 from collections.abc import Callable
-from typing import Any, BinaryIO
+from pathlib import Path
+from typing import Any, BinaryIO, TextIO
 
 from ._toml_rs import (
+    _dumps,
     _load,
     _loads,
     _version,
@@ -21,10 +26,22 @@ def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[
     return _load(fp, parse_float=parse_float)
 
 
-def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
+def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> str:
     if not isinstance(s, str):
         raise TypeError(f"Expected str object, not '{type(s).__name__}'")
     return _loads(s, parse_float=parse_float)
+
+
+def dump(obj: Any, /, file: Path | TextIO, *, pretty: bool = False) -> int:
+    s = dumps(obj, pretty=pretty)
+    if isinstance(file, Path):
+        return file.write_text(s, encoding="UTF-8")
+    else:
+        return file.write(s)
+
+
+def dumps(obj: Any, /, *, pretty: bool = False) -> str:
+    return _dumps(obj, pretty=pretty)
 
 
 class TOMLDecodeError(ValueError):
@@ -41,3 +58,11 @@ class TOMLDecodeError(ValueError):
         self.pos = pos
         self.colno = colno
         self.lineno = lineno
+
+
+class TOMLEncodeError(TypeError):
+    def __init__(self, msg: str, obj_type: type | None = None, *args: Any):
+        msg = msg.rstrip()
+        super().__init__(msg)
+        self.msg = msg
+        self.obj_type = obj_type
