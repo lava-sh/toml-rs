@@ -33,7 +33,7 @@ def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, 
 
 
 def dump(obj: Any, /, file: Path | TextIO, *, pretty: bool = False) -> int:
-    s = dumps(obj, pretty=pretty)
+    s = _dumps(obj, pretty=pretty)
     if isinstance(file, Path):
         return file.write_text(s, encoding="UTF-8")
     else:
