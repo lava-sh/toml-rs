@@ -1,5 +1,5 @@
-from re import escape as e
 from datetime import datetime, timedelta, timezone
+from re import escape as e
 
 import pytest
 import toml_rs
