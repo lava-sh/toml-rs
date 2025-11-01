@@ -17,10 +17,10 @@ uv pip install toml-rs
 
 ## Examples
 ```python
+import tomllib
 from pprint import pprint
 
 import toml_rs
-import tomllib
 
 toml = """\
 title = "TOML Example"
@@ -46,13 +46,14 @@ role = "backend"
 
 tomllib_loads = tomllib.loads(toml)
 toml_rs_loads = toml_rs.loads(toml)
+toml_rs_dumps = toml_rs.dumps(toml_rs_loads)
 
 assert tomllib_loads == toml_rs_loads
 
-print("tomllib:")
-pprint(tomllib_loads)
-print("toml_rs:")
+print("toml_rs.loads:")
 pprint(toml_rs_loads)
+print("toml_rs.dumps:")
+print(toml_rs_dumps)
 ```
 
 ## Differences with [`tomllib`](https://docs.python.org/3/library/tomllib.html)
@@ -109,4 +110,22 @@ print(toml_rs.loads(t))
 # 1 | x = 999_999_999_999_999_999_999_999
 #   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # invalid type: integer `999999999999999999999999` as i128, expected any valid TOML value
+```
+
+3. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
+
+```python
+from pathlib import Path
+
+import toml_rs
+
+data = {
+    "title": "TOML Example",
+    "owner": {"name": "Alice", "age": 30},
+}
+
+print(toml_rs.dumps(data))
+
+toml_rs.dump(data, Path("example.toml"))  
+# or `toml_rs.dump(data, "example.toml")`
 ```
