@@ -201,9 +201,9 @@ fn _python_to_toml<'py>(
                     crate::TOMLEncodeError::new_err((
                         format!(
                             "TOML table keys must be strings, got {}",
-                            crate::get_repr!(k)
+                            crate::get_type!(k)
                         ),
-                        Some(k.clone().unbind()),
+                        None::<Py<PyAny>>,
                     ))
                 })?
                 .to_string();
@@ -267,8 +267,8 @@ fn _python_to_toml<'py>(
         })
     } else {
         return Err(crate::TOMLEncodeError::new_err((
-            format!("Cannot serialize {} to TOML", crate::get_repr!(obj)),
-            Some(obj.clone().unbind()),
+            format!("Cannot serialize {} to TOML", crate::get_type!(obj)),
+            None::<Py<PyAny>>,
         )));
     };
     recursion.exit();
