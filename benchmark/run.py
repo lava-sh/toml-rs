@@ -20,7 +20,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-N = 10_000
+N = 5_000
 
 
 def get_lib_version(lib: str) -> str:
@@ -37,24 +37,11 @@ def benchmark(func: Callable, count: int) -> float:
     return end - start
 
 
-def run(run_count: int) -> None:
-    file_path = Path(__file__).resolve().parent
-    path = file_path.parent / "tests" / "data" / "example.toml"
-    data = path.read_bytes().decode()
-    fixed_data = data.replace("\r\n", "\n")
-
-    parsers = {
-        "toml_rs": lambda: toml_rs.loads(data),
-        "rtoml": lambda: rtoml.loads(data),
-        "pytomlpp": lambda: pytomlpp.loads(data),
-        "tomllib": lambda: tomllib.loads(data),
-        "toml": lambda: toml.loads(data),
-        "qtoml": lambda: qtoml.loads(fixed_data),
-        "tomlkit": lambda: tomlkit.parse(data),
-    }
-
-    results = {name: benchmark(func, run_count) for name, func in parsers.items()}
-
+def plot_benchmark(
+        results: dict[str, float],
+        run_type: str,
+        save_path: Path,
+) -> None:
     df = (
         pl.DataFrame({
             "parser": [f"{name} ({get_lib_version(name)})" for name in results],
@@ -114,10 +101,42 @@ def run(run_count: int) -> None:
         width=600,
         height=400,
         title={
-            "text": "TOML parsers benchmark",
+            "text": f"TOML parsers benchmark ({run_type})",
             "subtitle": f"Python: {py} ({os}) | CPU: {cpu}",
         },
-    ).save(file_path / "benchmark.svg")
+    ).save(save_path)
+
+
+file = Path(__file__).resolve().parent
+example_toml = file.parent / "tests" / "data" / "example.toml"
+data = example_toml.read_bytes().decode()
+fixed_data = data.replace("\r\n", "\n")
+
+obj = tomllib.loads(example_toml.read_text())
+
+
+def run(run_count: int) -> None:
+    loads = {
+        "toml_rs": lambda: toml_rs.loads(data),
+        "rtoml": lambda: rtoml.loads(data),
+        "pytomlpp": lambda: pytomlpp.loads(data),
+        "tomllib": lambda: tomllib.loads(data),
+        "toml": lambda: toml.loads(data),
+        "qtoml": lambda: qtoml.loads(fixed_data),
+        "tomlkit": lambda: tomlkit.parse(data),
+    }
+    dumps = {
+        "toml_rs": lambda: toml_rs.dumps(obj),
+        "rtoml": lambda: rtoml.dumps(obj),
+        "pytomlpp": lambda: pytomlpp.dumps(obj),
+        "toml": lambda: toml.dumps(obj),
+        "qtoml": lambda: qtoml.dumps(obj),
+        "tomlkit": lambda: tomlkit.dumps(obj),
+    }
+    loads = {name: benchmark(func, run_count) for name, func in loads.items()}
+    dumps = {name: benchmark(func, run_count) for name, func in dumps.items()}
+    plot_benchmark(loads, run_type="loads", save_path=file / "loads.svg")
+    plot_benchmark(dumps, run_type="dumps", save_path=file / "dumps.svg")
 
 
 if __name__ == "__main__":

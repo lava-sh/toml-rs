@@ -26,4 +26,10 @@ python benchmark/run.py
 ```
 
 ## Results
-<img src="benchmark.svg" alt="TOML parser benchmark">
+### loads:
+
+<img src="loads.svg" alt="TOML parser benchmark">
+
+### dumps:
+
+<img src="dumps.svg" alt="TOML parser benchmark">
