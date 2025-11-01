@@ -26,7 +26,7 @@ def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[
     return _load(fp, parse_float=parse_float)
 
 
-def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> str:
+def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
     if not isinstance(s, str):
         raise TypeError(f"Expected str object, not '{type(s).__name__}'")
     return _loads(s, parse_float=parse_float)
