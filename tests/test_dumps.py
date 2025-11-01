@@ -1,4 +1,4 @@
-import re
+from re import escape as e
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -11,29 +11,29 @@ import toml_rs
         (
             pytest.param(
                 type("_Class", (), {}),
-                r"Cannot serialize <class '.*_Class'",
+                r"Cannot serialize <class '.*_Class'> \(<class 'type'>\)",
                 id="class",
             )
         ),
         (
             {"x": lambda x: x},
-            r"Cannot serialize <function .*<lambda>",
+            r"Cannot serialize <function <lambda> at 0x.*> \(<class 'function'>\)",
         ),
         (
             {"x": 1 + 2j},
-            re.escape("Cannot serialize (1+2j)"),
+            e("Cannot serialize (1+2j) (<class 'complex'>)"),
         ),
         (
             {"set": {1, 2, 3}},
-            r"Cannot serialize {1, 2, 3}",
+            r"Cannot serialize {1, 2, 3} \(<class 'set'>\)",
         ),
         (
             {"valid": {"invalid": object()}},
-            r"Cannot serialize <object object at",
+            r"Cannot serialize <object object at 0x.*> \(<class 'object'>\)",
         ),
         (
             {42: "value"},
-            r"TOML table keys must be strings, got 42",
+            e("TOML table keys must be strings, got 42 (<class 'int'>)"),
         ),
     ],
 )
