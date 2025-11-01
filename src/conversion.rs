@@ -193,10 +193,9 @@ fn _python_to_toml<'py>(
     } else if let Ok(float) = obj.cast::<PyFloat>() {
         let value = float.value();
         if !value.is_finite() {
-            return Err(crate::TOMLEncodeError::new_err((
+            return Err(crate::TOMLEncodeError::new_err(
                 "TOML does not support non-finite floats (nan, inf, -inf)".to_string(),
-                Some(obj.clone().unbind()),
-            )));
+            ));
         }
         Value::Float(value)
     } else if let Ok(dict) = obj.cast::<PyDict>() {
