@@ -1,6 +1,7 @@
 use std::borrow::Cow;
 
 use pyo3::{
+    IntoPyObjectExt,
     exceptions::{PyRecursionError, PyValueError},
     intern,
     prelude::*,
@@ -8,7 +9,6 @@ use pyo3::{
         PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
         PyList, PyString, PyTime, PyTimeAccess, PyTzInfo, PyTzInfoAccess,
     },
-    IntoPyObjectExt,
 };
 use toml::Value;
 use toml_datetime::Offset;
