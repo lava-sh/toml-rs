@@ -19,6 +19,7 @@ const MAX_RECURSION_DEPTH: usize = 999;
 struct RecursionGuard {
     current: usize,
 }
+
 impl RecursionGuard {
     #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
