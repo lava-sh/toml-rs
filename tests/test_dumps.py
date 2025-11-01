@@ -35,10 +35,6 @@ import toml_rs
             {42: "value"},
             r"TOML table keys must be strings, got 42",
         ),
-        (
-            {"n": float("nan")},
-            r"TOML does not support non-finite floats",
-        ),
     ],
 )
 def test_incorrect_dumps(v, pattern):
@@ -49,6 +45,8 @@ def test_incorrect_dumps(v, pattern):
 def test_dumps():
     obj = {
         "title": "TOML Example",
+        "float": float("-inf"),
+        "float_2": float("+nan"),
         "owner": {
             "dob": datetime(1979, 5, 27, 7, 32, tzinfo=timezone(timedelta(hours=-8))),
             "name": "Tom Preston-Werner",
@@ -62,6 +60,8 @@ def test_dumps():
     }
     assert toml_rs.dumps(obj) == """\
 title = "TOML Example"
+float = -inf
+float_2 = nan
 
 [owner]
 dob = 1979-05-27T07:32:00-08:00
