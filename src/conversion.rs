@@ -191,13 +191,7 @@ fn _python_to_toml<'py>(
     } else if let Ok(int) = obj.cast::<PyInt>() {
         Value::Integer(int.extract()?)
     } else if let Ok(float) = obj.cast::<PyFloat>() {
-        let value = float.value();
-        if !value.is_finite() {
-            return Err(crate::TOMLEncodeError::new_err(
-                "TOML does not support non-finite floats (nan, inf, -inf)".to_string(),
-            ));
-        }
-        Value::Float(value)
+        Value::Float(float.value())
     } else if let Ok(dict) = obj.cast::<PyDict>() {
         let mut table = toml::map::Map::with_capacity(dict.len());
         for (k, v) in dict.iter() {
