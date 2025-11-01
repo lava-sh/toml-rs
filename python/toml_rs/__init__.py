@@ -61,8 +61,7 @@ class TOMLDecodeError(ValueError):
 
 
 class TOMLEncodeError(TypeError):
-    def __init__(self, msg: str, obj_type: type | None = None, *args: Any):
+    def __init__(self, msg: str, *args: Any):
         msg = msg.rstrip()
         super().__init__(msg)
         self.msg = msg
-        self.obj_type = obj_type

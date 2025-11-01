@@ -1,7 +1,6 @@
 use std::borrow::Cow;
 
 use pyo3::{
-    IntoPyObjectExt,
     exceptions::{PyRecursionError, PyValueError},
     intern,
     prelude::*,
@@ -9,6 +8,7 @@ use pyo3::{
         PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
         PyList, PyString, PyTime, PyTimeAccess, PyTzInfo, PyTzInfoAccess,
     },
+    IntoPyObjectExt,
 };
 use toml::Value;
 use toml_datetime::Offset;
@@ -184,7 +184,15 @@ fn _python_to_toml<'py>(
 ) -> PyResult<Value> {
     recursion.enter()?;
 
-    let value = if let Ok(dict) = obj.cast::<PyDict>() {
+    let value = if let Ok(str) = obj.cast::<PyString>() {
+        Value::String(str.to_string())
+    } else if let Ok(bool) = obj.cast::<PyBool>() {
+        Value::Boolean(bool.is_true())
+    } else if let Ok(int) = obj.cast::<PyInt>() {
+        Value::Integer(int.extract()?)
+    } else if let Ok(float) = obj.cast::<PyFloat>() {
+        Value::Float(float.value())
+    } else if let Ok(dict) = obj.cast::<PyDict>() {
         let mut table = toml::map::Map::with_capacity(dict.len());
         for (k, v) in dict.iter() {
             let key = k.cast::<PyString>()?.to_string();
@@ -197,14 +205,6 @@ fn _python_to_toml<'py>(
             vec.push(_python_to_toml(py, &item, recursion)?);
         }
         Value::Array(vec)
-    } else if let Ok(bool) = obj.cast::<PyBool>() {
-        Value::Boolean(bool.is_true())
-    } else if let Ok(int) = obj.cast::<PyInt>() {
-        Value::Integer(int.extract()?)
-    } else if let Ok(str) = obj.cast::<PyString>() {
-        Value::String(str.to_string())
-    } else if let Ok(float) = obj.cast::<PyFloat>() {
-        Value::Float(float.value())
     } else if let Ok(dt) = obj.cast::<PyDateTime>() {
         Value::Datetime(toml_datetime::Datetime {
             date: Some(toml_datetime::Date {
