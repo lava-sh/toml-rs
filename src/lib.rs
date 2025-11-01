@@ -58,7 +58,7 @@ fn dumps(py: Python, obj: &Bound<'_, PyAny>, pretty: bool) -> PyResult<String> {
     } else {
         toml::to_string(&value)
     }
-    .map_err(|err| TOMLEncodeError::new_err(format!("{}", err)))?;
+    .map_err(|err| TOMLEncodeError::new_err(err.to_string()))?;
     Ok(toml)
 }
 
