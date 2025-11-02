@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! create_py_datetime {
     ($py:expr, $date:expr, $time:expr, $tzinfo:expr) => {
-        PyDateTime::new(
+        t::PyDateTime::new(
             $py,
             $date.year as i32,
             $date.month,
