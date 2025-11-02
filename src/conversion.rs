@@ -7,8 +7,7 @@ use pyo3::{
     prelude::*,
     types::{self as t, PyDateAccess, PyDeltaAccess, PyTimeAccess, PyTzInfoAccess},
 };
-use toml::Value;
-use toml_datetime::Offset;
+use toml::{Value, value::Offset};
 
 const MAX_RECURSION_DEPTH: usize = 999;
 
@@ -214,13 +213,13 @@ fn _python_to_toml<'py>(
         }
         Value::Array(vec)
     } else if let Ok(dt) = obj.cast::<t::PyDateTime>() {
-        Value::Datetime(toml_datetime::Datetime {
-            date: Some(toml_datetime::Date {
+        Value::Datetime(toml::value::Datetime {
+            date: Some(toml::value::Date {
                 year: dt.get_year() as u16,
                 month: dt.get_month(),
                 day: dt.get_day(),
             }),
-            time: Some(toml_datetime::Time {
+            time: Some(toml::value::Time {
                 hour: dt.get_hour(),
                 minute: dt.get_minute(),
                 second: dt.get_second(),
@@ -242,8 +241,8 @@ fn _python_to_toml<'py>(
             },
         })
     } else if let Ok(date) = obj.cast::<t::PyDate>() {
-        Value::Datetime(toml_datetime::Datetime {
-            date: Some(toml_datetime::Date {
+        Value::Datetime(toml::value::Datetime {
+            date: Some(toml::value::Date {
                 year: date.get_year() as u16,
                 month: date.get_month(),
                 day: date.get_day(),
@@ -252,9 +251,9 @@ fn _python_to_toml<'py>(
             offset: None,
         })
     } else if let Ok(time) = obj.cast::<t::PyTime>() {
-        Value::Datetime(toml_datetime::Datetime {
+        Value::Datetime(toml::value::Datetime {
             date: None,
-            time: Some(toml_datetime::Time {
+            time: Some(toml::value::Time {
                 hour: time.get_hour(),
                 minute: time.get_minute(),
                 second: time.get_second(),

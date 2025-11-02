@@ -297,7 +297,6 @@ dependencies = [
  "pyo3",
  "ryu",
  "toml",
- "toml_datetime",
 ]
 
 [[package]]
