@@ -172,7 +172,6 @@ pub(crate) fn python_to_toml<'py>(py: Python<'py>, obj: &Bound<'py, PyAny>) -> P
     _python_to_toml(py, obj, &mut RecursionGuard::default())
 }
 
-#[inline]
 fn _python_to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
