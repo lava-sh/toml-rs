@@ -181,7 +181,7 @@ fn _python_to_toml<'py>(
 ) -> PyResult<Value> {
     recursion.enter()?;
 
-    let value = if let Ok(str) = obj.cast::<t::PyString>() {
+    let toml = if let Ok(str) = obj.cast::<t::PyString>() {
         Value::String(str.to_string())
     } else if let Ok(bool) = obj.cast::<t::PyBool>() {
         Value::Boolean(bool.is_true())
@@ -269,5 +269,5 @@ fn _python_to_toml<'py>(
         )));
     };
     recursion.exit();
-    Ok(value)
+    Ok(toml)
 }
