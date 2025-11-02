@@ -5,10 +5,7 @@ use pyo3::{
     exceptions::{PyRecursionError, PyValueError},
     intern,
     prelude::*,
-    types::{
-        PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
-        PyList, PyString, PyTime, PyTimeAccess, PyTzInfo, PyTzInfoAccess,
-    },
+    types::{self as t, PyDateAccess, PyDeltaAccess, PyTimeAccess, PyTzInfoAccess},
 };
 use toml::Value;
 use toml_datetime::Offset;
@@ -38,10 +35,6 @@ impl RecursionGuard {
     }
 }
 
-pub(crate) fn python_to_toml<'py>(py: Python<'py>, obj: &Bound<'py, PyAny>) -> PyResult<Value> {
-    _python_to_toml(py, obj, &mut RecursionGuard::default())
-}
-
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
@@ -65,7 +58,7 @@ fn _toml_to_python<'py>(
             if let Some(f) = parse_float {
                 let mut buf = ryu::Buffer::new();
                 let py_call = f.call1((buf.format(float),))?;
-                if py_call.cast::<PyDict>().is_ok() || py_call.cast::<PyList>().is_ok() {
+                if py_call.cast::<t::PyDict>().is_ok() || py_call.cast::<t::PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
@@ -77,14 +70,14 @@ fn _toml_to_python<'py>(
         }
         Value::Boolean(bool) => bool.into_bound_py_any(py),
         Value::Array(array) => {
-            let py_list = PyList::empty(py);
+            let py_list = t::PyList::empty(py);
             for item in array {
                 py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
             }
             Ok(py_list.into_any())
         }
         Value::Table(table) => {
-            let py_dict = PyDict::new(py);
+            let py_dict = t::PyDict::new(py);
             for (k, v) in table {
                 let value = _toml_to_python(py, v, parse_float, recursion)?;
                 py_dict.set_item(k, value)?;
@@ -100,11 +93,11 @@ fn _toml_to_python<'py>(
                 Ok(crate::create_py_datetime!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
-                let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
+                let py_date = t::PyDate::new(py, date.year as i32, date.month, date.day)?;
                 Ok(py_date.into_any())
             }
             (None, Some(time), None) => {
-                let py_time = PyTime::new(
+                let py_time = t::PyTime::new(
                     py,
                     time.hour,
                     time.minute,
@@ -124,9 +117,9 @@ fn _toml_to_python<'py>(
 fn create_timezone_from_offset<'py>(
     py: Python<'py>,
     offset: &Offset,
-) -> PyResult<Bound<'py, PyTzInfo>> {
+) -> PyResult<Bound<'py, t::PyTzInfo>> {
     match offset {
-        Offset::Z => PyTzInfo::utc(py).map(|utc| utc.to_owned()),
+        Offset::Z => t::PyTzInfo::utc(py).map(|utc| utc.to_owned()),
         Offset::Custom { minutes } => {
             let seconds = *minutes as i32 * 60;
             let (days, seconds) = if seconds < 0 {
@@ -136,8 +129,8 @@ fn create_timezone_from_offset<'py>(
             } else {
                 (0, seconds)
             };
-            let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
-            PyTzInfo::fixed_offset(py, py_delta)
+            let py_delta = t::PyDelta::new(py, days, seconds, 0, false)?;
+            t::PyTzInfo::fixed_offset(py, py_delta)
         }
     }
 }
@@ -176,6 +169,10 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
     }
 }
 
+pub(crate) fn python_to_toml<'py>(py: Python<'py>, obj: &Bound<'py, PyAny>) -> PyResult<Value> {
+    _python_to_toml(py, obj, &mut RecursionGuard::default())
+}
+
 #[inline]
 fn _python_to_toml<'py>(
     py: Python<'py>,
@@ -184,19 +181,19 @@ fn _python_to_toml<'py>(
 ) -> PyResult<Value> {
     recursion.enter()?;
 
-    let value = if let Ok(str) = obj.cast::<PyString>() {
+    let value = if let Ok(str) = obj.cast::<t::PyString>() {
         Value::String(str.to_string())
-    } else if let Ok(bool) = obj.cast::<PyBool>() {
+    } else if let Ok(bool) = obj.cast::<t::PyBool>() {
         Value::Boolean(bool.is_true())
-    } else if let Ok(int) = obj.cast::<PyInt>() {
+    } else if let Ok(int) = obj.cast::<t::PyInt>() {
         Value::Integer(int.extract()?)
-    } else if let Ok(float) = obj.cast::<PyFloat>() {
+    } else if let Ok(float) = obj.cast::<t::PyFloat>() {
         Value::Float(float.value())
-    } else if let Ok(dict) = obj.cast::<PyDict>() {
+    } else if let Ok(dict) = obj.cast::<t::PyDict>() {
         let mut table = toml::map::Map::with_capacity(dict.len());
         for (k, v) in dict.iter() {
             let key = k
-                .cast::<PyString>()
+                .cast::<t::PyString>()
                 .map_err(|_| {
                     crate::TOMLEncodeError::new_err((
                         format!(
@@ -210,13 +207,13 @@ fn _python_to_toml<'py>(
             table.insert(key, _python_to_toml(py, &v, recursion)?);
         }
         Value::Table(table)
-    } else if let Ok(list) = obj.cast::<PyList>() {
+    } else if let Ok(list) = obj.cast::<t::PyList>() {
         let mut vec = Vec::with_capacity(list.len());
         for item in list.iter() {
             vec.push(_python_to_toml(py, &item, recursion)?);
         }
         Value::Array(vec)
-    } else if let Ok(dt) = obj.cast::<PyDateTime>() {
+    } else if let Ok(dt) = obj.cast::<t::PyDateTime>() {
         Value::Datetime(toml_datetime::Datetime {
             date: Some(toml_datetime::Date {
                 year: dt.get_year() as u16,
@@ -234,7 +231,7 @@ fn _python_to_toml<'py>(
                 if utc_offset.is_none() {
                     None
                 } else {
-                    let delta = utc_offset.cast::<PyDelta>()?;
+                    let delta = utc_offset.cast::<t::PyDelta>()?;
                     let total_seconds = delta.get_days() * 86400 + delta.get_seconds();
                     Some(Offset::Custom {
                         minutes: (total_seconds / 60) as i16,
@@ -244,7 +241,7 @@ fn _python_to_toml<'py>(
                 None
             },
         })
-    } else if let Ok(date) = obj.cast::<PyDate>() {
+    } else if let Ok(date) = obj.cast::<t::PyDate>() {
         Value::Datetime(toml_datetime::Datetime {
             date: Some(toml_datetime::Date {
                 year: date.get_year() as u16,
@@ -254,7 +251,7 @@ fn _python_to_toml<'py>(
             time: None,
             offset: None,
         })
-    } else if let Ok(time) = obj.cast::<PyTime>() {
+    } else if let Ok(time) = obj.cast::<t::PyTime>() {
         Value::Datetime(toml_datetime::Datetime {
             date: None,
             time: Some(toml_datetime::Time {
