@@ -9,22 +9,42 @@ use pyo3::{
 };
 use toml::{Value, value::Offset};
 
-const MAX_RECURSION_DEPTH: usize = 999;
+#[derive(Copy, Clone, Debug)]
+struct Limit(usize);
 
-#[derive(Clone, Debug, Default)]
+impl Limit {
+    #[inline]
+    fn value_limit(&self, value: usize) -> bool {
+        value < self.0
+    }
+}
+
+const RECURSION_LIMIT: Limit = Limit(999);
+
+#[derive(Clone, Debug)]
 struct RecursionGuard {
     current: usize,
+    limit: Limit,
+}
+
+impl Default for RecursionGuard {
+    fn default() -> Self {
+        Self {
+            current: 0,
+            limit: RECURSION_LIMIT,
+        }
+    }
 }
 
 impl RecursionGuard {
     #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
-        self.current += 1;
-        if MAX_RECURSION_DEPTH <= self.current {
+        if !self.limit.value_limit(self.current) {
             return Err(PyRecursionError::new_err(
                 "max recursion depth met".to_string(),
             ));
         }
+        self.current += 1;
         Ok(())
     }
 
@@ -48,15 +68,13 @@ fn _toml_to_python<'py>(
     parse_float: Option<&Bound<'py, PyAny>>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Bound<'py, PyAny>> {
-    recursion.enter()?;
-
-    let toml = match value {
+    match value {
         Value::String(str) => str.into_bound_py_any(py),
         Value::Integer(int) => int.into_bound_py_any(py),
         Value::Float(float) => {
             if let Some(f) = parse_float {
-                let mut buf = ryu::Buffer::new();
-                let py_call = f.call1((buf.format(float),))?;
+                let mut ryu_buf = ryu::Buffer::new();
+                let py_call = f.call1((ryu_buf.format(float),))?;
                 if py_call.cast::<t::PyDict>().is_ok() || py_call.cast::<t::PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
@@ -68,21 +86,6 @@ fn _toml_to_python<'py>(
             }
         }
         Value::Boolean(bool) => bool.into_bound_py_any(py),
-        Value::Array(array) => {
-            let py_list = t::PyList::empty(py);
-            for item in array {
-                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
-            }
-            Ok(py_list.into_any())
-        }
-        Value::Table(table) => {
-            let py_dict = t::PyDict::new(py);
-            for (k, v) in table {
-                let value = _toml_to_python(py, v, parse_float, recursion)?;
-                py_dict.set_item(k, value)?;
-            }
-            Ok(py_dict.into_any())
-        }
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
@@ -108,9 +111,26 @@ fn _toml_to_python<'py>(
             }
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
-    };
-    recursion.exit();
-    toml
+        Value::Array(array) => {
+            recursion.enter()?;
+            let py_list = t::PyList::empty(py);
+            for item in array {
+                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
+            }
+            recursion.exit();
+            Ok(py_list.into_any())
+        }
+        Value::Table(table) => {
+            recursion.enter()?;
+            let py_dict = t::PyDict::new(py);
+            for (k, v) in table {
+                let value = _toml_to_python(py, v, parse_float, recursion)?;
+                py_dict.set_item(k, value)?;
+            }
+            recursion.exit();
+            Ok(py_dict.into_any())
+        }
+    }
 }
 
 fn create_timezone_from_offset<'py>(
@@ -177,39 +197,17 @@ fn _python_to_toml<'py>(
     obj: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Value> {
-    recursion.enter()?;
-
-    let toml = if let Ok(str) = obj.cast::<t::PyString>() {
-        Value::String(str.to_string())
+    if let Ok(str) = obj.cast::<t::PyString>() {
+        return Ok(Value::String(str.to_string()));
     } else if let Ok(bool) = obj.cast::<t::PyBool>() {
-        Value::Boolean(bool.is_true())
+        return Ok(Value::Boolean(bool.is_true()));
     } else if let Ok(int) = obj.cast::<t::PyInt>() {
-        Value::Integer(int.extract()?)
+        return Ok(Value::Integer(int.extract()?));
     } else if let Ok(float) = obj.cast::<t::PyFloat>() {
-        Value::Float(float.value())
-    } else if let Ok(dict) = obj.cast::<t::PyDict>() {
-        let mut table = toml::map::Map::with_capacity(dict.len());
-        for (k, v) in dict.iter() {
-            let key = k
-                .cast::<t::PyString>()
-                .map_err(|_| {
-                    crate::TOMLEncodeError::new_err(format!(
-                        "TOML table keys must be strings, got {}",
-                        crate::get_type!(k)
-                    ))
-                })?
-                .to_string();
-            table.insert(key, _python_to_toml(py, &v, recursion)?);
-        }
-        Value::Table(table)
-    } else if let Ok(list) = obj.cast::<t::PyList>() {
-        let mut vec = Vec::with_capacity(list.len());
-        for item in list.iter() {
-            vec.push(_python_to_toml(py, &item, recursion)?);
-        }
-        Value::Array(vec)
-    } else if let Ok(dt) = obj.cast::<t::PyDateTime>() {
-        Value::Datetime(toml::value::Datetime {
+        return Ok(Value::Float(float.value()));
+    }
+    if let Ok(dt) = obj.cast::<t::PyDateTime>() {
+        return Ok(Value::Datetime(toml::value::Datetime {
             date: Some(toml::value::Date {
                 year: dt.get_year() as u16,
                 month: dt.get_month(),
@@ -235,9 +233,9 @@ fn _python_to_toml<'py>(
             } else {
                 None
             },
-        })
+        }));
     } else if let Ok(date) = obj.cast::<t::PyDate>() {
-        Value::Datetime(toml::value::Datetime {
+        return Ok(Value::Datetime(toml::value::Datetime {
             date: Some(toml::value::Date {
                 year: date.get_year() as u16,
                 month: date.get_month(),
@@ -245,9 +243,9 @@ fn _python_to_toml<'py>(
             }),
             time: None,
             offset: None,
-        })
+        }));
     } else if let Ok(time) = obj.cast::<t::PyTime>() {
-        Value::Datetime(toml::value::Datetime {
+        return Ok(Value::Datetime(toml::value::Datetime {
             date: None,
             time: Some(toml::value::Time {
                 hour: time.get_hour(),
@@ -256,13 +254,38 @@ fn _python_to_toml<'py>(
                 nanosecond: time.get_microsecond() * 1000,
             }),
             offset: None,
-        })
-    } else {
-        return Err(crate::TOMLEncodeError::new_err(format!(
-            "Cannot serialize {} to TOML",
-            crate::get_type!(obj)
-        )));
-    };
-    recursion.exit();
-    Ok(toml)
+        }));
+    }
+
+    if let Ok(dict) = obj.cast::<t::PyDict>() {
+        recursion.enter()?;
+        let mut table = toml::map::Map::with_capacity(dict.len());
+        for (k, v) in dict.iter() {
+            let key = k
+                .cast::<t::PyString>()
+                .map_err(|_| {
+                    crate::TOMLEncodeError::new_err(format!(
+                        "TOML table keys must be strings, got {}",
+                        crate::get_type!(k)
+                    ))
+                })?
+                .to_string();
+            table.insert(key, _python_to_toml(py, &v, recursion)?);
+        }
+        recursion.exit();
+        return Ok(Value::Table(table));
+    } else if let Ok(list) = obj.cast::<t::PyList>() {
+        recursion.enter()?;
+        let mut vec = Vec::with_capacity(list.len());
+        for item in list.iter() {
+            vec.push(_python_to_toml(py, &item, recursion)?);
+        }
+        recursion.exit();
+        return Ok(Value::Array(vec));
+    }
+
+    Err(crate::TOMLEncodeError::new_err(format!(
+        "Cannot serialize {} to TOML",
+        crate::get_type!(obj)
+    )))
 }

@@ -14,7 +14,6 @@ from typing import Any, BinaryIO, TextIO
 
 from ._toml_rs import (
     _dumps,
-    _load,
     _loads,
     _version,
 )
@@ -23,7 +22,13 @@ __version__: str = _version
 
 
 def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
-    return _load(fp, parse_float=parse_float)
+    b = fp.read()
+    try:
+        s = b.decode()
+    except AttributeError:
+        msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+        raise TypeError(msg) from None
+    return loads(s, parse_float=parse_float)
 
 
 def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
