@@ -7,24 +7,45 @@ use pyo3::{
     prelude::*,
     types::{self as t, PyDateAccess, PyDeltaAccess, PyTimeAccess, PyTzInfoAccess},
 };
+use smallvec::SmallVec;
 use toml::{Value, value::Offset};
 
-const MAX_RECURSION_DEPTH: usize = 999;
+#[derive(Copy, Clone, Debug)]
+struct Limit(usize);
 
-#[derive(Clone, Debug, Default)]
+impl Limit {
+    #[inline]
+    fn _limit(&self, value: usize) -> bool {
+        value < self.0
+    }
+}
+
+const RECURSION_LIMIT: Limit = Limit(999);
+
+#[derive(Clone, Debug)]
 struct RecursionGuard {
     current: usize,
+    limit: Limit,
+}
+
+impl Default for RecursionGuard {
+    fn default() -> Self {
+        Self {
+            current: 0,
+            limit: RECURSION_LIMIT,
+        }
+    }
 }
 
 impl RecursionGuard {
     #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
-        self.current += 1;
-        if MAX_RECURSION_DEPTH <= self.current {
+        if !self.limit._limit(self.current) {
             return Err(PyRecursionError::new_err(
                 "max recursion depth met".to_string(),
             ));
         }
+        self.current += 1;
         Ok(())
     }
 
@@ -48,15 +69,13 @@ fn _toml_to_python<'py>(
     parse_float: Option<&Bound<'py, PyAny>>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Bound<'py, PyAny>> {
-    recursion.enter()?;
-
-    let toml = match value {
+    match value {
         Value::String(str) => str.into_bound_py_any(py),
         Value::Integer(int) => int.into_bound_py_any(py),
         Value::Float(float) => {
             if let Some(f) = parse_float {
-                let mut buf = ryu::Buffer::new();
-                let py_call = f.call1((buf.format(float),))?;
+                let mut ryu_buf = ryu::Buffer::new();
+                let py_call = f.call1((ryu_buf.format(float),))?;
                 if py_call.cast::<t::PyDict>().is_ok() || py_call.cast::<t::PyList>().is_ok() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
@@ -68,21 +87,6 @@ fn _toml_to_python<'py>(
             }
         }
         Value::Boolean(bool) => bool.into_bound_py_any(py),
-        Value::Array(array) => {
-            let py_list = t::PyList::empty(py);
-            for item in array {
-                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
-            }
-            Ok(py_list.into_any())
-        }
-        Value::Table(table) => {
-            let py_dict = t::PyDict::new(py);
-            for (k, v) in table {
-                let value = _toml_to_python(py, v, parse_float, recursion)?;
-                py_dict.set_item(k, value)?;
-            }
-            Ok(py_dict.into_any())
-        }
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
@@ -108,9 +112,34 @@ fn _toml_to_python<'py>(
             }
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
-    };
-    recursion.exit();
-    toml
+        Value::Array(array) => {
+            if array.is_empty() {
+                return Ok(t::PyList::empty(py).into_any());
+            }
+
+            recursion.enter()?;
+            let py_list = t::PyList::empty(py);
+            for item in array {
+                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
+            }
+            recursion.exit();
+            Ok(py_list.into_any())
+        }
+        Value::Table(table) => {
+            if table.is_empty() {
+                return Ok(t::PyDict::new(py).into_any());
+            }
+
+            recursion.enter()?;
+            let py_dict = t::PyDict::new(py);
+            for (k, v) in table {
+                let value = _toml_to_python(py, v, parse_float, recursion)?;
+                py_dict.set_item(k, value)?;
+            }
+            recursion.exit();
+            Ok(py_dict.into_any())
+        }
+    }
 }
 
 fn create_timezone_from_offset<'py>(
@@ -177,18 +206,71 @@ fn _python_to_toml<'py>(
     obj: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Value> {
-    recursion.enter()?;
-
-    let toml = if let Ok(str) = obj.cast::<t::PyString>() {
-        Value::String(str.to_string())
+    if let Ok(str) = obj.cast::<t::PyString>() {
+        return Ok(Value::String(str.to_str()?.to_owned()));
     } else if let Ok(bool) = obj.cast::<t::PyBool>() {
-        Value::Boolean(bool.is_true())
+        return Ok(Value::Boolean(bool.is_true()));
     } else if let Ok(int) = obj.cast::<t::PyInt>() {
-        Value::Integer(int.extract()?)
+        return Ok(Value::Integer(int.extract()?));
     } else if let Ok(float) = obj.cast::<t::PyFloat>() {
-        Value::Float(float.value())
-    } else if let Ok(dict) = obj.cast::<t::PyDict>() {
-        let mut table = toml::map::Map::with_capacity(dict.len());
+        return Ok(Value::Float(float.value()));
+    }
+
+    if let Ok(dt) = obj.cast::<t::PyDateTime>() {
+        let date = crate::toml_dt!(Date, dt.get_year(), dt.get_month(), dt.get_day());
+        let time = crate::toml_dt!(
+            Time,
+            dt.get_hour(),
+            dt.get_minute(),
+            dt.get_second(),
+            dt.get_microsecond() * 1000
+        );
+
+        let offset = if let Some(tzinfo) = dt.get_tzinfo() {
+            let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
+            if utc_offset.is_none() {
+                None
+            } else {
+                let delta = utc_offset.cast::<t::PyDelta>()?;
+                let seconds = delta.get_days() * 86400 + delta.get_seconds();
+                Some(Offset::Custom {
+                    minutes: (seconds / 60) as i16,
+                })
+            }
+        } else {
+            None
+        };
+
+        return Ok(crate::toml_dt!(Datetime, Some(date), Some(time), offset));
+    } else if let Ok(date_obj) = obj.cast::<t::PyDate>() {
+        let date = crate::toml_dt!(
+            Date,
+            date_obj.get_year(),
+            date_obj.get_month(),
+            date_obj.get_day()
+        );
+        return Ok(crate::toml_dt!(Datetime, Some(date), None, None));
+    } else if let Ok(time_obj) = obj.cast::<t::PyTime>() {
+        let time = crate::toml_dt!(
+            Time,
+            time_obj.get_hour(),
+            time_obj.get_minute(),
+            time_obj.get_second(),
+            time_obj.get_microsecond() * 1000
+        );
+        return Ok(crate::toml_dt!(Datetime, None, Some(time), None));
+    }
+
+    if let Ok(dict) = obj.cast::<t::PyDict>() {
+        recursion.enter()?;
+        let len = dict.len();
+
+        if len == 0 {
+            return Ok(Value::Table(toml::map::Map::new()));
+        }
+
+        let mut items: SmallVec<[(String, Value); 8]> = SmallVec::with_capacity(len);
+
         for (k, v) in dict.iter() {
             let key = k
                 .cast::<t::PyString>()
@@ -198,71 +280,40 @@ fn _python_to_toml<'py>(
                         crate::get_type!(k)
                     ))
                 })?
-                .to_string();
-            table.insert(key, _python_to_toml(py, &v, recursion)?);
+                .to_str()?
+                .to_owned();
+
+            let value = _python_to_toml(py, &v, recursion)?;
+            items.push((key, value));
         }
-        Value::Table(table)
-    } else if let Ok(list) = obj.cast::<t::PyList>() {
-        let mut vec = Vec::with_capacity(list.len());
+        let mut table = toml::map::Map::with_capacity(len);
+
+        for (k, v) in items {
+            table.insert(k, v);
+        }
+        recursion.exit();
+        return Ok(Value::Table(table));
+    }
+
+    if let Ok(list) = obj.cast::<t::PyList>() {
+        recursion.enter()?;
+        let len = list.len();
+
+        if len == 0 {
+            return Ok(Value::Array(Vec::new()));
+        }
+
+        let mut items: SmallVec<[Value; 8]> = SmallVec::with_capacity(len);
+
         for item in list.iter() {
-            vec.push(_python_to_toml(py, &item, recursion)?);
+            items.push(_python_to_toml(py, &item, recursion)?);
         }
-        Value::Array(vec)
-    } else if let Ok(dt) = obj.cast::<t::PyDateTime>() {
-        Value::Datetime(toml::value::Datetime {
-            date: Some(toml::value::Date {
-                year: dt.get_year() as u16,
-                month: dt.get_month(),
-                day: dt.get_day(),
-            }),
-            time: Some(toml::value::Time {
-                hour: dt.get_hour(),
-                minute: dt.get_minute(),
-                second: dt.get_second(),
-                nanosecond: dt.get_microsecond() * 1000,
-            }),
-            offset: if let Some(tzinfo) = dt.get_tzinfo() {
-                let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
-                if utc_offset.is_none() {
-                    None
-                } else {
-                    let delta = utc_offset.cast::<t::PyDelta>()?;
-                    let total_seconds = delta.get_days() * 86400 + delta.get_seconds();
-                    Some(Offset::Custom {
-                        minutes: (total_seconds / 60) as i16,
-                    })
-                }
-            } else {
-                None
-            },
-        })
-    } else if let Ok(date) = obj.cast::<t::PyDate>() {
-        Value::Datetime(toml::value::Datetime {
-            date: Some(toml::value::Date {
-                year: date.get_year() as u16,
-                month: date.get_month(),
-                day: date.get_day(),
-            }),
-            time: None,
-            offset: None,
-        })
-    } else if let Ok(time) = obj.cast::<t::PyTime>() {
-        Value::Datetime(toml::value::Datetime {
-            date: None,
-            time: Some(toml::value::Time {
-                hour: time.get_hour(),
-                minute: time.get_minute(),
-                second: time.get_second(),
-                nanosecond: time.get_microsecond() * 1000,
-            }),
-            offset: None,
-        })
-    } else {
-        return Err(crate::TOMLEncodeError::new_err(format!(
-            "Cannot serialize {} to TOML",
-            crate::get_type!(obj)
-        )));
-    };
-    recursion.exit();
-    Ok(toml)
+        recursion.exit();
+        return Ok(Value::Array(items.into_vec()));
+    }
+
+    Err(crate::TOMLEncodeError::new_err(format!(
+        "Cannot serialize {} to TOML",
+        crate::get_type!(obj)
+    )))
 }

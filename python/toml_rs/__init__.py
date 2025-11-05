@@ -14,7 +14,6 @@ from typing import Any, BinaryIO, TextIO
 
 from ._toml_rs import (
     _dumps,
-    _load,
     _loads,
     _version,
 )
@@ -23,7 +22,13 @@ __version__: str = _version
 
 
 def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
-    return _load(fp, parse_float=parse_float)
+    _bytes = fp.read()
+    try:
+        _str = _bytes.decode()
+    except AttributeError:
+        msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+        raise TypeError(msg) from None
+    return loads(_str, parse_float=parse_float)
 
 
 def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
@@ -37,7 +42,7 @@ def dump(obj: Any, /, file: str | Path | TextIO, *, pretty: bool = False) -> int
     if isinstance(file, str):
         file = Path(file)
     if isinstance(file, Path):
-        return file.write_text(s, encoding="UTF-8")
+        return file.write_text(s, encoding="utf-8")
     else:
         return file.write(s)
 
