@@ -30,3 +30,31 @@ macro_rules! get_type {
         )
     };
 }
+
+#[macro_export]
+macro_rules! toml_dt {
+    (Date, $y:expr, $m:expr, $d:expr) => {
+        toml::value::Date {
+            year: $y as u16,
+            month: $m,
+            day: $d,
+        }
+    };
+
+    (Time, $h:expr, $m:expr, $s:expr, $ns:expr) => {
+        toml::value::Time {
+            hour: $h,
+            minute: $m,
+            second: $s,
+            nanosecond: $ns,
+        }
+    };
+
+    (Datetime, $date:expr, $time:expr, $offset:expr) => {
+        Value::Datetime(toml::value::Datetime {
+            date: $date,
+            time: $time,
+            offset: $offset,
+        })
+    };
+}
