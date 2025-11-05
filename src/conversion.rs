@@ -114,7 +114,6 @@ fn _toml_to_python<'py>(
         },
         Value::Array(array) => {
             if array.is_empty() {
-                recursion.exit();
                 return Ok(t::PyList::empty(py).into_any());
             }
 
@@ -128,7 +127,6 @@ fn _toml_to_python<'py>(
         }
         Value::Table(table) => {
             if table.is_empty() {
-                recursion.exit();
                 return Ok(t::PyDict::new(py).into_any());
             }
 
@@ -268,7 +266,6 @@ fn _python_to_toml<'py>(
         let len = dict.len();
 
         if len == 0 {
-            recursion.exit();
             return Ok(Value::Table(toml::map::Map::new()));
         }
 
@@ -303,7 +300,6 @@ fn _python_to_toml<'py>(
         let len = list.len();
 
         if len == 0 {
-            recursion.exit();
             return Ok(Value::Array(Vec::new()));
         }
 
