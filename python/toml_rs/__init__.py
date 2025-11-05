@@ -42,7 +42,7 @@ def dump(obj: Any, /, file: str | Path | TextIO, *, pretty: bool = False) -> int
     if isinstance(file, str):
         file = Path(file)
     if isinstance(file, Path):
-        return file.write_text(s, encoding="UTF-8")
+        return file.write_text(s, encoding="utf-8")
     else:
         return file.write(s)
 
