@@ -14,7 +14,7 @@ struct Limit(usize);
 
 impl Limit {
     #[inline]
-    fn value_limit(&self, value: usize) -> bool {
+    fn _limit(&self, value: usize) -> bool {
         value < self.0
     }
 }
@@ -39,7 +39,7 @@ impl Default for RecursionGuard {
 impl RecursionGuard {
     #[inline(always)]
     fn enter(&mut self) -> PyResult<()> {
-        if !self.limit.value_limit(self.current) {
+        if !self.limit._limit(self.current) {
             return Err(PyRecursionError::new_err(
                 "max recursion depth met".to_string(),
             ));
