@@ -3,8 +3,10 @@ mod loads;
 mod macros;
 mod recursion_guard;
 
-use crate::dumps::python_to_toml;
-use crate::loads::{normalize_line_ending, toml_to_python};
+use crate::{
+    dumps::python_to_toml,
+    loads::{normalize_line_ending, toml_to_python},
+};
 
 use pyo3::{import_exception, prelude::*};
 
