@@ -44,6 +44,7 @@ dev = [
     "maturin ~= 1.9",
     "pytest ~= 8.4.2",
     "zizmor ~= 1.16.3",
+    "typos ~= 1.39.0"
 ]
 bench = [
     "pytomlpp",
