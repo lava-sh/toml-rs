@@ -25,7 +25,7 @@ fn _toml_to_python<'py>(
             if let Some(f) = parse_float {
                 let mut ryu_buf = ryu::Buffer::new();
                 let py_call = f.call1((ryu_buf.format(float),))?;
-                if py_call.cast::<t::PyDict>().is_ok() || py_call.cast::<t::PyList>().is_ok() {
+                if py_call.is_instance_of::<t::PyDict>() || py_call.is_instance_of::<t::PyList>() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
