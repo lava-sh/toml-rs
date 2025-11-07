@@ -1,15 +1,18 @@
 mod dumps;
 mod loads;
 mod macros;
+mod pretty;
 mod recursion_guard;
 
 use crate::{
-    dumps::python_to_toml,
+    dumps::{python_to_toml, validate_inline_paths},
     loads::{normalize_line_ending, toml_to_python},
+    pretty::Pretty,
 };
 
 use pyo3::{import_exception, prelude::*};
 use rustc_hash::FxHashSet;
+use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 #[cfg(feature = "default")]
 #[global_allocator]
@@ -39,39 +42,24 @@ fn _dumps(
     pretty: bool,
     inline_tables: Option<FxHashSet<String>>,
 ) -> PyResult<String> {
-    let to_toml = python_to_toml(py, obj, inline_tables.as_ref())?;
+    let mut doc = DocumentMut::new();
 
-    let mut toml = toml_edit::DocumentMut::new();
-    if let toml_edit::Item::Table(table) = to_toml {
-        *toml.as_table_mut() = table;
+    if let Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
+        *doc.as_table_mut() = table;
     }
 
-    if let Some(paths) = inline_tables {
-        for path in paths {
-            let mut current = toml.as_item();
+    if let Some(ref paths) = inline_tables {
+        validate_inline_paths(&doc.as_item(), paths)?;
+    }
 
-            for key in path.split(".") {
-                if let Some(item) = current.get(key) {
-                    current = item;
-                } else {
-                    return Err(TOMLEncodeError::new_err(format!(
-                        "Path '{}' specified in inline_tables does not exist in the toml",
-                        path
-                    )));
-                }
-            }
-            if !current.is_table() && !current.is_inline_table() {
-                return Err(TOMLEncodeError::new_err(format!(
-                    "Path '{}' does not point to a table",
-                    path
-                )));
-            }
-        }
-    }
-    if pretty {
-        toml.fmt();
-    }
-    Ok(toml.to_string())
+    let toml = if pretty {
+        Pretty::new(inline_tables.is_none()).visit_document_mut(&mut doc);
+        doc.to_string()
+    } else {
+        doc.to_string()
+    };
+
+    Ok(toml)
 }
 
 #[pymodule(name = "_toml_rs")]

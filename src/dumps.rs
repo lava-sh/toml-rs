@@ -9,6 +9,35 @@ use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
 use toml_edit::{Array, Formatted, InlineTable, Item, Table, Value};
 
+pub(crate) fn validate_inline_paths(
+    doc: &Item,
+    inline_tables: &FxHashSet<String>,
+) -> Result<(), PyErr> {
+    for path in inline_tables {
+        let mut current = doc;
+
+        for key in path.split('.') {
+            if let Some(item) = current.get(key) {
+                current = item;
+            } else {
+                return Err(crate::TOMLEncodeError::new_err(format!(
+                    "Path '{}' specified in inline_tables does not exist in the toml",
+                    path
+                )));
+            }
+        }
+
+        if !current.is_table() && !current.is_inline_table() {
+            return Err(crate::TOMLEncodeError::new_err(format!(
+                "Path '{}' does not point to a table",
+                path
+            )));
+        }
+    }
+
+    Ok(())
+}
+
 pub(crate) fn python_to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
