@@ -7,6 +7,7 @@
 * Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases (see [below](#differences-with-tomllib))
 
 ## Installation
+
 ```bash
 # Using pip
 pip install toml-rs
@@ -16,6 +17,7 @@ uv pip install toml-rs
 ```
 
 ## Examples
+
 ```python
 import tomllib
 from pprint import pprint
@@ -71,6 +73,7 @@ v =
 print(tomllib.loads(t))
 # tomllib.TOMLDecodeError: Invalid value (at line 3, column 5)
 ```
+
 ```python
 import toml_rs
 
@@ -100,6 +103,7 @@ t = "x = 999_999_999_999_999_999_999_999"
 print(tomllib.loads(t))
 # {'x': 999999999999999999999999} <== speс violation
 ```
+
 ```python
 import toml_rs
 

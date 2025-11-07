@@ -1,6 +1,7 @@
 # To run the benchmarks
 
 ## Create and activate virtual environment
+
 ```bash
 # Linux / MacOS
 python3 -m venv .venv
@@ -12,6 +13,7 @@ py -m venv .venv
 ```
 
 ## Install benchmark dependencies
+
 ```bash
 # Using pip
 pip install . --group bench
@@ -21,15 +23,17 @@ uv pip install . --group bench
 ```
 
 ## Run `benchmark/run.py`
+
 ```bash
 python benchmark/run.py                                                                                                                             
 ```
 
 ## Results
-### loads:
 
-<img src="loads.svg" alt="TOML parser benchmark">
+### loads
 
-### dumps:
+![TOML loads benchmark](dumps.svg)
 
-<img src="dumps.svg" alt="TOML parser benchmark">
+### dumps
+
+![TOML parser benchmark](dumps.svg)

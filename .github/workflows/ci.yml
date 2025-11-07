@@ -97,6 +97,9 @@ jobs:
       - name: "Run typos"
         run: |
           typos benchmark/ python/ src/ README.md
+      - name: "Run rumdl"
+        run: |
+          rumdl check .
       - name: "Run pytest"
         run: |
           pytest tests/
