@@ -8,8 +8,8 @@ use crate::{
     loads::{normalize_line_ending, toml_to_python},
 };
 
-use rustc_hash::FxHashSet;
 use pyo3::{import_exception, prelude::*};
+use rustc_hash::FxHashSet;
 
 #[cfg(feature = "default")]
 #[global_allocator]
