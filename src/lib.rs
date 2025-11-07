@@ -49,7 +49,7 @@ fn _dumps(
     }
 
     if let Some(ref paths) = inline_tables {
-        validate_inline_paths(&doc.as_item(), paths)?;
+        validate_inline_paths(doc.as_item(), paths)?;
     }
 
     let toml = if pretty {
