@@ -51,10 +51,10 @@ macro_rules! toml_dt {
     };
 
     (Datetime, $date:expr, $time:expr, $offset:expr) => {
-        toml::Value::Datetime(toml::value::Datetime {
+        toml::value::Datetime {
             date: $date,
             time: $time,
             offset: $offset,
-        })
+        }
     };
 }

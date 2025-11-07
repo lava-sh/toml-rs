@@ -1,14 +1,18 @@
 mod dumps;
 mod loads;
 mod macros;
+mod pretty;
 mod recursion_guard;
 
 use crate::{
-    dumps::python_to_toml,
+    dumps::{python_to_toml, validate_inline_paths},
     loads::{normalize_line_ending, toml_to_python},
+    pretty::Pretty,
 };
 
 use pyo3::{import_exception, prelude::*};
+use rustc_hash::FxHashSet;
+use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 #[cfg(feature = "default")]
 #[global_allocator]
@@ -32,14 +36,29 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
 }
 
 #[pyfunction]
-fn _dumps(py: Python, obj: &Bound<'_, PyAny>, pretty: bool) -> PyResult<String> {
-    let value = python_to_toml(py, obj)?;
-    let toml = if pretty {
-        toml::to_string_pretty(&value)
-    } else {
-        toml::to_string(&value)
+fn _dumps(
+    py: Python,
+    obj: &Bound<'_, PyAny>,
+    pretty: bool,
+    inline_tables: Option<FxHashSet<String>>,
+) -> PyResult<String> {
+    let mut doc = DocumentMut::new();
+
+    if let Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
+        *doc.as_table_mut() = table;
     }
-    .map_err(|err| TOMLEncodeError::new_err(err.to_string()))?;
+
+    if let Some(ref paths) = inline_tables {
+        validate_inline_paths(doc.as_item(), paths)?;
+    }
+
+    let toml = if pretty {
+        Pretty::new(inline_tables.is_none()).visit_document_mut(&mut doc);
+        doc.to_string()
+    } else {
+        doc.to_string()
+    };
+
     Ok(toml)
 }
 
