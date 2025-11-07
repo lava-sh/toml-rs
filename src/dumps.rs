@@ -16,7 +16,7 @@ pub(crate) fn validate_inline_paths(
     for path in inline_tables {
         let mut current = doc;
 
-        for key in path.split('.') {
+        for key in path.split(".") {
             if let Some(item) = current.get(key) {
                 current = item;
             } else {
