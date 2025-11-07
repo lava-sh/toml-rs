@@ -32,7 +32,7 @@ python benchmark/run.py
 
 ### loads
 
-![TOML loads benchmark](dumps.svg)
+![TOML loads benchmark](loads.svg)
 
 ### dumps
 
