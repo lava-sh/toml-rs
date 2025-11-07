@@ -73,3 +73,52 @@ enabled = true
 ports = [8001, 8001, 8002]
 server = "192.168.1.1"
 """
+
+
+def test_dumps_inline_tables():
+    obj = {
+        "database": {
+            "connection": {"host": "localhost", "port": 5432},
+            "credentials": {"user": "admin", "password": "secret"},
+        },
+        "service": {
+            "endpoint": "https://api.example.com",
+            "parameters": {"timeout": 30, "retries": 3},
+        },
+    }
+    dumps = toml_rs.dumps(obj)
+    dumps_with_inline_tables = toml_rs.dumps(
+        obj,
+        inline_tables={
+            "database.connection",
+            "database.credentials",
+            "service.parameters",
+        },
+    )
+    assert dumps == """\
+[database]
+
+[database.connection]
+host = "localhost"
+port = 5432
+
+[database.credentials]
+user = "admin"
+password = "secret"
+
+[service]
+endpoint = "https://api.example.com"
+
+[service.parameters]
+timeout = 30
+retries = 3
+"""
+    assert dumps_with_inline_tables == """\
+[database]
+connection = { host = "localhost", port = 5432 }
+credentials = { user = "admin", password = "secret" }
+
+[service]
+endpoint = "https://api.example.com"
+parameters = { timeout = 30, retries = 3 }
+"""
