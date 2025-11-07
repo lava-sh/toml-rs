@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.0.13"
+version = "0.1.0"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -11,14 +11,21 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.27.1", features = ["generate-import-lib", "extension-module"] }
+pyo3 = { version = "0.27.1", features = [
+    "generate-import-lib",
+    "extension-module",
+] }
 toml = { version = "0.9.8", features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)
     "preserve_order", # save order
 ] }
+toml_edit = { version = "0.23.7", features = [
+    "unbounded",
+] }
 ryu = "1.0.20"
 smallvec = "1.15"
+rustc-hash = "2.1.1"
 memchr = { version = "2", default-features = false }
 mimalloc = { version = "*", features = ["v3"], optional = true }
 

@@ -37,18 +37,31 @@ def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, 
     return _loads(s, parse_float=parse_float)
 
 
-def dump(obj: Any, /, file: str | Path | TextIO, *, pretty: bool = False) -> int:
-    s = _dumps(obj, pretty=pretty)
+def dump(
+        obj: Any,
+        /,
+        file: str | Path | TextIO,
+        inline_tables: set[str] | None = None,
+        *,
+        pretty: bool = False,
+) -> int:
+    _str = _dumps(obj, inline_tables=inline_tables, pretty=pretty)
     if isinstance(file, str):
         file = Path(file)
     if isinstance(file, Path):
-        return file.write_text(s, encoding="utf-8")
+        return file.write_text(_str, encoding="utf-8")
     else:
-        return file.write(s)
+        return file.write(_str)
 
 
-def dumps(obj: Any, /, *, pretty: bool = False) -> str:
-    return _dumps(obj, pretty=pretty)
+def dumps(
+        obj: Any,
+        /,
+        inline_tables: set[str] | None = None,
+        *,
+        pretty: bool = False,
+) -> str:
+    return _dumps(obj, inline_tables=inline_tables, pretty=pretty)
 
 
 class TOMLDecodeError(ValueError):
