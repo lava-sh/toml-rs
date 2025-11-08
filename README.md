@@ -2,7 +2,7 @@
 
 # toml-rs
 
-## A High-Performance TOML parser for Python written in Rust
+*A High-Performance TOML parser for Python written in Rust*
 
 [![PyPI License](https://img.shields.io/pypi/l/toml_rs.svg?style=flat-square)](https://pypi.org/project/toml_rs/)
 [![Monthly downloads](https://img.shields.io/pypi/dm/toml_rs.svg?style=)](https://pypi.org/project/toml_rs/)
