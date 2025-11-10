@@ -45,7 +45,7 @@ dev = [
     "pytest == 9.0.0",
     "zizmor == 1.16.3",
     "typos == 1.39.0",
-    "rumdl == 0.0.173"
+    "rumdl == 0.0.173",
 ]
 bench = [
     "pytomlpp",
