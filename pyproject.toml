@@ -42,10 +42,10 @@ classifiers = [
 dev = [
     "ruff == 0.14.4",
     "maturin == 1.10.1",
-    "pytest == 9.0.0",
+    "pytest == 9.0.1",
     "zizmor == 1.16.3",
-    "typos == 1.39.0",
-    "rumdl == 0.0.173",
+    "typos == 1.39.1",
+    "rumdl == 0.0.175",
 ]
 bench = [
     "pytomlpp",
