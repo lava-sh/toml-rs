@@ -1,12 +1,18 @@
-use crate::recursion_guard::RecursionGuard;
+use crate::{create_py_datetime, recursion_guard::RecursionGuard};
 
-use std::borrow::Cow;
+use std::{borrow::Cow, str::from_utf8_unchecked};
 
-use pyo3::{IntoPyObjectExt, exceptions::PyValueError, prelude::*, types as t};
+use pyo3::{
+    exceptions::PyValueError,
+    prelude::*,
+    types::{PyDate, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
+    IntoPyObjectExt,
+};
+use toml::{value::Offset, Value};
 
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
-    value: toml::Value,
+    value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
     _toml_to_python(py, value, parse_float, &mut RecursionGuard::default())
@@ -14,18 +20,24 @@ pub(crate) fn toml_to_python<'py>(
 
 fn _toml_to_python<'py>(
     py: Python<'py>,
-    value: toml::Value,
+    value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Bound<'py, PyAny>> {
     match value {
-        toml::Value::String(str) => str.into_bound_py_any(py),
-        toml::Value::Integer(int) => int.into_bound_py_any(py),
-        toml::Value::Float(float) => {
+        Value::String(str) => str.into_bound_py_any(py),
+        Value::Integer(int) => int.into_bound_py_any(py),
+        Value::Float(float) => {
             if let Some(f) = parse_float {
-                let mut ryu_buf = ryu::Buffer::new();
-                let py_call = f.call1((ryu_buf.format(float),))?;
-                if py_call.is_instance_of::<t::PyDict>() || py_call.is_instance_of::<t::PyList>() {
+                let mut buffer = [0u8; lexical_core::BUFFER_SIZE];
+                let write_bytes = lexical_core::write(float, &mut buffer);
+                let py_call = f.call1((
+                    // SAFETY: `lexical_core::write()` guarantees that it only writes valid
+                    // ASCII characters: 0-9, '.', '-' and 'e' fo exponential notation.
+                    // All these characters are valid UTF-8.
+                    unsafe { from_utf8_unchecked(write_bytes) },
+                ))?;
+                if py_call.is_instance_of::<PyDict>() || py_call.is_instance_of::<PyList>() {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
@@ -35,21 +47,21 @@ fn _toml_to_python<'py>(
                 float.into_bound_py_any(py)
             }
         }
-        toml::Value::Boolean(bool) => bool.into_bound_py_any(py),
-        toml::Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
+        Value::Boolean(bool) => bool.into_bound_py_any(py),
+        Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
-                Ok(crate::create_py_datetime!(py, date, time, tzinfo)?.into_any())
+                Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
-                Ok(crate::create_py_datetime!(py, date, time, None)?.into_any())
+                Ok(create_py_datetime!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
-                let py_date = t::PyDate::new(py, date.year as i32, date.month, date.day)?;
+                let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
                 Ok(py_date.into_any())
             }
             (None, Some(time), None) => {
-                let py_time = t::PyTime::new(
+                let py_time = PyTime::new(
                     py,
                     time.hour,
                     time.minute,
@@ -61,26 +73,26 @@ fn _toml_to_python<'py>(
             }
             _ => Err(PyValueError::new_err("Invalid datetime format")),
         },
-        toml::Value::Array(array) => {
+        Value::Array(array) => {
             if array.is_empty() {
-                return Ok(t::PyList::empty(py).into_any());
+                return Ok(PyList::empty(py).into_any());
             }
 
             recursion.enter()?;
-            let py_list = t::PyList::empty(py);
+            let py_list = PyList::empty(py);
             for item in array {
                 py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
             }
             recursion.exit();
             Ok(py_list.into_any())
         }
-        toml::Value::Table(table) => {
+        Value::Table(table) => {
             if table.is_empty() {
-                return Ok(t::PyDict::new(py).into_any());
+                return Ok(PyDict::new(py).into_any());
             }
 
             recursion.enter()?;
-            let py_dict = t::PyDict::new(py);
+            let py_dict = PyDict::new(py);
             for (k, v) in table {
                 let value = _toml_to_python(py, v, parse_float, recursion)?;
                 py_dict.set_item(k, value)?;
@@ -93,11 +105,11 @@ fn _toml_to_python<'py>(
 
 fn create_timezone_from_offset<'py>(
     py: Python<'py>,
-    offset: &toml::value::Offset,
-) -> PyResult<Bound<'py, t::PyTzInfo>> {
+    offset: &Offset,
+) -> PyResult<Bound<'py, PyTzInfo>> {
     match offset {
-        toml::value::Offset::Z => t::PyTzInfo::utc(py).map(|utc| utc.to_owned()),
-        toml::value::Offset::Custom { minutes } => {
+        Offset::Z => PyTzInfo::utc(py).map(|utc| utc.to_owned()),
+        Offset::Custom { minutes } => {
             let seconds = *minutes as i32 * 60;
             let (days, seconds) = if seconds < 0 {
                 let days = seconds.div_euclid(86400);
@@ -106,8 +118,8 @@ fn create_timezone_from_offset<'py>(
             } else {
                 (0, seconds)
             };
-            let py_delta = t::PyDelta::new(py, days, seconds, 0, false)?;
-            t::PyTzInfo::fixed_offset(py, py_delta)
+            let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
+            PyTzInfo::fixed_offset(py, py_delta)
         }
     }
 }

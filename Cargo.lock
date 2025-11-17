@@ -68,6 +68,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "lexical-core"
+version = "1.0.6"
+source = "git+https://github.com/Alexhuszagh/rust-lexical?rev=59382e249f8fd0dd384ed1f180b38d168cf9fcbb#59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
+dependencies = [
+ "lexical-util",
+ "lexical-write-float",
+]
+
+[[package]]
+name = "lexical-util"
+version = "1.0.7"
+source = "git+https://github.com/Alexhuszagh/rust-lexical?rev=59382e249f8fd0dd384ed1f180b38d168cf9fcbb#59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
+
+[[package]]
+name = "lexical-write-float"
+version = "1.0.6"
+source = "git+https://github.com/Alexhuszagh/rust-lexical?rev=59382e249f8fd0dd384ed1f180b38d168cf9fcbb#59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
+dependencies = [
+ "lexical-util",
+ "lexical-write-integer",
+]
+
+[[package]]
+name = "lexical-write-integer"
+version = "1.0.6"
+source = "git+https://github.com/Alexhuszagh/rust-lexical?rev=59382e249f8fd0dd384ed1f180b38d168cf9fcbb#59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
+dependencies = [
+ "lexical-util",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.177"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -221,12 +252,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d"
 
 [[package]]
-name = "ryu"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28d3b2b1366ec20994f1fd18c3c594f05c5dd4bc44d8bb0c1c632c8d6829481f"
-
-[[package]]
 name = "serde_core"
 version = "1.0.228"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -263,9 +288,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "smallvec"
-version = "1.15.1"
+version = "2.0.0-alpha.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+checksum = "ef784004ca8777809dcdad6ac37629f0a97caee4c685fcea805278d81dd8b857"
 
 [[package]]
 name = "syn"
@@ -304,11 +329,11 @@ dependencies = [
 name = "toml-rs"
 version = "0.1.0"
 dependencies = [
+ "lexical-core",
  "memchr",
  "mimalloc",
  "pyo3",
  "rustc-hash",
- "ryu",
  "smallvec",
  "toml",
  "toml_edit",

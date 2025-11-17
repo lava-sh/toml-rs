@@ -1,13 +1,16 @@
-use crate::recursion_guard::RecursionGuard;
+use crate::{TOMLEncodeError, recursion_guard::RecursionGuard};
 
 use pyo3::{
     intern,
     prelude::*,
-    types::{self as t, PyDateAccess, PyDeltaAccess, PyTimeAccess, PyTzInfoAccess},
+    types::{
+        PyBool, PyDate, PyDateAccess, PyDateTime, PyDelta, PyDeltaAccess, PyDict, PyFloat, PyInt,
+        PyList, PyString, PyTime, PyTimeAccess, PyTzInfoAccess,
+    },
 };
 use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
-use toml_edit::{Array, Formatted, InlineTable, Item, Table, Value};
+use toml_edit::{Array, Formatted, InlineTable, Item, Offset, Table, Value};
 
 pub(crate) fn validate_inline_paths(
     doc: &Item,
@@ -20,7 +23,7 @@ pub(crate) fn validate_inline_paths(
             if let Some(item) = current.get(key) {
                 current = item;
             } else {
-                return Err(crate::TOMLEncodeError::new_err(format!(
+                return Err(TOMLEncodeError::new_err(format!(
                     "Path '{}' specified in inline_tables does not exist in the toml",
                     path
                 )));
@@ -28,7 +31,7 @@ pub(crate) fn validate_inline_paths(
         }
 
         if !current.is_table() && !current.is_inline_table() {
-            return Err(crate::TOMLEncodeError::new_err(format!(
+            return Err(TOMLEncodeError::new_err(format!(
                 "Path '{}' does not point to a table",
                 path
             )));
@@ -48,7 +51,9 @@ pub(crate) fn python_to_toml<'py>(
         obj,
         &mut RecursionGuard::default(),
         inline_tables,
-        &mut SmallVec::<[String; 8]>::new(),
+        &mut SmallVec::<String, 32>::with_capacity(
+            inline_tables.map_or(0, |set| set.len())
+        ),
     )
 }
 
@@ -57,21 +62,21 @@ fn _python_to_toml<'py>(
     obj: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
     inline_tables: Option<&FxHashSet<String>>,
-    _path: &mut SmallVec<[String; 8]>,
+    _path: &mut SmallVec<String, 32>,
 ) -> PyResult<Item> {
-    if let Ok(str) = obj.cast::<t::PyString>() {
+    if let Ok(str) = obj.cast::<PyString>() {
         return Ok(Item::Value(Value::String(Formatted::new(
             str.to_str()?.to_owned(),
         ))));
-    } else if let Ok(bool) = obj.cast::<t::PyBool>() {
+    } else if let Ok(bool) = obj.cast::<PyBool>() {
         return Ok(Item::Value(Value::Boolean(Formatted::new(bool.is_true()))));
-    } else if let Ok(int) = obj.cast::<t::PyInt>() {
+    } else if let Ok(int) = obj.cast::<PyInt>() {
         return Ok(Item::Value(Value::Integer(Formatted::new(int.extract()?))));
-    } else if let Ok(float) = obj.cast::<t::PyFloat>() {
+    } else if let Ok(float) = obj.cast::<PyFloat>() {
         return Ok(Item::Value(Value::Float(Formatted::new(float.value()))));
     }
 
-    if let Ok(dt) = obj.cast::<t::PyDateTime>() {
+    if let Ok(dt) = obj.cast::<PyDateTime>() {
         let date = crate::toml_dt!(Date, dt.get_year(), dt.get_month(), dt.get_day());
         let time = crate::toml_dt!(
             Time,
@@ -86,9 +91,9 @@ fn _python_to_toml<'py>(
             if utc_offset.is_none() {
                 None
             } else {
-                let delta = utc_offset.cast::<t::PyDelta>()?;
+                let delta = utc_offset.cast::<PyDelta>()?;
                 let seconds = delta.get_days() * 86400 + delta.get_seconds();
-                Some(toml::value::Offset::Custom {
+                Some(Offset::Custom {
                     minutes: (seconds / 60) as i16,
                 })
             }
@@ -99,7 +104,7 @@ fn _python_to_toml<'py>(
         return Ok(Item::Value(Value::Datetime(Formatted::new(
             crate::toml_dt!(Datetime, Some(date), Some(time), offset),
         ))));
-    } else if let Ok(date_obj) = obj.cast::<t::PyDate>() {
+    } else if let Ok(date_obj) = obj.cast::<PyDate>() {
         let date = crate::toml_dt!(
             Date,
             date_obj.get_year(),
@@ -109,7 +114,7 @@ fn _python_to_toml<'py>(
         return Ok(Item::Value(Value::Datetime(Formatted::new(
             crate::toml_dt!(Datetime, Some(date), None, None),
         ))));
-    } else if let Ok(time_obj) = obj.cast::<t::PyTime>() {
+    } else if let Ok(time_obj) = obj.cast::<PyTime>() {
         let time = crate::toml_dt!(
             Time,
             time_obj.get_hour(),
@@ -122,7 +127,7 @@ fn _python_to_toml<'py>(
         ))));
     }
 
-    if let Ok(dict) = obj.cast::<t::PyDict>() {
+    if let Ok(dict) = obj.cast::<PyDict>() {
         recursion.enter()?;
 
         if dict.is_empty() {
@@ -138,9 +143,9 @@ fn _python_to_toml<'py>(
             let mut inline_table = InlineTable::new();
             for (k, v) in dict.iter() {
                 let key = k
-                    .cast::<t::PyString>()
+                    .cast::<PyString>()
                     .map_err(|_| {
-                        crate::TOMLEncodeError::new_err(format!(
+                        TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {}",
                             crate::get_type!(k)
                         ))
@@ -155,7 +160,7 @@ fn _python_to_toml<'py>(
                     inline_table.insert(key, val);
                 } else {
                     recursion.exit();
-                    return Err(crate::TOMLEncodeError::new_err(
+                    return Err(TOMLEncodeError::new_err(
                         "Inline tables can only contain values, not nested tables",
                     ));
                 }
@@ -166,9 +171,9 @@ fn _python_to_toml<'py>(
             let mut table = Table::new();
             for (k, v) in dict.iter() {
                 let key = k
-                    .cast::<t::PyString>()
+                    .cast::<PyString>()
                     .map_err(|_| {
-                        crate::TOMLEncodeError::new_err(format!(
+                        TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {}",
                             crate::get_type!(k)
                         ))
@@ -186,7 +191,7 @@ fn _python_to_toml<'py>(
         };
     }
 
-    if let Ok(list) = obj.cast::<t::PyList>() {
+    if let Ok(list) = obj.cast::<PyList>() {
         recursion.enter()?;
 
         if list.is_empty() {
@@ -207,7 +212,7 @@ fn _python_to_toml<'py>(
                 }
                 _ => {
                     recursion.exit();
-                    return Err(crate::TOMLEncodeError::new_err(
+                    return Err(TOMLEncodeError::new_err(
                         "Arrays can only contain values or inline tables",
                     ));
                 }
@@ -217,7 +222,7 @@ fn _python_to_toml<'py>(
         return Ok(Item::Value(Value::Array(array)));
     }
 
-    Err(crate::TOMLEncodeError::new_err(format!(
+    Err(TOMLEncodeError::new_err(format!(
         "Cannot serialize {} to TOML",
         crate::get_type!(obj)
     )))
