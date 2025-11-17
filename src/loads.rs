@@ -33,7 +33,7 @@ fn _toml_to_python<'py>(
                 let write_bytes = lexical_core::write(float, &mut buffer);
                 let py_call = f.call1((
                     // SAFETY: `lexical_core::write()` guarantees that it only writes valid
-                    // ASCII characters: 0-9, '.', '-' and 'e' fo exponential notation.
+                    // ASCII characters: 0-9, '.', '-' and 'e' for exponential notation.
                     // All these characters are valid UTF-8.
                     unsafe { from_utf8_unchecked(write_bytes) },
                 ))?;
