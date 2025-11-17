@@ -3,12 +3,12 @@ use crate::{create_py_datetime, recursion_guard::RecursionGuard};
 use std::{borrow::Cow, str::from_utf8_unchecked};
 
 use pyo3::{
+    IntoPyObjectExt,
     exceptions::PyValueError,
     prelude::*,
     types::{PyDate, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
-    IntoPyObjectExt,
 };
-use toml::{value::Offset, Value};
+use toml::{Value, value::Offset};
 
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,

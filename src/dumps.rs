@@ -51,9 +51,7 @@ pub(crate) fn python_to_toml<'py>(
         obj,
         &mut RecursionGuard::default(),
         inline_tables,
-        &mut SmallVec::<String, 32>::with_capacity(
-            inline_tables.map_or(0, |set| set.len())
-        ),
+        &mut SmallVec::<String, 32>::with_capacity(inline_tables.map_or(0, |set| set.len())),
     )
 }
 
