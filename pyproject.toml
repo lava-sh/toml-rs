@@ -46,6 +46,7 @@ dev = [
     "zizmor == 1.16.3",
     "typos == 1.39.0",
     "rumdl == 0.0.173",
+    "tomli ; python_version<'3.11'",
 ]
 bench = [
     "pytomlpp",
