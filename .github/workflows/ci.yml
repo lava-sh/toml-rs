@@ -85,7 +85,8 @@ jobs:
         shell: bash
         run: |
           uv venv .venv --python ${{ matrix.python-version }}
-          echo ".venv/bin" >> $GITHUB_PATH
+          echo ".venv/bin" >> "$GITHUB_PATH"
+          echo "PYO3_PYTHON=.venv/bin/python3" >> "$GITHUB_ENV"
       - name: "Install dependencies"
         run: |
           uv pip install --group dev
@@ -94,7 +95,9 @@ jobs:
           zizmor .github/
       - name: "Run maturin (--release)"
         run: |
-          maturin develop --release
+          rustc --version --verbose
+          maturin build --release
+          uv pip install target/wheels/*.whl
       - name: "Run Ruff"
         run: |
           ruff check
