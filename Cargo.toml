@@ -1,6 +1,5 @@
 [package]
 name = "toml-rs"
-version = "0.1.0"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -13,6 +12,8 @@ crate-type = ["cdylib"]
 [dependencies.pyo3]
 version = "0.27.1"
 features = [
+    "nightly",
+    "smallvec",
     "extension-module",
     "generate-import-lib",
 ]
@@ -47,6 +48,9 @@ version = "2.1.1"
 [dependencies.memchr]
 version = "2"
 default-features = false
+
+[dependencies.git-version]
+version = "0.3.9"
 
 [dependencies.mimalloc]
 version = "*"

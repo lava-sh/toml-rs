@@ -1,18 +1,20 @@
+#![feature(optimize_attribute)]
+
 mod dumps;
 mod loads;
 mod macros;
 mod pretty;
 mod recursion_guard;
 
+use pyo3::{import_exception, prelude::*};
+use rustc_hash::FxHashSet;
+use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
+
 use crate::{
     dumps::{python_to_toml, validate_inline_paths},
     loads::{normalize_line_ending, toml_to_python},
     pretty::Pretty,
 };
-
-use pyo3::{import_exception, prelude::*};
-use rustc_hash::FxHashSet;
-use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 #[cfg(feature = "default")]
 #[global_allocator]
@@ -66,6 +68,6 @@ fn _dumps(
 fn toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(_loads, m)?)?;
     m.add_function(wrap_pyfunction!(_dumps, m)?)?;
-    m.add("_version", env!("CARGO_PKG_VERSION"))?;
+    m.add("_version", git_version::git_version!())?;
     Ok(())
 }
