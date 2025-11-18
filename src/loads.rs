@@ -38,7 +38,9 @@ fn _toml_to_python<'py>(
                     // All these characters are valid UTF-8.
                     unsafe { from_utf8_unchecked(write_bytes) },
                 ))?;
-                if py_call.cast::<PyDict>() || py_call.cast::<PyList>() {
+                if py_call.is_exact_instance_of::<PyDict>()
+                    || py_call.is_exact_instance_of::<PyList>()
+                {
                     return Err(PyValueError::new_err(
                         "parse_float must not return dicts or lists",
                     ));
