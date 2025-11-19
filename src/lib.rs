@@ -68,6 +68,6 @@ fn _dumps(
 fn toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(_loads, m)?)?;
     m.add_function(wrap_pyfunction!(_dumps, m)?)?;
-    m.add("_version", git_version::git_version!())?;
+    m.add("_version", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
