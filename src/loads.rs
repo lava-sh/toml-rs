@@ -1,5 +1,3 @@
-use crate::{create_py_datetime, recursion_guard::RecursionGuard};
-
 use std::{borrow::Cow, str::from_utf8_unchecked};
 
 use pyo3::{
@@ -10,6 +8,8 @@ use pyo3::{
 };
 use toml::{Value, value::Offset};
 
+use crate::{create_py_datetime, recursion_guard::RecursionGuard};
+
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
@@ -19,6 +19,7 @@ pub(crate) fn toml_to_python<'py>(
 }
 
 #[inline]
+#[optimize(speed)]
 fn _toml_to_python<'py>(
     py: Python<'py>,
     value: Value,
@@ -106,6 +107,8 @@ fn _toml_to_python<'py>(
     }
 }
 
+#[inline]
+#[optimize(speed)]
 fn create_timezone_from_offset<'py>(
     py: Python<'py>,
     offset: &Offset,
@@ -128,6 +131,7 @@ fn create_timezone_from_offset<'py>(
 }
 
 #[must_use]
+#[optimize(speed)]
 pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
     if memchr::memchr(b'\r', s.as_bytes()).is_none() {
         return Cow::Borrowed(s);

@@ -1,5 +1,3 @@
-use crate::{TOMLEncodeError, recursion_guard::RecursionGuard};
-
 use pyo3::{
     intern,
     prelude::*,
@@ -12,6 +10,10 @@ use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
 use toml_edit::{Array, Formatted, InlineTable, Item, Offset, Table, Value};
 
+use crate::{TOMLEncodeError, recursion_guard::RecursionGuard};
+
+#[inline]
+#[optimize(speed)]
 pub(crate) fn validate_inline_paths(
     doc: &Item,
     inline_tables: &FxHashSet<String>,
@@ -55,6 +57,8 @@ pub(crate) fn python_to_toml<'py>(
     )
 }
 
+#[inline]
+#[optimize(speed)]
 fn _python_to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
