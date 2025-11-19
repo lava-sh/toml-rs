@@ -9,48 +9,30 @@ repository = "https://github.com/lava-sh/toml-rs"
 name = "_toml_rs"
 crate-type = ["cdylib"]
 
-[dependencies.pyo3]
-version = "0.27.1"
-features = [
+[dependencies]
+pyo3 = { version = "0.27.1", features = [
     "nightly",
-    "smallvec",
     "extension-module",
     "generate-import-lib",
-]
-
-[dependencies.toml]
-version = "0.9.8"
-features = [
+] }
+toml = { version = "0.9.8", features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)
     "preserve_order", # save order
-]
-
-[dependencies.toml_edit]
-version = "0.23.7"
-features = [
+] }
+toml_edit = { version = "0.23.7", features = [
     "serde",
     "unbounded",
-]
+] }
+rustc-hash = "2.1.1"
+smallvec = "2.0.0-alpha.12"
+memchr = { version = "2.7.6", default-features = false }
 
 [dependencies.lexical-core]
 git = "https://github.com/Alexhuszagh/rust-lexical"
 rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = ["write-floats"]
-
-[dependencies.smallvec]
-version = "2.0.0-alpha.12"
-
-[dependencies.rustc-hash]
-version = "2.1.1"
-
-[dependencies.memchr]
-version = "2"
-default-features = false
-
-[dependencies.git-version]
-version = "0.3.9"
 
 [dependencies.mimalloc]
 version = "*"
