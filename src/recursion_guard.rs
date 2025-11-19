@@ -30,7 +30,7 @@ impl RecursionGuard {
     pub fn enter(&mut self) -> pyo3::PyResult<()> {
         if !self.limit._limit(self.current) {
             return Err(pyo3::exceptions::PyRecursionError::new_err(
-                "max recursion depth met".to_string(),
+                "max recursion depth met",
             ));
         }
         self.current += 1;
