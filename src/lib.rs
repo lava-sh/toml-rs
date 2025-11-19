@@ -4,15 +4,15 @@ mod macros;
 mod pretty;
 mod recursion_guard;
 
+use pyo3::{import_exception, prelude::*};
+use rustc_hash::FxHashSet;
+use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
+
 use crate::{
     dumps::{python_to_toml, validate_inline_paths},
     loads::{normalize_line_ending, toml_to_python},
     pretty::Pretty,
 };
-
-use pyo3::{import_exception, prelude::*};
-use rustc_hash::FxHashSet;
-use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 #[cfg(feature = "default")]
 #[global_allocator]

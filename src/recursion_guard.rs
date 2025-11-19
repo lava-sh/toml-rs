@@ -1,3 +1,5 @@
+use pyo3::{PyResult, exceptions::PyRecursionError};
+
 #[derive(Copy, Clone, Debug)]
 struct Limit(usize);
 
@@ -27,11 +29,9 @@ impl Default for RecursionGuard {
 
 impl RecursionGuard {
     #[inline(always)]
-    pub fn enter(&mut self) -> pyo3::PyResult<()> {
+    pub fn enter(&mut self) -> PyResult<()> {
         if !self.limit._limit(self.current) {
-            return Err(pyo3::exceptions::PyRecursionError::new_err(
-                "max recursion depth met".to_string(),
-            ));
+            return Err(PyRecursionError::new_err("max recursion depth met"));
         }
         self.current += 1;
         Ok(())
