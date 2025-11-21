@@ -28,7 +28,6 @@ rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 memchr = { version = "2.7.6", default-features = false }
 mimalloc = { version = "0.1.48", features = ["v3"], optional = true }
-snmalloc-rs = { version = "0.3.8", features = ["lto"], optional = true }
 
 [dependencies.lexical-core]
 git = "https://github.com/Alexhuszagh/rust-lexical"
@@ -39,7 +38,6 @@ features = ["write-floats"]
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
-snmalloc = ["dep:snmalloc-rs"]
 
 [profile.release]
 lto = "fat"
