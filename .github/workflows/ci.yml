@@ -163,10 +163,17 @@ jobs:
         if: matrix.platform.target == 'armv7'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-          sudo apt-get install -y libatomic1-armhf-cross
+          sudo apt-get install -y \
+            gcc-arm-linux-gnueabihf \
+            g++-arm-linux-gnueabihf \
+            libc6-dev-armhf-cross \
+            libatomic1-armhf-cross \
+            binutils-arm-linux-gnueabihf
       - name: "Build wheels"
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
+        env:
+          CFLAGS: "-Wno-error=date-time"
+          CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: "arm-linux-gnueabihf-gcc"
         with:
           target: ${{ matrix.platform.target }}
           args: ${{ matrix.platform.maturin-args }} --interpreter ${{ matrix.platform.interpreter }}

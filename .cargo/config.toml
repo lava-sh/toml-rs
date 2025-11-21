@@ -8,5 +8,4 @@ linker = "arm-linux-gnueabihf-gcc"
 rustflags = [
     "-C", "link-arg=-Wl,--as-needed",
     "-C", "link-arg=-latomic",
-    "-C", "link-arg=-L/usr/arm-linux-gnueabihf/lib",
 ]
