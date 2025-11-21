@@ -14,9 +14,13 @@ use crate::{
     pretty::Pretty,
 };
 
-#[cfg(feature = "default")]
+#[cfg(feature = "mimalloc")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+#[cfg(feature = "snmalloc")]
+#[global_allocator]
+static GLOBAL: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
 
 import_exception!(toml_rs, TOMLDecodeError);
 import_exception!(toml_rs, TOMLEncodeError);
