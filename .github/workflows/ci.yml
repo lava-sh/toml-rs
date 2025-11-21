@@ -173,7 +173,11 @@ jobs:
         uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380 # v1.49.4
         env:
           CFLAGS: "-Wno-error=date-time"
-          CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: "arm-linux-gnueabihf-gcc"
+          CXXFLAGS: "-Wno-error=date-time"
+          MI_CFLAGS: "-Wall -Wextra"
+          CC_armv7_unknown_linux_gnueabihf: "arm-linux-gnueabihf-gcc"
+          CXX_armv7_unknown_linux_gnueabihf: "arm-linux-gnueabihf-g++"
+          CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_RUSTFLAGS: "-C link-arg=-latomic"
         with:
           target: ${{ matrix.platform.target }}
           args: ${{ matrix.platform.maturin-args }} --interpreter ${{ matrix.platform.interpreter }}
