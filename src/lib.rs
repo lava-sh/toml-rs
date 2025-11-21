@@ -26,7 +26,7 @@ import_exception!(toml_rs, TOMLDecodeError);
 import_exception!(toml_rs, TOMLEncodeError);
 
 #[pyfunction]
-fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+fn _loads(py: Python, s: &str, parse_float: Option<&Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
     let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
         TOMLDecodeError::new_err((
@@ -35,11 +35,12 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
             err.span().map_or(0, |s| s.start),
         ))
     })?;
-    let toml = toml_to_python(py, value, parse_float.as_ref())?;
+    let toml = toml_to_python(py, value, parse_float)?;
     Ok(toml.unbind())
 }
 
 #[pyfunction]
+#[allow(clippy::needless_pass_by_value)]
 fn _dumps(
     py: Python,
     obj: &Bound<'_, PyAny>,
