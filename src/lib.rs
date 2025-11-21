@@ -14,7 +14,7 @@ use crate::{
     pretty::Pretty,
 };
 
-#[cfg(feature = "default")]
+#[cfg(feature = "mimalloc")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
@@ -22,20 +22,21 @@ import_exception!(toml_rs, TOMLDecodeError);
 import_exception!(toml_rs, TOMLEncodeError);
 
 #[pyfunction]
-fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+fn _loads(py: Python, s: &str, parse_float: Option<&Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
     let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
         TOMLDecodeError::new_err((
             err.to_string(),
             normalized.to_string(),
-            err.span().map(|s| s.start).unwrap_or(0),
+            err.span().map_or(0, |s| s.start),
         ))
     })?;
-    let toml = toml_to_python(py, value, parse_float.as_ref())?;
+    let toml = toml_to_python(py, value, parse_float)?;
     Ok(toml.unbind())
 }
 
 #[pyfunction]
+#[allow(clippy::needless_pass_by_value)]
 fn _dumps(
     py: Python,
     obj: &Bound<'_, PyAny>,

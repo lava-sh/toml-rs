@@ -19,21 +19,19 @@ pub(crate) fn validate_inline_paths(
     for path in inline_tables {
         let mut current = doc;
 
-        for key in path.split(".") {
+        for key in path.split('.') {
             if let Some(item) = current.get(key) {
                 current = item;
             } else {
                 return Err(TOMLEncodeError::new_err(format!(
-                    "Path '{}' specified in inline_tables does not exist in the toml",
-                    path
+                    "Path '{path}' specified in inline_tables does not exist in the toml"
                 )));
             }
         }
 
         if !current.is_table() && !current.is_inline_table() {
             return Err(TOMLEncodeError::new_err(format!(
-                "Path '{}' does not point to a table",
-                path
+                "Path '{path}' does not point to a table",
             )));
         }
     }
@@ -51,7 +49,7 @@ pub(crate) fn python_to_toml<'py>(
         obj,
         &mut RecursionGuard::default(),
         inline_tables,
-        &mut SmallVec::<String, 32>::with_capacity(inline_tables.map_or(0, |set| set.len())),
+        &mut SmallVec::<String, 32>::with_capacity(inline_tables.map_or(0, FxHashSet::len)),
     )
 }
 
@@ -92,7 +90,7 @@ fn _python_to_toml<'py>(
                 let delta = utc_offset.cast::<PyDelta>()?;
                 let seconds = delta.get_days() * 86400 + delta.get_seconds();
                 Some(Offset::Custom {
-                    minutes: (seconds / 60) as i16,
+                    minutes: i16::try_from(seconds / 60)?,
                 })
             }
         } else {
@@ -133,9 +131,7 @@ fn _python_to_toml<'py>(
             return Ok(Item::Table(Table::new()));
         }
 
-        let inline = inline_tables
-            .map(|set| set.contains(&_path.join(".")))
-            .unwrap_or(false);
+        let inline = inline_tables.is_some_and(|set| set.contains(&_path.join(".")));
 
         return if inline {
             let mut inline_table = InlineTable::new();

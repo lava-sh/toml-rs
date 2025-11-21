@@ -27,6 +27,7 @@ toml_edit = { version = "0.23.7", features = [
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 memchr = { version = "2.7.6", default-features = false }
+mimalloc = { version = "0.1.48", features = ["v3"], optional = true }
 
 [dependencies.lexical-core]
 git = "https://github.com/Alexhuszagh/rust-lexical"
@@ -34,15 +35,21 @@ rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = ["write-floats"]
 
-[dependencies.mimalloc]
-version = "*"
-features = ["v3"]
-optional = true
-
 [features]
-default = ["dep:mimalloc"]
+default = []
+mimalloc = ["dep:mimalloc"]
 
 [profile.release]
 lto = "fat"
 strip = "symbols"
 codegen-units = 1
+
+[lints]
+rust.warnings = { level = "deny" }
+clippy.perf = { level = "deny", priority = -1 }
+clippy.style = { level = "warn", priority = -1 }
+clippy.pedantic = { level = "warn", priority = -1 }
+
+clippy.too_many_lines = "allow"
+clippy.used_underscore_items = "allow"
+clippy.used_underscore_binding = "allow"
