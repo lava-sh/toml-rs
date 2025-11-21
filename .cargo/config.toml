@@ -2,3 +2,6 @@
 _fmt = [
     "fmt", "--all", "--", "--config-path", ".rustfmt.nightly.toml",
 ]
+
+[target.armv7-unknown-linux-gnueabihf]
+rustflags = ["-C", "link-arg=-Wno-error=date-time"]
