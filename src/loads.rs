@@ -106,10 +106,7 @@ fn _toml_to_python<'py>(
     }
 }
 
-fn create_timezone_from_offset(
-    py: Python,
-    offset: Offset,
-) -> PyResult<Bound<PyTzInfo>> {
+fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
     match offset {
         Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
         Offset::Custom { minutes } => {

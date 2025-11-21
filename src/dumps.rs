@@ -131,8 +131,7 @@ fn _python_to_toml<'py>(
             return Ok(Item::Table(Table::new()));
         }
 
-        let inline = inline_tables
-            .is_some_and(|set| set.contains(&_path.join(".")));
+        let inline = inline_tables.is_some_and(|set| set.contains(&_path.join(".")));
 
         return if inline {
             let mut inline_table = InlineTable::new();
