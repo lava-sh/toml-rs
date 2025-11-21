@@ -3,7 +3,7 @@ macro_rules! create_py_datetime {
     ($py:expr, $date:expr, $time:expr, $tzinfo:expr) => {
         pyo3::types::PyDateTime::new(
             $py,
-            $date.year as i32,
+            i32::from($date.year),
             $date.month,
             $date.day,
             $time.hour,
@@ -35,7 +35,7 @@ macro_rules! get_type {
 macro_rules! toml_dt {
     (Date, $y:expr, $m:expr, $d:expr) => {
         toml::value::Date {
-            year: $y as u16,
+            year: u16::try_from($y)?,
             month: $m,
             day: $d,
         }

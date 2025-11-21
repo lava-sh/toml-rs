@@ -32,7 +32,7 @@ fn _loads(py: Python, s: &str, parse_float: Option<Bound<'_, PyAny>>) -> PyResul
         TOMLDecodeError::new_err((
             err.to_string(),
             normalized.to_string(),
-            err.span().map(|s| s.start).unwrap_or(0),
+            err.span().map_or(0, |s| s.start),
         ))
     })?;
     let toml = toml_to_python(py, value, parse_float.as_ref())?;

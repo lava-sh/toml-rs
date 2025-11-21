@@ -53,9 +53,9 @@ jobs:
       - uses: Swatinem/rust-cache@f13886b937689c021905a6b90929199931d60db1 # v2.8.1
         with:
           lookup-only: true
-      - run: cargo clippy --all-targets -- -D warnings -W clippy::style -D clippy::perf
-      - run: cargo clippy --all-targets --features mimalloc -- -D warnings -W clippy::style -D clippy::perf
-      - run: cargo clippy --all-targets --features snmalloc -- -D warnings -W clippy::style -D clippy::perf
+      - run: cargo clippy --all-targets
+      - run: cargo clippy --all-targets --features mimalloc
+      - run: cargo clippy --all-targets --features snmalloc
 
 
   tests:

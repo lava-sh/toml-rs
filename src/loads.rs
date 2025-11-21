@@ -53,14 +53,14 @@ fn _toml_to_python<'py>(
         Value::Boolean(bool) => bool.into_bound_py_any(py),
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
-                let tzinfo = Some(&create_timezone_from_offset(py, &offset)?);
+                let tzinfo = Some(&create_timezone_from_offset(py, offset)?);
                 Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
                 Ok(create_py_datetime!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
-                let py_date = PyDate::new(py, date.year as i32, date.month, date.day)?;
+                let py_date = PyDate::new(py, i32::from(date.year), date.month, date.day)?;
                 Ok(py_date.into_any())
             }
             (None, Some(time), None) => {
@@ -106,14 +106,14 @@ fn _toml_to_python<'py>(
     }
 }
 
-fn create_timezone_from_offset<'py>(
-    py: Python<'py>,
-    offset: &Offset,
-) -> PyResult<Bound<'py, PyTzInfo>> {
+fn create_timezone_from_offset(
+    py: Python,
+    offset: Offset,
+) -> PyResult<Bound<PyTzInfo>> {
     match offset {
-        Offset::Z => PyTzInfo::utc(py).map(|utc| utc.to_owned()),
+        Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
         Offset::Custom { minutes } => {
-            let seconds = *minutes as i32 * 60;
+            let seconds = i32::from(minutes) * 60;
             let (days, seconds) = if seconds < 0 {
                 let days = seconds.div_euclid(86400);
                 let seconds = seconds.rem_euclid(86400);

@@ -17,11 +17,10 @@ impl Pretty {
 
 fn make_item(node: &mut Item) {
     let other = std::mem::take(node);
-    let other = other.into_table().map(Item::Table).unwrap_or_else(|i| i);
+    let other = other.into_table().map_or_else(|i| i, Item::Table);
     let other = other
         .into_array_of_tables()
-        .map(Item::ArrayOfTables)
-        .unwrap_or_else(|i| i);
+        .map_or_else(|i| i, Item::ArrayOfTables);
     *node = other;
 }
 
