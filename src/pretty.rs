@@ -1,5 +1,5 @@
 // https://github.com/toml-rs/toml/blob/v0.23.7/crates/toml_edit/src/ser/pretty.rs
-use toml_edit::{Array, Item, Table, Value, visit_mut};
+use toml_edit::{Array, DocumentMut, Item, Table, Value, visit_mut};
 
 pub(crate) struct Pretty {
     in_value: bool,
@@ -16,16 +16,15 @@ impl Pretty {
 }
 
 fn make_item(node: &mut Item) {
-    let other = std::mem::take(node);
-    let other = other.into_table().map_or_else(|i| i, Item::Table);
-    let other = other
+    *node = std::mem::take(node)
+        .into_table()
+        .map_or_else(|i| i, Item::Table)
         .into_array_of_tables()
         .map_or_else(|i| i, Item::ArrayOfTables);
-    *node = other;
 }
 
 impl visit_mut::VisitMut for Pretty {
-    fn visit_document_mut(&mut self, node: &mut crate::DocumentMut) {
+    fn visit_document_mut(&mut self, node: &mut DocumentMut) {
         visit_mut::visit_document_mut(self, node);
     }
 

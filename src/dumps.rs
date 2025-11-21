@@ -10,7 +10,7 @@ use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
 use toml_edit::{Array, Formatted, InlineTable, Item, Offset, Table, Value};
 
-use crate::{TOMLEncodeError, recursion_guard::RecursionGuard};
+use crate::{TOMLEncodeError, get_type, recursion_guard::RecursionGuard};
 
 pub(crate) fn validate_inline_paths(
     doc: &Item,
@@ -141,7 +141,7 @@ fn _python_to_toml<'py>(
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {}",
-                            crate::get_type!(k)
+                            get_type!(k)
                         ))
                     })?
                     .to_str()?;
@@ -169,7 +169,7 @@ fn _python_to_toml<'py>(
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {}",
-                            crate::get_type!(k)
+                            get_type!(k)
                         ))
                     })?
                     .to_str()?;
@@ -218,6 +218,6 @@ fn _python_to_toml<'py>(
 
     Err(TOMLEncodeError::new_err(format!(
         "Cannot serialize {} to TOML",
-        crate::get_type!(obj)
+        get_type!(obj)
     )))
 }

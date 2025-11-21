@@ -107,17 +107,14 @@ fn _toml_to_python<'py>(
 }
 
 fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
+    const SECS_IN_DAY: i32 = 86_400;
+
     match offset {
         Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
         Offset::Custom { minutes } => {
             let seconds = i32::from(minutes) * 60;
-            let (days, seconds) = if seconds < 0 {
-                let days = seconds.div_euclid(86400);
-                let seconds = seconds.rem_euclid(86400);
-                (days, seconds)
-            } else {
-                (0, seconds)
-            };
+            let days = seconds.div_euclid(SECS_IN_DAY);
+            let seconds = seconds.rem_euclid(SECS_IN_DAY);
             let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
             PyTzInfo::fixed_offset(py, py_delta)
         }
