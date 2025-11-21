@@ -1,2 +1,0 @@
-warns = ["clippy::style"]
-deny = ["warnings", "clippy::perf"]
