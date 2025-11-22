@@ -2,10 +2,3 @@
 _fmt = [
     "fmt", "--all", "--", "--config-path", ".rustfmt.nightly.toml",
 ]
-
-[target.armv7-unknown-linux-gnueabihf]
-linker = "arm-linux-gnueabihf-gcc"
-rustflags = [
-    "-C", "link-arg=-Wl,--as-needed",
-    "-C", "link-arg=-latomic",
-]
