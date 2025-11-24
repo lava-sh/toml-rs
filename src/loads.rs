@@ -29,26 +29,27 @@ fn _toml_to_python<'py>(
         Value::String(str) => str.into_bound_py_any(py),
         Value::Integer(int) => int.into_bound_py_any(py),
         Value::Float(float) => {
-            if let Some(f) = parse_float {
-                let mut buffer = [0u8; lexical_core::BUFFER_SIZE];
-                let write_bytes = lexical_core::write(float, &mut buffer);
-                let py_call = f.call1((
-                    // SAFETY: `lexical_core::write()` guarantees that it only writes valid
-                    // ASCII characters: 0-9, '.', '-' and 'e' for exponential notation.
-                    // All these characters are valid UTF-8.
-                    unsafe { from_utf8_unchecked(write_bytes) },
-                ))?;
-                if py_call.is_exact_instance_of::<PyDict>()
-                    || py_call.is_exact_instance_of::<PyList>()
-                {
-                    return Err(PyValueError::new_err(
-                        "parse_float must not return dicts or lists",
-                    ));
-                }
-                Ok(py_call)
-            } else {
-                float.into_bound_py_any(py)
+            let Some(f) = parse_float else {
+                return float.into_bound_py_any(py);
+            };
+
+            let mut buffer = [0u8; lexical_core::BUFFER_SIZE];
+            let write_bytes = lexical_core::write(float, &mut buffer);
+            let py_call = f.call1((
+                // SAFETY: `lexical_core::write()` guarantees that it only writes valid
+                // ASCII characters: 0-9, '.', '-' and 'e' for exponential notation.
+                // All these characters are valid UTF-8.
+                unsafe { from_utf8_unchecked(write_bytes) },
+            ))?;
+
+            if py_call.is_exact_instance_of::<PyDict>() || py_call.is_exact_instance_of::<PyList>()
+            {
+                return Err(PyValueError::new_err(
+                    "parse_float must not return dicts or lists",
+                ));
             }
+
+            Ok(py_call)
         }
         Value::Boolean(bool) => bool.into_bound_py_any(py),
         Value::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
@@ -134,10 +135,9 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
     let finder = memchr::memmem::Finder::new(b"\r\n");
 
     loop {
-        let idx = match finder.find(&tail[gap_len..]) {
-            None => tail.len(),
-            Some(idx) => idx + gap_len,
-        };
+        let idx = finder
+            .find(&tail[gap_len..])
+            .map_or(tail.len(), |idx| idx + gap_len);
         tail.copy_within(gap_len..idx, 0);
         tail = &mut tail[idx - gap_len..];
 

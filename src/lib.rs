@@ -53,14 +53,11 @@ fn _dumps(
         validate_inline_paths(doc.as_item(), paths)?;
     }
 
-    let toml = if pretty {
+    if pretty {
         Pretty::new(inline_tables.is_none()).visit_document_mut(&mut doc);
-        doc.to_string()
-    } else {
-        doc.to_string()
-    };
+    }
 
-    Ok(toml)
+    Ok(doc.to_string())
 }
 
 #[pymodule(name = "_toml_rs")]
