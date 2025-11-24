@@ -20,13 +20,12 @@ pub(crate) fn validate_inline_paths(
         let mut current = doc;
 
         for key in path.split('.') {
-            if let Some(item) = current.get(key) {
-                current = item;
-            } else {
+            let Some(item) = current.get(key) else {
                 return Err(TOMLEncodeError::new_err(format!(
                     "Path '{path}' specified in inline_tables does not exist in the toml"
                 )));
-            }
+            };
+            current = item;
         }
 
         if !current.is_table() && !current.is_inline_table() {
@@ -64,11 +63,14 @@ fn _python_to_toml<'py>(
         return Ok(Item::Value(Value::String(Formatted::new(
             str.to_str()?.to_owned(),
         ))));
-    } else if let Ok(bool) = obj.cast::<PyBool>() {
-        return Ok(Item::Value(Value::Boolean(Formatted::new(bool.is_true()))));
-    } else if let Ok(int) = obj.cast::<PyInt>() {
+    }
+    if let Ok(b) = obj.cast::<PyBool>() {
+        return Ok(Item::Value(Value::Boolean(Formatted::new(b.is_true()))));
+    }
+    if let Ok(int) = obj.cast::<PyInt>() {
         return Ok(Item::Value(Value::Integer(Formatted::new(int.extract()?))));
-    } else if let Ok(float) = obj.cast::<PyFloat>() {
+    }
+    if let Ok(float) = obj.cast::<PyFloat>() {
         return Ok(Item::Value(Value::Float(Formatted::new(float.value()))));
     }
 
@@ -82,20 +84,17 @@ fn _python_to_toml<'py>(
             dt.get_microsecond() * 1000
         );
 
-        let offset = if let Some(tzinfo) = dt.get_tzinfo() {
-            let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,))?;
+        let offset = dt.get_tzinfo().and_then(|tzinfo| {
+            let utc_offset = tzinfo.call_method1(intern!(py, "utcoffset"), (dt,)).ok()?;
             if utc_offset.is_none() {
-                None
-            } else {
-                let delta = utc_offset.cast::<PyDelta>()?;
-                let seconds = delta.get_days() * 86400 + delta.get_seconds();
-                Some(Offset::Custom {
-                    minutes: i16::try_from(seconds / 60)?,
-                })
+                return None;
             }
-        } else {
-            None
-        };
+            let delta = utc_offset.cast::<PyDelta>().ok()?;
+            let seconds = delta.get_days() * 86400 + delta.get_seconds();
+            Some(Offset::Custom {
+                minutes: i16::try_from(seconds / 60).ok()?,
+            })
+        });
 
         return Ok(Item::Value(Value::Datetime(Formatted::new(
             crate::toml_dt!(Datetime, Some(date), Some(time), offset),
