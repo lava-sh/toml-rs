@@ -33,20 +33,20 @@ macro_rules! get_type {
 
 #[macro_export]
 macro_rules! toml_dt {
-    (Date, $y:expr, $m:expr, $d:expr) => {
+    (Date, $py_date:expr) => {
         toml::value::Date {
-            year: u16::try_from($y)?,
-            month: $m,
-            day: $d,
+            year: u16::try_from($py_date.get_year())?,
+            month: $py_date.get_month(),
+            day: $py_date.get_day(),
         }
     };
 
-    (Time, $h:expr, $m:expr, $s:expr, $ns:expr) => {
+    (Time, $py_time:expr) => {
         toml::value::Time {
-            hour: $h,
-            minute: $m,
-            second: $s,
-            nanosecond: $ns,
+            hour: $py_time.get_hour(),
+            minute: $py_time.get_minute(),
+            second: $py_time.get_second(),
+            nanosecond: $py_time.get_microsecond() * 1000,
         }
     };
 
@@ -56,5 +56,25 @@ macro_rules! toml_dt {
             time: $time,
             offset: $offset,
         }
+    };
+}
+
+#[macro_export]
+macro_rules! to_toml {
+    (TomlTable, $value:expr) => {
+        Ok(toml_edit::Item::Table($value))
+    };
+    (TomlArray, $value:expr) => {
+        Ok(toml_edit::Item::Value(toml_edit::Value::Array($value)))
+    };
+    (TomlInlineTable, $value:expr) => {
+        Ok(toml_edit::Item::Value(toml_edit::Value::InlineTable(
+            $value,
+        )))
+    };
+    ($var:ident, $value:expr) => {
+        Ok(toml_edit::Item::Value(toml_edit::Value::$var(
+            toml_edit::Formatted::new($value),
+        )))
     };
 }
