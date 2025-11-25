@@ -40,12 +40,12 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "ruff == 0.14.5",
+    "ruff == 0.14.6",
     "maturin == 1.10.2",
     "pytest == 9.0.1",
-    "zizmor == 1.16.3",
+    "zizmor == 1.17.0",
     "typos == 1.39.2",
-    "rumdl == 0.0.175",
+    "rumdl == 0.0.182",
     "tomli ; python_version<'3.11'",
 ]
 bench = [
@@ -55,8 +55,8 @@ bench = [
     "qtoml",
     "rtoml",
     "tomli ; python_version<'3.11'",
-    "polars ~= 1.35.1",
-    "altair == 5.5.0",
+    "polars == 1.35.2",
+    "altair == 6.0.0",
     "vl-convert-python == 1.8.0",
     "py-cpuinfo == 9.0.0",
 ]
