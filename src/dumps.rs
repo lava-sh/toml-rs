@@ -43,21 +43,21 @@ pub(crate) fn python_to_toml<'py>(
     obj: &Bound<'py, PyAny>,
     inline_tables: Option<&FxHashSet<String>>,
 ) -> PyResult<Item> {
-    _python_to_toml(
+    to_toml(
         py,
         obj,
         &mut RecursionGuard::default(),
         inline_tables,
-        &mut SmallVec::<String, 32>::with_capacity(inline_tables.map_or(0, FxHashSet::len)),
+        &mut SmallVec::<String, 16>::with_capacity(inline_tables.map_or(0, FxHashSet::len)),
     )
 }
 
-fn _python_to_toml<'py>(
+fn to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
     inline_tables: Option<&FxHashSet<String>>,
-    _path: &mut SmallVec<String, 32>,
+    toml_path: &mut SmallVec<String, 16>,
 ) -> PyResult<Item> {
     if let Ok(s) = obj.cast::<PyString>() {
         return to_toml!(String, s.to_str()?.to_owned());
@@ -110,7 +110,7 @@ fn _python_to_toml<'py>(
             return to_toml!(TomlTable, Table::new());
         }
 
-        let inline = inline_tables.is_some_and(|set| set.contains(&_path.join(".")));
+        let inline = inline_tables.is_some_and(|set| set.contains(&toml_path.join(".")));
 
         return if inline {
             let mut inline_table = InlineTable::new();
@@ -119,15 +119,15 @@ fn _python_to_toml<'py>(
                     .cast::<PyString>()
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
-                            "TOML table keys must be strings, got {}",
-                            get_type!(k)
+                            "TOML table keys must be strings, got {py_type}",
+                            py_type = get_type!(k)
                         ))
                     })?
                     .to_str()?;
 
-                _path.push(key.to_owned());
-                let item = _python_to_toml(py, &v, recursion, inline_tables, _path)?;
-                _path.pop();
+                toml_path.push(key.to_owned());
+                let item = to_toml(py, &v, recursion, inline_tables, toml_path)?;
+                toml_path.pop();
 
                 if let Item::Value(val) = item {
                     inline_table.insert(key, val);
@@ -147,15 +147,15 @@ fn _python_to_toml<'py>(
                     .cast::<PyString>()
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
-                            "TOML table keys must be strings, got {}",
-                            get_type!(k)
+                            "TOML table keys must be strings, got {py_type}",
+                            py_type = get_type!(obj)
                         ))
                     })?
                     .to_str()?;
 
-                _path.push(key.to_owned());
-                let item = _python_to_toml(py, &v, recursion, inline_tables, _path)?;
-                _path.pop();
+                toml_path.push(key.to_owned());
+                let item = to_toml(py, &v, recursion, inline_tables, toml_path)?;
+                toml_path.pop();
 
                 table.insert(key, item);
             }
@@ -174,8 +174,8 @@ fn _python_to_toml<'py>(
 
         let mut array = Array::new();
         for item in list.iter() {
-            let _item = _python_to_toml(py, &item, recursion, inline_tables, _path)?;
-            match _item {
+            let items = to_toml(py, &item, recursion, inline_tables, toml_path)?;
+            match items {
                 Item::Value(value) => {
                     array.push(value);
                 }
@@ -196,7 +196,7 @@ fn _python_to_toml<'py>(
     }
 
     Err(TOMLEncodeError::new_err(format!(
-        "Cannot serialize {} to TOML",
-        get_type!(obj)
+        "Cannot serialize {py_type} to TOML",
+        py_type = get_type!(obj)
     )))
 }

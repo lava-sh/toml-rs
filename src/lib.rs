@@ -21,8 +21,12 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 import_exception!(toml_rs, TOMLDecodeError);
 import_exception!(toml_rs, TOMLEncodeError);
 
-#[pyfunction]
-fn _loads(py: Python, s: &str, parse_float: Option<&Bound<'_, PyAny>>) -> PyResult<Py<PyAny>> {
+#[pyfunction(name = "_loads")]
+fn load_toml_from_string(
+    py: Python,
+    s: &str,
+    parse_float: Option<&Bound<'_, PyAny>>,
+) -> PyResult<Py<PyAny>> {
     let normalized = normalize_line_ending(s);
     let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
         TOMLDecodeError::new_err((
@@ -35,9 +39,9 @@ fn _loads(py: Python, s: &str, parse_float: Option<&Bound<'_, PyAny>>) -> PyResu
     Ok(toml.unbind())
 }
 
-#[pyfunction]
 #[allow(clippy::needless_pass_by_value)]
-fn _dumps(
+#[pyfunction(name = "_dumps")]
+fn dumps_toml(
     py: Python,
     obj: &Bound<'_, PyAny>,
     pretty: bool,
@@ -62,8 +66,8 @@ fn _dumps(
 
 #[pymodule(name = "_toml_rs")]
 fn toml_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(_loads, m)?)?;
-    m.add_function(wrap_pyfunction!(_dumps, m)?)?;
+    m.add_function(wrap_pyfunction!(load_toml_from_string, m)?)?;
+    m.add_function(wrap_pyfunction!(dumps_toml, m)?)?;
     m.add("_version", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
