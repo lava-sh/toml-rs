@@ -148,7 +148,7 @@ fn to_toml<'py>(
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {py_type}",
-                            py_type = get_type!(obj)
+                            py_type = get_type!(k)
                         ))
                     })?
                     .to_str()?;
