@@ -15,11 +15,11 @@ pub(crate) fn toml_to_python<'py>(
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    _toml_to_python(py, value, parse_float, &mut RecursionGuard::default())
+    to_python(py, value, parse_float, &mut RecursionGuard::default())
 }
 
 #[inline]
-fn _toml_to_python<'py>(
+fn to_python<'py>(
     py: Python<'py>,
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
@@ -85,7 +85,7 @@ fn _toml_to_python<'py>(
             recursion.enter()?;
             let py_list = PyList::empty(py);
             for item in array {
-                py_list.append(_toml_to_python(py, item, parse_float, recursion)?)?;
+                py_list.append(to_python(py, item, parse_float, recursion)?)?;
             }
             recursion.exit();
             Ok(py_list.into_any())
@@ -98,7 +98,7 @@ fn _toml_to_python<'py>(
             recursion.enter()?;
             let py_dict = PyDict::new(py);
             for (k, v) in table {
-                let value = _toml_to_python(py, v, parse_float, recursion)?;
+                let value = to_python(py, v, parse_float, recursion)?;
                 py_dict.set_item(k, value)?;
             }
             recursion.exit();
@@ -107,6 +107,7 @@ fn _toml_to_python<'py>(
     }
 }
 
+#[inline]
 fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
     const SECS_IN_DAY: i32 = 86_400;
 
