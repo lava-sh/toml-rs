@@ -40,12 +40,12 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "ruff == 0.14.6",
+    "ruff == 0.14.7",
     "maturin == 1.10.2",
     "pytest == 9.0.1",
-    "zizmor == 1.17.0",
-    "typos == 1.39.2",
-    "rumdl == 0.0.182",
+    "zizmor == 1.18.0",
+    "typos == 1.40.0",
+    "rumdl == 0.0.185",
     "tomli ; python_version<'3.11'",
 ]
 bench = [
