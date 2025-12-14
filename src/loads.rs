@@ -1,4 +1,4 @@
-use std::{borrow::Cow, str::from_utf8_unchecked};
+use std::str::from_utf8_unchecked;
 
 use pyo3::{
     IntoPyObjectExt,
@@ -120,38 +120,5 @@ fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyT
             let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
             PyTzInfo::fixed_offset(py, py_delta)
         }
-    }
-}
-
-#[must_use]
-pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
-    if memchr::memchr(b'\r', s.as_bytes()).is_none() {
-        return Cow::Borrowed(s);
-    }
-
-    let mut buf = s.to_string().into_bytes();
-    let mut gap_len = 0;
-    let mut tail = buf.as_mut_slice();
-
-    let finder = memchr::memmem::Finder::new(b"\r\n");
-
-    loop {
-        let idx = finder
-            .find(&tail[gap_len..])
-            .map_or(tail.len(), |idx| idx + gap_len);
-        tail.copy_within(gap_len..idx, 0);
-        tail = &mut tail[idx - gap_len..];
-
-        if tail.len() == gap_len {
-            break;
-        }
-        gap_len += 1;
-    }
-    // Account for removed `\r`.
-    let new_len = buf.len() - gap_len;
-    unsafe {
-        // SAFETY: After `set_len`, `buf` is guaranteed to contain utf-8 again.
-        buf.set_len(new_len);
-        Cow::Owned(String::from_utf8_unchecked(buf))
     }
 }

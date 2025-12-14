@@ -10,7 +10,7 @@ use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 use crate::{
     dumps::{python_to_toml, validate_inline_paths},
-    loads::{normalize_line_ending, toml_to_python},
+    loads::toml_to_python,
     pretty::Pretty,
 };
 
@@ -24,14 +24,13 @@ import_exception!(toml_rs, TOMLEncodeError);
 #[pyfunction(name = "_loads")]
 fn load_toml_from_string(
     py: Python,
-    s: &str,
+    toml_string: &str,
     parse_float: Option<&Bound<'_, PyAny>>,
 ) -> PyResult<Py<PyAny>> {
-    let normalized = normalize_line_ending(s);
-    let value = py.detach(|| toml::from_str(&normalized)).map_err(|err| {
+    let value = py.detach(|| toml::from_str(toml_string)).map_err(|err| {
         TOMLDecodeError::new_err((
             err.to_string(),
-            normalized.to_string(),
+            toml_string.to_string(),
             err.span().map_or(0, |s| s.start),
         ))
     })?;
