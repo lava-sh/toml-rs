@@ -20,13 +20,12 @@ toml = { version = "0.9.8", features = [
     "unbounded", # disables default recursion limit to set own limit (999)
     "preserve_order", # save order
 ] }
-toml_edit = { version = "0.23.7", features = [
+toml_edit = { version = "0.23.9", features = [
     "serde",
     "unbounded",
 ] }
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
-memchr = { version = "2.7.6", default-features = false }
 mimalloc = { version = "0.1.48", features = ["v3", "override"], optional = true }
 
 [dependencies.lexical-core]
