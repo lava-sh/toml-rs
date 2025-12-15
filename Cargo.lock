@@ -327,7 +327,7 @@ dependencies = [
 
 [[package]]
 name = "toml-rs"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "lexical-core",
  "mimalloc",
