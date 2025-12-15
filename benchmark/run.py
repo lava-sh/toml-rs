@@ -20,7 +20,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib
 
-N = 5_000
+N = 5_00
 
 
 def get_lib_version(lib: str) -> str:
