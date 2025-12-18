@@ -10,7 +10,7 @@ __all__ = (
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, BinaryIO, TextIO
+from typing import Any, BinaryIO, Literal, TextIO
 
 from ._toml_rs import (
     _dumps,
@@ -21,31 +21,49 @@ from ._toml_rs import (
 __version__: str = _version
 
 
-def load(fp: BinaryIO, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
+def load(
+    fp: BinaryIO,
+    /,
+    *,
+    parse_float: Callable[[str], Any] = float,
+    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+) -> dict[str, Any]:
     _bytes = fp.read()
     try:
         _str = _bytes.decode()
     except AttributeError:
         msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
         raise TypeError(msg) from None
-    return loads(_str, parse_float=parse_float)
+    return loads(_str, parse_float=parse_float, toml_version=toml_version)
 
 
-def loads(s: str, /, *, parse_float: Callable[[str], Any] = float) -> dict[str, Any]:
+def loads(
+    s: str,
+    /,
+    *,
+    parse_float: Callable[[str], Any] = float,
+    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+) -> dict[str, Any]:
     if not isinstance(s, str):
-        raise TypeError(f"Expected str object, not '{type(s).__name__}'")
-    return _loads(s, parse_float=parse_float)
+        raise TypeError(f"Expected str object, not '{type(s).__qualname__}'")
+    return _loads(s, parse_float=parse_float, toml_version=toml_version)
 
 
 def dump(
-        obj: Any,
-        /,
-        file: str | Path | TextIO,
-        inline_tables: set[str] | None = None,
-        *,
-        pretty: bool = False,
+    obj: Any,
+    /,
+    file: str | Path | TextIO,
+    inline_tables: set[str] | None = None,
+    *,
+    pretty: bool = False,
+    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
 ) -> int:
-    _str = _dumps(obj, inline_tables=inline_tables, pretty=pretty)
+    _str = _dumps(
+        obj,
+        inline_tables=inline_tables,
+        pretty=pretty,
+        toml_version=toml_version,
+    )
     if isinstance(file, str):
         file = Path(file)
     if isinstance(file, Path):
@@ -55,13 +73,19 @@ def dump(
 
 
 def dumps(
-        obj: Any,
-        /,
-        inline_tables: set[str] | None = None,
-        *,
-        pretty: bool = False,
+    obj: Any,
+    /,
+    inline_tables: set[str] | None = None,
+    *,
+    pretty: bool = False,
+    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
 ) -> str:
-    return _dumps(obj, inline_tables=inline_tables, pretty=pretty)
+    return _dumps(
+        obj,
+        inline_tables=inline_tables,
+        pretty=pretty,
+        toml_version=toml_version,
+    )
 
 
 class TOMLDecodeError(ValueError):

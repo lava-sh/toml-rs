@@ -1,12 +1,12 @@
 // https://github.com/toml-rs/toml/blob/v0.23.7/crates/toml_edit/src/ser/pretty.rs
-use toml_edit::{Array, DocumentMut, Item, Table, Value, visit_mut};
+use toml_edit_v1_0_0::{Array, DocumentMut, Item, Table, Value, visit_mut};
 
-pub(crate) struct Pretty {
+pub(crate) struct PrettyV100 {
     in_value: bool,
     format_tables: bool,
 }
 
-impl Pretty {
+impl PrettyV100 {
     pub(crate) fn new(format_tables: bool) -> Self {
         Self {
             in_value: false,
@@ -23,7 +23,7 @@ fn make_item(node: &mut Item) {
         .map_or_else(|i| i, Item::ArrayOfTables);
 }
 
-impl visit_mut::VisitMut for Pretty {
+impl visit_mut::VisitMut for PrettyV100 {
     fn visit_document_mut(&mut self, node: &mut DocumentMut) {
         visit_mut::visit_document_mut(self, node);
     }
