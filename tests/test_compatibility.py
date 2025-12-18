@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 import toml_rs
 
-from tests import TOML
 from .burntsushi import convert, normalize
-from .test_data import VALID_PAIRS
+from .helpers import TOML
+from .test_data import VALID_PAIRS_1_0_0 as VALID_PAIRS
 
 if sys.version_info >= (3, 11):
     import tomllib
