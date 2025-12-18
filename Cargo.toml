@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -15,15 +15,6 @@ pyo3 = { version = "0.27.2", features = [
     "extension-module",
     "generate-import-lib",
 ] }
-toml = { version = "0.9.8", features = [
-    "fast_hash", # uses `foldhash`
-    "unbounded", # disables default recursion limit to set own limit (999)
-    "preserve_order", # save order
-] }
-toml_edit = { version = "0.23.9", features = [
-    "serde",
-    "unbounded",
-] }
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 mimalloc = { version = "0.1.48", features = ["v3", "override"], optional = true }
@@ -33,6 +24,42 @@ git = "https://github.com/Alexhuszagh/rust-lexical"
 rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = ["write-floats"]
+
+# TOML v1.0.0 support
+[dependencies.toml_edit_v1_0_0]
+git = "https://github.com/lava-sh/toml"
+rev = "2eb3bde37b8a9fd0e348f2510027599aaa431694"
+version = "0.23.10"
+features = [
+    "serde",
+    "unbounded",
+]
+
+[dependencies.toml_v1_0_0]
+git = "https://github.com/lava-sh/toml"
+rev = "2eb3bde37b8a9fd0e348f2510027599aaa431694"
+version = "0.9.9"
+features = [
+    "fast_hash", # uses `foldhash`
+    "unbounded", # disables default recursion limit to set own limit (999)
+    "preserve_order", # save order
+]
+
+# TOML v1.1.0 support
+[dependencies.toml_edit]
+version = "0.24.0"
+features = [
+    "serde",
+    "unbounded",
+]
+
+[dependencies.toml]
+version = "0.9.10"
+features = [
+    "fast_hash", # uses `foldhash`
+    "unbounded", # disables default recursion limit to set own limit (999)
+    "preserve_order", # save order
+]
 
 [features]
 default = []

@@ -1,17 +1,21 @@
-mod dumps;
-mod loads;
-mod macros;
-mod pretty;
 mod recursion_guard;
+mod v1_0_0;
+mod v1_1_0;
 
-use pyo3::{import_exception, prelude::*};
+use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
 use rustc_hash::FxHashSet;
-use toml_edit::{DocumentMut, Item, visit_mut::VisitMut};
 
 use crate::{
-    dumps::{python_to_toml, validate_inline_paths},
-    loads::toml_to_python,
-    pretty::Pretty,
+    v1_0_0::{
+        dumps::{python_to_toml_v1_0_0, validate_inline_paths_v1_0_0},
+        loads::toml_to_python_v1_0_0,
+        pretty::PrettyV100,
+    },
+    v1_1_0::{
+        dumps::{python_to_toml, validate_inline_paths},
+        loads::toml_to_python,
+        pretty::Pretty,
+    },
 };
 
 #[cfg(feature = "mimalloc")]
@@ -26,16 +30,37 @@ fn load_toml_from_string(
     py: Python,
     toml_string: &str,
     parse_float: Option<&Bound<'_, PyAny>>,
+    toml_version: &str,
 ) -> PyResult<Py<PyAny>> {
-    let value = py.detach(|| toml::from_str(toml_string)).map_err(|err| {
-        TOMLDecodeError::new_err((
-            err.to_string(),
-            toml_string.to_string(),
-            err.span().map_or(0, |s| s.start),
-        ))
-    })?;
-    let toml = toml_to_python(py, value, parse_float)?;
-    Ok(toml.unbind())
+    match toml_version {
+        "1.0.0" => {
+            let parsed: toml_v1_0_0::Value = py
+                .detach(|| toml_v1_0_0::from_str(toml_string))
+                .map_err(|err| {
+                    TOMLDecodeError::new_err((
+                        err.to_string(),
+                        toml_string.to_string(),
+                        err.span().map_or(0, |s| s.start),
+                    ))
+                })?;
+            let toml = toml_to_python_v1_0_0(py, parsed, parse_float)?;
+            Ok(toml.unbind())
+        }
+        "1.1.0" => {
+            let parsed: toml::Value = py.detach(|| toml::from_str(toml_string)).map_err(|err| {
+                TOMLDecodeError::new_err((
+                    err.to_string(),
+                    toml_string.to_string(),
+                    err.span().map_or(0, |s| s.start),
+                ))
+            })?;
+            let toml = toml_to_python(py, parsed, parse_float)?;
+            Ok(toml.unbind())
+        }
+        _ => Err(PyValueError::new_err(format!(
+            "Unsupported TOML version: {toml_version}. Supported versions: 1.0.0, 1.1.0",
+        ))),
+    }
 }
 
 #[allow(clippy::needless_pass_by_value)]
@@ -45,22 +70,54 @@ fn dumps_toml(
     obj: &Bound<'_, PyAny>,
     pretty: bool,
     inline_tables: Option<FxHashSet<String>>,
+    toml_version: &str,
 ) -> PyResult<String> {
-    let mut doc = DocumentMut::new();
+    match toml_version {
+        "1.0.0" => {
+            use toml_edit_v1_0_0::visit_mut::VisitMut;
 
-    if let Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
-        *doc.as_table_mut() = table;
+            let mut doc = toml_edit_v1_0_0::DocumentMut::new();
+
+            if let toml_edit_v1_0_0::Item::Table(table) =
+                python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())?
+            {
+                *doc.as_table_mut() = table;
+            }
+
+            if let Some(ref paths) = inline_tables {
+                validate_inline_paths_v1_0_0(doc.as_item(), paths)?;
+            }
+
+            if pretty {
+                PrettyV100::new(inline_tables.is_none()).visit_document_mut(&mut doc);
+            }
+
+            Ok(doc.to_string())
+        }
+        "1.1.0" => {
+            use toml_edit::visit_mut::VisitMut;
+
+            let mut doc = toml_edit::DocumentMut::new();
+
+            if let toml_edit::Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())?
+            {
+                *doc.as_table_mut() = table;
+            }
+
+            if let Some(ref paths) = inline_tables {
+                validate_inline_paths(doc.as_item(), paths)?;
+            }
+
+            if pretty {
+                Pretty::new(inline_tables.is_none()).visit_document_mut(&mut doc);
+            }
+
+            Ok(doc.to_string())
+        }
+        _ => Err(PyValueError::new_err(format!(
+            "Unsupported TOML version: {toml_version}. Supported versions: 1.0.0, 1.1.0",
+        ))),
     }
-
-    if let Some(ref paths) = inline_tables {
-        validate_inline_paths(doc.as_item(), paths)?;
-    }
-
-    if pretty {
-        Pretty::new(inline_tables.is_none()).visit_document_mut(&mut doc);
-    }
-
-    Ok(doc.to_string())
 }
 
 #[pymodule(name = "_toml_rs")]

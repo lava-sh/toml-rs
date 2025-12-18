@@ -99,3 +99,11 @@ x =
     assert exc.lineno == 7
     assert exc.colno == 4
     assert f"line {exc.lineno}, column {exc.colno}" in str(exc)
+
+
+def test_unsupported_version():
+    with pytest.raises(
+            ValueError,
+            match="Unsupported TOML version",
+    ):
+        tomllib.loads("x = 1", toml_version="2")
