@@ -289,6 +289,36 @@ jobs:
           name: wheels-macos-${{ matrix.platform.target }}
           path: dist
 
+  wasm:
+    name: "wasm (ubuntu-latest / ${{ matrix.target }})"
+    needs: [ tests, cargo-fmt, cargo-clippy ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - wasm32-wasi
+          - wasm32-unknown-emscripten
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: 3.x
+      - name: "Build wheels"
+        uses: PyO3/maturin-action@86b9d133d34bc1b40018696f782949dac11bd380
+        with:
+          target: ${{ matrix.target }}
+          args: >
+            --release --out dist 
+            --features mimalloc
+          manylinux: off  # wasm builds don't use manylinux
+      - name: "Upload wheels"
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: wheels-wasm-${{ matrix.target }}
+          path: dist
+
   build-sdist:
     name: "build sdist"
     runs-on: ubuntu-latest
