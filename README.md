@@ -129,6 +129,9 @@ print(toml_rs.loads(t))
 # invalid type: integer `999999999999999999999999` as i128, expected any valid TOML value
 ```
 
+Note: TOML v1.1.0 allows parsers to support integers and floats beyond `i64`/`f64` limits,
+ so the behavior will be the same as [`tomllib`](https://docs.python.org/3/library/tomllib.html)
+
 3. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
 
 ```python

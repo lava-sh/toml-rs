@@ -47,14 +47,16 @@ fn load_toml_from_string(
             Ok(toml.unbind())
         }
         "1.1.0" => {
-            let parsed: toml::Value = py.detach(|| toml::from_str(toml_string)).map_err(|err| {
+            use toml::de::{DeTable, DeValue::Table};
+
+            let parsed = DeTable::parse(toml_string).map_err(|err| {
                 TOMLDecodeError::new_err((
                     err.to_string(),
                     toml_string.to_string(),
                     err.span().map_or(0, |s| s.start),
                 ))
             })?;
-            let toml = toml_to_python(py, parsed, parse_float)?;
+            let toml = toml_to_python(py, Table(parsed.into_inner()), parse_float)?;
             Ok(toml.unbind())
         }
         _ => Err(PyValueError::new_err(format!(
@@ -74,13 +76,11 @@ fn dumps_toml(
 ) -> PyResult<String> {
     match toml_version {
         "1.0.0" => {
-            use toml_edit_v1_0_0::visit_mut::VisitMut;
+            use toml_edit_v1_0_0::{DocumentMut, Item::Table, visit_mut::VisitMut};
 
-            let mut doc = toml_edit_v1_0_0::DocumentMut::new();
+            let mut doc = DocumentMut::new();
 
-            if let toml_edit_v1_0_0::Item::Table(table) =
-                python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())?
-            {
+            if let Table(table) = python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())? {
                 *doc.as_table_mut() = table;
             }
 
@@ -95,12 +95,11 @@ fn dumps_toml(
             Ok(doc.to_string())
         }
         "1.1.0" => {
-            use toml_edit::visit_mut::VisitMut;
+            use toml_edit::{DocumentMut, Item::Table, visit_mut::VisitMut};
 
-            let mut doc = toml_edit::DocumentMut::new();
+            let mut doc = DocumentMut::new();
 
-            if let toml_edit::Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())?
-            {
+            if let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
                 *doc.as_table_mut() = table;
             }
 

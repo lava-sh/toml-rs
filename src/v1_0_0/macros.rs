@@ -1,37 +1,4 @@
 #[macro_export]
-macro_rules! create_py_datetime_v1_0_0 {
-    ($py:expr, $date:expr, $time:expr, $tzinfo:expr) => {
-        pyo3::types::PyDateTime::new(
-            $py,
-            i32::from($date.year),
-            $date.month,
-            $date.day,
-            $time.hour,
-            $time.minute,
-            $time.second,
-            $time.nanosecond / 1000,
-            $tzinfo,
-        )
-    };
-}
-
-#[macro_export]
-macro_rules! get_type_v1_0_0 {
-    ($obj:expr) => {
-        format!(
-            "{} ({})",
-            $obj.repr()
-                .map(|s| s.to_string())
-                .unwrap_or_else(|_| String::from("<unknown>")),
-            $obj.get_type()
-                .repr()
-                .map(|s| s.to_string())
-                .unwrap_or_else(|_| String::from("<unknown>"))
-        )
-    };
-}
-
-#[macro_export]
 macro_rules! toml_dt_v1_0_0 {
     (Date, $py_date:expr) => {
         toml_v1_0_0::value::Date {

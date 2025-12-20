@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -14,7 +14,9 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.27.2", features = [
     "extension-module",
     "generate-import-lib",
+    "num-bigint",
 ] }
+num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 mimalloc = { version = "0.1.48", features = ["v3", "override"], optional = true }
@@ -23,7 +25,12 @@ mimalloc = { version = "0.1.48", features = ["v3", "override"], optional = true 
 git = "https://github.com/Alexhuszagh/rust-lexical"
 rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
-features = ["write-floats"]
+features = [
+    "radix",
+    "parse-floats",
+    "write-floats",
+    "parse-integers",
+]
 
 # TOML v1.0.0 support
 [dependencies.toml_edit_v1_0_0]

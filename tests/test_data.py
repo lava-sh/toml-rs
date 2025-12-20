@@ -1,5 +1,7 @@
 import json
+import math
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -97,3 +99,29 @@ def test_valid_tomls(valid: Path, expected: dict, toml_version: str) -> None:
     assert actual == expected_normalized
     # Ensure that parsed toml's can be serialized back without error
     tomllib.dumps(actual)
+
+
+def test_parse_big_nums() -> None:
+    big_int = 999 ** 999
+    big_float = float(f"{big_int}.{big_int}")
+
+    t = f"x = {big_int}"
+    t2 = f"x = {big_float}"
+    t3 = f"x = {big_int + big_int}.{big_int}"
+
+    assert tomllib.loads(t, toml_version="1.1.0")["x"] == big_int
+    assert math.isclose(
+        tomllib.loads(t3, toml_version="1.1.0")["x"],
+        big_float,
+        abs_tol=1e-9,
+    )
+    assert math.isclose(
+        tomllib.loads(t3, toml_version="1.1.0", parse_float=Decimal)["x"],
+        Decimal(big_float),
+        abs_tol=1e-9,
+    )
+    assert math.isclose(
+        tomllib.loads(t2, toml_version="1.1.0")["x"],
+        float("inf"),
+        abs_tol=1e-9,
+    )

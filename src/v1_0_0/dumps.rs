@@ -11,8 +11,7 @@ use smallvec::SmallVec;
 use toml_edit_v1_0_0::{Array, InlineTable, Item, Offset, Table, Value};
 
 use crate::{
-    TOMLEncodeError, get_type_v1_0_0, recursion_guard::RecursionGuard, to_toml_v1_0_0,
-    toml_dt_v1_0_0,
+    TOMLEncodeError, get_type, recursion_guard::RecursionGuard, to_toml_v1_0_0, toml_dt_v1_0_0,
 };
 
 pub(crate) fn validate_inline_paths_v1_0_0(
@@ -123,7 +122,7 @@ fn to_toml<'py>(
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {py_type}",
-                            py_type = get_type_v1_0_0!(k)
+                            py_type = get_type!(k)
                         ))
                     })?
                     .to_str()?;
@@ -151,7 +150,7 @@ fn to_toml<'py>(
                     .map_err(|_| {
                         TOMLEncodeError::new_err(format!(
                             "TOML table keys must be strings, got {py_type}",
-                            py_type = get_type_v1_0_0!(k)
+                            py_type = get_type!(k)
                         ))
                     })?
                     .to_str()?;
@@ -200,6 +199,6 @@ fn to_toml<'py>(
 
     Err(TOMLEncodeError::new_err(format!(
         "Cannot serialize {py_type} to TOML",
-        py_type = get_type_v1_0_0!(obj)
+        py_type = get_type!(obj)
     )))
 }
