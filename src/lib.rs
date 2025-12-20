@@ -4,6 +4,7 @@ mod v1_1_0;
 
 use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
 use rustc_hash::FxHashSet;
+use toml::de::{DeTable, DeValue::Table};
 
 use crate::{
     v1_0_0::{
@@ -47,8 +48,6 @@ fn load_toml_from_string(
             Ok(toml.unbind())
         }
         "1.1.0" => {
-            use toml::de::{DeTable, DeValue::Table};
-
             let parsed = DeTable::parse(toml_string).map_err(|err| {
                 TOMLDecodeError::new_err((
                     err.to_string(),
