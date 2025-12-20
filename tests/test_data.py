@@ -1,6 +1,7 @@
 import json
 import math
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -112,6 +113,11 @@ def test_parse_big_nums() -> None:
     assert math.isclose(
         tomllib.loads(t3, toml_version="1.1.0")["x"],
         big_float,
+        abs_tol=1e-9,
+    )
+    assert math.isclose(
+        tomllib.loads(t3, toml_version="1.1.0", parse_float=Decimal)["x"],
+        Decimal(big_float),
         abs_tol=1e-9,
     )
     assert math.isclose(
