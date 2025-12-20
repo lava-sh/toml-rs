@@ -1,5 +1,6 @@
 use std::str::from_utf8_unchecked;
 
+use lexical_core::ParseIntegerOptions;
 use pyo3::{
     IntoPyObjectExt,
     exceptions::PyValueError,
@@ -8,7 +9,7 @@ use pyo3::{
 };
 use toml::{de::DeValue, value::Offset};
 
-use crate::{create_py_datetime, recursion_guard::RecursionGuard};
+use crate::{create_py_datetime, parse_int, recursion_guard::RecursionGuard};
 
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
@@ -29,16 +30,19 @@ fn to_python<'py>(
         DeValue::String(str) => str.into_bound_py_any(py),
         DeValue::Integer(int) => {
             let bytes = int.as_str().as_bytes();
+            let radix = int.radix();
 
-            if let Ok(i_64) = lexical_core::parse::<i64>(bytes) {
+            let options = ParseIntegerOptions::new();
+
+            if let Ok(i_64) = parse_int!(i64, bytes, &options, radix) {
                 return i_64.into_bound_py_any(py);
             }
 
-            if let Ok(i_128) = lexical_core::parse::<i128>(bytes) {
+            if let Ok(i_128) = parse_int!(i128, bytes, &options, radix) {
                 return i_128.into_bound_py_any(py);
             }
 
-            if let Some(bigint) = num_bigint::BigInt::parse_bytes(bytes, 10) {
+            if let Some(bigint) = num_bigint::BigInt::parse_bytes(bytes, radix) {
                 return bigint.into_bound_py_any(py);
             }
 

@@ -76,6 +76,7 @@ dependencies = [
  "lexical-parse-integer",
  "lexical-util",
  "lexical-write-float",
+ "lexical-write-integer",
 ]
 
 [[package]]
@@ -389,6 +390,7 @@ dependencies = [
  "lexical-core",
  "mimalloc",
  "num-bigint",
+ "num-traits",
  "pyo3",
  "rustc-hash",
  "smallvec",

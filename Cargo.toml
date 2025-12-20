@@ -16,6 +16,7 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
+num-traits = "0.2.19"
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
@@ -26,6 +27,7 @@ git = "https://github.com/Alexhuszagh/rust-lexical"
 rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = [
+    "radix",
     "parse-floats",
     "write-floats",
     "parse-integers",
