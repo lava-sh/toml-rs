@@ -11,11 +11,9 @@ name = "toml-rs"
 dynamic = ["version"]
 requires-python = ">=3.10"
 description = "A High-Performance TOML Parser for Python written in Rust"
-
 readme = "README.md"
 license = "UNLICENSE"
 license-files = ["UNLICENSE"]
-
 authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
 ]
@@ -40,12 +38,12 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-    "ruff == 0.14.9",
+    "ruff == 0.14.10",
     "maturin == 1.10.2",
     "pytest == 9.0.2",
-    "zizmor == 1.18.0",
+    "zizmor == 1.19.0",
     "typos == 1.40.0",
-    "rumdl == 0.0.194",
+    "rumdl == 0.0.198",
     "tomli ; python_version<'3.11'",
 ]
 bench = [
