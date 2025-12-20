@@ -390,7 +390,6 @@ dependencies = [
  "lexical-core",
  "mimalloc",
  "num-bigint",
- "num-traits",
  "pyo3",
  "rustc-hash",
  "smallvec",

@@ -4,7 +4,6 @@ mod v1_1_0;
 
 use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
 use rustc_hash::FxHashSet;
-use toml::de::{DeTable, DeValue::Table};
 
 use crate::{
     v1_0_0::{
@@ -48,6 +47,8 @@ fn load_toml_from_string(
             Ok(toml.unbind())
         }
         "1.1.0" => {
+            use toml::de::{DeTable, DeValue::Table};
+
             let parsed = DeTable::parse(toml_string).map_err(|err| {
                 TOMLDecodeError::new_err((
                     err.to_string(),
@@ -75,13 +76,11 @@ fn dumps_toml(
 ) -> PyResult<String> {
     match toml_version {
         "1.0.0" => {
-            use toml_edit_v1_0_0::visit_mut::VisitMut;
+            use toml_edit_v1_0_0::{DocumentMut, Item::Table, visit_mut::VisitMut};
 
-            let mut doc = toml_edit_v1_0_0::DocumentMut::new();
+            let mut doc = DocumentMut::new();
 
-            if let toml_edit_v1_0_0::Item::Table(table) =
-                python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())?
-            {
+            if let Table(table) = python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())? {
                 *doc.as_table_mut() = table;
             }
 
@@ -96,12 +95,11 @@ fn dumps_toml(
             Ok(doc.to_string())
         }
         "1.1.0" => {
-            use toml_edit::visit_mut::VisitMut;
+            use toml_edit::{DocumentMut, Item::Table, visit_mut::VisitMut};
 
-            let mut doc = toml_edit::DocumentMut::new();
+            let mut doc = DocumentMut::new();
 
-            if let toml_edit::Item::Table(table) = python_to_toml(py, obj, inline_tables.as_ref())?
-            {
+            if let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
                 *doc.as_table_mut() = table;
             }
 
