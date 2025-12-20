@@ -117,7 +117,7 @@ obj = tomllib.loads(example_toml.read_text())
 
 def run(run_count: int) -> None:
     loads = {
-        "toml_rs": lambda: toml_rs.loads(data),
+        "toml_rs": lambda: toml_rs.loads(data, toml_version="1.1.0"),
         "rtoml": lambda: rtoml.loads(data),
         "pytomlpp": lambda: pytomlpp.loads(data),
         "tomllib": lambda: tomllib.loads(data),
