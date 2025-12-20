@@ -47,14 +47,16 @@ fn load_toml_from_string(
             Ok(toml.unbind())
         }
         "1.1.0" => {
-            let parsed: toml::Value = py.detach(|| toml::from_str(toml_string)).map_err(|err| {
+            use toml::de::{DeTable, DeValue::Table};
+
+            let parsed = DeTable::parse(toml_string).map_err(|err| {
                 TOMLDecodeError::new_err((
                     err.to_string(),
                     toml_string.to_string(),
                     err.span().map_or(0, |s| s.start),
                 ))
             })?;
-            let toml = toml_to_python(py, parsed, parse_float)?;
+            let toml = toml_to_python(py, Table(parsed.into_inner()), parse_float)?;
             Ok(toml.unbind())
         }
         _ => Err(PyValueError::new_err(format!(
