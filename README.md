@@ -105,7 +105,7 @@ print(toml_rs.loads(t))
 
 2. Strict compliance with TOML v1.0.0
 
-From [TOML spec](https://toml.io/en/v1.0.0#integer):
+From [TOML v1.0.0 spec](https://toml.io/en/v1.0.0#integer):
 
 > Arbitrary 64-bit signed integers (from `−2^63` to `2^63−1`) should be accepted and handled losslessly. If an integer cannot be represented losslessly, an error must be thrown.
 
@@ -129,7 +129,7 @@ print(toml_rs.loads(t))
 # invalid type: integer `999999999999999999999999` as i128, expected any valid TOML value
 ```
 
-Note: TOML v1.1.0 allows parsers to support integers and floats beyond `i64`/`f64` limits,
+Note: TOML v1.1.0 [allows parsers to support integers and floats beyond `i64`/`f64` limits](https://github.com/toml-lang/toml/pull/1058),
  so the behavior will be the same as [`tomllib`](https://docs.python.org/3/library/tomllib.html)
 
 3. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
