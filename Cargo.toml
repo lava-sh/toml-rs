@@ -16,6 +16,7 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
+zmij = "0.1.7"
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
@@ -28,7 +29,6 @@ default-features = false
 features = [
     "radix",
     "parse-floats",
-    "write-floats",
     "parse-integers",
 ]
 

@@ -397,6 +397,7 @@ dependencies = [
  "toml_edit",
  "toml_edit_v1_0_0",
  "toml_v1_0_0",
+ "zmij",
 ]
 
 [[package]]
@@ -508,3 +509,9 @@ checksum = "21a0236b59786fed61e2a80582dd500fe61f18b5dca67a4a067d0bc9039339cf"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "zmij"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e404bcd8afdaf006e529269d3e85a743f9480c3cef60034d77860d02964f3ba"
