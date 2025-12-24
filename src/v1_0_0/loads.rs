@@ -1,5 +1,3 @@
-use std::str::from_utf8_unchecked;
-
 use pyo3::{
     IntoPyObjectExt,
     exceptions::PyValueError,
@@ -33,14 +31,10 @@ fn to_python<'py>(
                 return float.into_bound_py_any(py);
             };
 
-            let mut buffer = [0u8; lexical_core::BUFFER_SIZE];
-            let write_bytes = lexical_core::write(float, &mut buffer);
-            let py_call = f.call1((
-                // SAFETY: `lexical_core::write()` guarantees that it only writes valid
-                // ASCII characters: 0-9, '.', '-' and 'e' for exponential notation.
-                // All these characters are valid UTF-8.
-                unsafe { from_utf8_unchecked(write_bytes) },
-            ))?;
+            let mut buffer = zmij::Buffer::new();
+            let formatted = buffer.format(float);
+
+            let py_call = f.call1((formatted,))?;
 
             if py_call.is_exact_instance_of::<PyDict>() || py_call.is_exact_instance_of::<PyList>()
             {
