@@ -1,5 +1,3 @@
-use std::str::from_utf8_unchecked;
-
 use lexical_core::ParseIntegerOptions;
 use pyo3::{
     IntoPyObjectExt,
@@ -51,26 +49,21 @@ fn to_python<'py>(
         DeValue::Float(float) => {
             let bytes = float.as_str().as_bytes();
 
-            let Some(f) = parse_float else {
-                if let Ok(f64) = lexical_core::parse::<f64>(bytes) {
-                    return f64.into_bound_py_any(py);
-                }
-                return float.as_str().into_bound_py_any(py);
+            let Ok(parse_f64) = lexical_core::parse::<f64>(bytes) else {
+                let Some(_) = parse_float else {
+                    return float.as_str().into_bound_py_any(py);
+                };
+                return Err(PyValueError::new_err(format!("invalid float '{float}'")));
             };
 
-            let mut buffer = [0u8; lexical_core::BUFFER_SIZE];
-            let write_bytes = lexical_core::write(
-                lexical_core::parse::<f64>(bytes)
-                    .map_err(|_| PyValueError::new_err(format!("invalid integer '{float}'")))?,
-                &mut buffer,
-            );
+            let Some(f) = parse_float else {
+                return parse_f64.into_bound_py_any(py);
+            };
 
-            let py_call = f.call1((
-                // SAFETY: `lexical_core::write()` guarantees that it only writes valid
-                // ASCII characters: 0-9, '.', '-' and 'e' for exponential notation.
-                // All these characters are valid UTF-8.
-                unsafe { from_utf8_unchecked(write_bytes) },
-            ))?;
+            let mut buffer = zmij::Buffer::new();
+            let formatted = buffer.format(parse_f64);
+
+            let py_call = f.call1((formatted,))?;
 
             if py_call.is_exact_instance_of::<PyDict>() || py_call.is_exact_instance_of::<PyList>()
             {
