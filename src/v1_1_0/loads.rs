@@ -49,22 +49,19 @@ fn to_python<'py>(
         DeValue::Float(float) => {
             let bytes = float.as_str().as_bytes();
 
-            let parsed_float = match lexical_core::parse::<f64>(bytes) {
-                Ok(f64) => f64,
-                Err(_) => {
-                    let Some(_) = parse_float else {
-                        return float.as_str().into_bound_py_any(py);
-                    };
-                    return Err(PyValueError::new_err(format!("invalid float '{float}'")));
-                }
+            let Ok(parse_f64) = lexical_core::parse::<f64>(bytes) else {
+                let Some(_) = parse_float else {
+                    return float.as_str().into_bound_py_any(py);
+                };
+                return Err(PyValueError::new_err(format!("invalid float '{float}'")));
             };
 
             let Some(f) = parse_float else {
-                return parsed_float.into_bound_py_any(py);
+                return parse_f64.into_bound_py_any(py);
             };
 
             let mut buffer = zmij::Buffer::new();
-            let formatted = buffer.format(parsed_float);
+            let formatted = buffer.format(parse_f64);
 
             let py_call = f.call1((formatted,))?;
 
