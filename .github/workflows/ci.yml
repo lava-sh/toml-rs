@@ -99,7 +99,7 @@ jobs:
 
   tests:
     name: "tests (python ${{ matrix.python-version }})"
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     strategy:
       matrix:
@@ -112,6 +112,10 @@ jobs:
           - "3.14"
           - "3.14t"
           - "pypy3.11"
+        os: [
+          ubuntu-latest,
+          windows-latest,
+        ]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
