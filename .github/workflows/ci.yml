@@ -98,7 +98,7 @@ jobs:
           typos --config .typos.toml
 
   tests:
-    name: "tests (python ${{ matrix.python-version }})"
+    name: "tests (${{ matrix.os }} / python ${{ matrix.python-version }})"
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     strategy:
