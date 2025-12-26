@@ -8,16 +8,17 @@ pub(crate) fn normalize_line_ending(s: &'_ str) -> Cow<'_, str> {
         return Cow::Borrowed(s);
     }
 
+    let finder = memchr::memmem::Finder::new(b"\r\n");
+
     let mut buf = s.to_string().into_bytes();
     let mut gap_len = 0;
     let mut tail = buf.as_mut_slice();
-
-    let finder = memchr::memmem::Finder::new(b"\r\n");
 
     loop {
         let idx = finder
             .find(&tail[gap_len..])
             .map_or(tail.len(), |idx| idx + gap_len);
+
         tail.copy_within(gap_len..idx, 0);
 
         tail = &mut tail[idx - gap_len..];
