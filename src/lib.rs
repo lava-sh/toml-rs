@@ -1,3 +1,4 @@
+mod normalize;
 mod recursion_guard;
 mod v1_0_0;
 mod v1_1_0;
@@ -6,6 +7,7 @@ use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
 use rustc_hash::FxHashSet;
 
 use crate::{
+    normalize::normalize_line_ending,
     v1_0_0::{
         dumps::{python_to_toml_v1_0_0, validate_inline_paths_v1_0_0},
         loads::toml_to_python_v1_0_0,
@@ -32,14 +34,16 @@ fn load_toml_from_string(
     parse_float: Option<&Bound<'_, PyAny>>,
     toml_version: &str,
 ) -> PyResult<Py<PyAny>> {
+    let normalized = normalize_line_ending(toml_string);
+
     match toml_version {
         "1.0.0" => {
             let parsed: toml_v1_0_0::Value = py
-                .detach(|| toml_v1_0_0::from_str(toml_string))
+                .detach(|| toml_v1_0_0::from_str(&normalized))
                 .map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
-                        toml_string.to_string(),
+                        normalized.to_string(),
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
@@ -49,10 +53,10 @@ fn load_toml_from_string(
         "1.1.0" => {
             use toml::de::{DeTable, DeValue::Table};
 
-            let parsed = DeTable::parse(toml_string).map_err(|err| {
+            let parsed = DeTable::parse(&normalized).map_err(|err| {
                 TOMLDecodeError::new_err((
                     err.to_string(),
-                    toml_string.to_string(),
+                    normalized.to_string(),
                     err.span().map_or(0, |s| s.start),
                 ))
             })?;

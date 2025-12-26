@@ -98,8 +98,8 @@ jobs:
           typos --config .typos.toml
 
   tests:
-    name: "tests (python ${{ matrix.python-version }})"
-    runs-on: ubuntu-latest
+    name: "tests (${{ matrix.os }} / python ${{ matrix.python-version }})"
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     strategy:
       matrix:
@@ -112,6 +112,10 @@ jobs:
           - "3.14"
           - "3.14t"
           - "pypy3.11"
+        os: [
+          ubuntu-latest,
+          windows-latest,
+        ]
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -127,13 +131,20 @@ jobs:
         shell: bash
         run: |
           uv venv .venv --python ${{ matrix.python-version }}
-          echo ".venv/bin" >> "$GITHUB_PATH"
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            echo ".venv/Scripts" >> "$GITHUB_PATH"
+            echo "PYO3_PYTHON=.venv/Scripts/python" >> "$GITHUB_ENV"
+          else
+            echo ".venv/bin" >> "$GITHUB_PATH"
+            echo "PYO3_PYTHON=.venv/bin/python3" >> "$GITHUB_ENV"
+          fi
       - name: "Install dependencies"
         run: |
           uv pip install --group ci
       - name: "Run maturin (--release)"
         run: |
-          maturin develop --release
+          rustc --version --verbose
+          maturin develop --release --features mimalloc
       - name: "Run Ruff"
         run: |
           ruff check

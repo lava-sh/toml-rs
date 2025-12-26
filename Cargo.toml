@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -16,10 +16,11 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-zmij = "0.1.8"
+zmij = "0.1.9"
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
+memchr = { version = "2.7.6", default-features = false }
 mimalloc = { version = "0.1.48", features = ["v3", "override"], optional = true }
 
 [dependencies.lexical-core]
