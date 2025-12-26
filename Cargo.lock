@@ -385,9 +385,10 @@ dependencies = [
 
 [[package]]
 name = "toml-rs"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "lexical-core",
+ "memchr",
  "mimalloc",
  "num-bigint",
  "pyo3",
@@ -512,6 +513,6 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1dccf46b25b205e4bebe1d5258a991df1cc17801017a845cb5b3fe0269781aa"
+checksum = "d0095ecd462946aa3927d9297b63ef82fb9a5316d7a37d134eeb36e58228615a"
