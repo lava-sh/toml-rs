@@ -135,7 +135,7 @@ jobs:
           echo "PYO3_PYTHON=.venv/bin/python3" >> "$GITHUB_ENV"
       - name: "Install dependencies"
         run: |
-          uv pip install --group ci --system
+          uv pip install --group ci
       - name: "Run maturin (--release)"
         run: |
           rustc --version --verbose
