@@ -144,8 +144,7 @@ jobs:
       - name: "Run maturin (--release)"
         run: |
           rustc --version --verbose
-          maturin build --release --features mimalloc
-          uv pip install target/wheels/*.whl
+          maturin develop --release --features mimalloc
       - name: "Run Ruff"
         run: |
           ruff check
