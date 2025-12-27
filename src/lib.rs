@@ -34,10 +34,10 @@ fn load_toml_from_string(
     parse_float: Option<&Bound<'_, PyAny>>,
     toml_version: &str,
 ) -> PyResult<Py<PyAny>> {
-    let normalized = normalize_line_ending(toml_string);
-
     match toml_version {
         "1.0.0" => {
+            let normalized = normalize_line_ending(toml_string);
+
             let parsed: toml_v1_0_0::Value = py
                 .detach(|| toml_v1_0_0::from_str(&normalized))
                 .map_err(|err| {
@@ -52,6 +52,8 @@ fn load_toml_from_string(
         }
         "1.1.0" => {
             use toml::de::{DeTable, DeValue::Table};
+
+            let normalized = normalize_line_ending(toml_string);
 
             let parsed = DeTable::parse(&normalized).map_err(|err| {
                 TOMLDecodeError::new_err((
