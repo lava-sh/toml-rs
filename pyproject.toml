@@ -37,7 +37,7 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.40.0"]
+typos = ["typos == 1.40.1"]
 zizmor = ["zizmor == 1.19.0"]
 ci = [
     "ruff == 0.14.10",

@@ -10,7 +10,7 @@ __all__ = (
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any, BinaryIO, Literal, TextIO
+from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
 from ._toml_rs import (
     _dumps,
@@ -20,13 +20,17 @@ from ._toml_rs import (
 
 __version__: str = _version
 
+TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
+
+DEFAULT_TOML_VERSION = "1.0.0"
+
 
 def load(
     fp: BinaryIO,
     /,
     *,
     parse_float: Callable[[str], Any] = float,
-    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
     _bytes = fp.read()
     try:
@@ -42,7 +46,7 @@ def loads(
     /,
     *,
     parse_float: Callable[[str], Any] = float,
-    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
     if not isinstance(s, str):
         raise TypeError(f"Expected str object, not '{type(s).__qualname__}'")
@@ -56,7 +60,7 @@ def dump(
     inline_tables: set[str] | None = None,
     *,
     pretty: bool = False,
-    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> int:
     _str = _dumps(
         obj,
@@ -78,7 +82,7 @@ def dumps(
     inline_tables: set[str] | None = None,
     *,
     pretty: bool = False,
-    toml_version: Literal["1.0.0", "1.1.0"] = "1.0.0",
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> str:
     return _dumps(
         obj,
