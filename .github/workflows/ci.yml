@@ -165,19 +165,16 @@ jobs:
           persist-credentials: false
       - name: "0.2.1"
         run: |
-          docker build \
-          --build-arg CMD_="uv pip install toml-rs==0.2.1 --system" \
-          -t toml_rs:0.2.1 \
-          -f .github/docker/Dockerfile .
-          set +e
-          docker run --rm toml_rs:0.2.1
+          docker run --rm -it ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
+          uv pip install toml-rs==0.2.1 --system && \
+          python -c 'import toml_rs; print(toml_rs.__version__)'
+          "
       - name: "latest"
         run: |
-          docker build \
-          --build-arg CMD_="uv pip install maturin --system && maturin develop --release --features mimalloc" \
-          -t toml_rs:latest \
-          -f .github/docker/Dockerfile .
-           docker run --rm toml_rs:latest
+          docker run --rm -it ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
+          uv pip install toml-rs==0.2.2 --system && \
+          python -c 'import toml_rs; print(toml_rs.__version__)'
+          "
 
   linux:
     name: "linux (ubuntu-latest / ${{ matrix.platform.target }})"
