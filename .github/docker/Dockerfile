@@ -8,7 +8,7 @@ ENV UV_LINK_MODE=copy \
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN ${CMD_}
+RUN /bin/sh -c "${CMD_}"
 
 RUN cat <<'EOF' > /app/example.py
 import toml_rs
