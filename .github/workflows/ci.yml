@@ -179,7 +179,7 @@ jobs:
             -w /app \
             ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
             apk add --no-cache rust cargo build-base && \
-            uv pip install maturin --system && \
+            uv pip install maturin[patchelf] --system && \
             maturin build --release --out /app/dist --features mimalloc && \
             uv pip install /app/dist/*.whl && \
             python -c 'import toml_rs; print(toml_rs.__version__)'
