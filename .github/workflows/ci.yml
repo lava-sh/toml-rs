@@ -171,9 +171,16 @@ jobs:
           " 2>&1 | tee /dev/stderr | grep -q "initial-exec TLS resolves to dynamic definition"
       - name: "latest"
         run: |
-          docker run --rm ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
-          uv pip install toml-rs==0.2.2 --system && \
-          python -c 'import toml_rs; print(toml_rs.__version__)'
+          mkdir -p /tmp/__build
+          cp -r python src Cargo.toml Cargo.lock pyproject.toml /tmp/__build/
+      
+          docker run --rm \
+            -v /tmp/__build:/app \
+            -w /app \
+            ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
+            uv pip install maturin --system && \
+            maturin develop --release --features mimalloc && \
+            python -c 'import toml_rs; print(toml_rs.__version__)'
           "
 
   linux:
