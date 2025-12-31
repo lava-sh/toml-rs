@@ -168,13 +168,13 @@ jobs:
           docker build \
           --build-arg CMD_="uv pip install toml-rs==0.2.1 --system" \
           -t toml_rs:0.2.1 \
-          -f Dockerfile.alpine .
+          -f Dockerfile .
       - name: "Build image (latest)"
         run: |
           docker build \
           --build-arg CMD_="uv pip install maturin --system && maturin develop --release --features mimalloc" \
           -t toml_rs:latest \
-          -f Dockerfile.alpine .
+          -f Dockerfile .
       - name: "Run container (0.2.1)"
         run: |
           set +e
