@@ -181,7 +181,7 @@ jobs:
             apk add --no-cache rust cargo build-base && \
             uv pip install maturin[patchelf] --system && \
             maturin build --release --out /app/dist --features mimalloc && \
-            uv pip install /app/dist/*.whl && \
+            uv pip install /app/dist/*.whl --system && \
             python -c 'import toml_rs; print(toml_rs.__version__)'
           "
 
