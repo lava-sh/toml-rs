@@ -166,13 +166,13 @@ jobs:
       - name: "Build image (0.2.1)"
         run: |
           docker build \
-          --build-arg CMD="uv pip install toml-rs==0.2.1 --system" \
+          --build-arg CMD_="uv pip install toml-rs==0.2.1 --system" \
           -t toml_rs:0.2.1 \
           -f Dockerfile.alpine .
       - name: "Build image (latest)"
         run: |
           docker build \
-          --build-arg CMD="uv pip install maturin --system && maturin develop --release --features mimalloc" \
+          --build-arg CMD_="uv pip install maturin --system && maturin develop --release --features mimalloc" \
           -t toml_rs:latest \
           -f Dockerfile.alpine .
       - name: "Run container (0.2.1)"
@@ -189,8 +189,6 @@ jobs:
       - name: "Run container (latest)"
         run: |
           docker run --rm toml_rs:latest
-
-
 
   linux:
     name: "linux (ubuntu-latest / ${{ matrix.platform.target }})"
