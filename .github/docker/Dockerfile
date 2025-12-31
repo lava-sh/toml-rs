@@ -37,7 +37,6 @@ expected = {
 
 assert loads == expected
 print(toml_rs.__version__)
-
 EOF
 
 RUN addgroup -S user && adduser -S -G user user
