@@ -180,7 +180,8 @@ jobs:
             ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
             apk add --no-cache rust cargo build-base && \
             uv pip install maturin --system && \
-            maturin develop --release --features mimalloc && \
+            maturin build --release --out /app/dist --features mimalloc && \
+            uv pip install /app/dist/*.whl && \
             python -c 'import toml_rs; print(toml_rs.__version__)'
           "
 
