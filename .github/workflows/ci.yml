@@ -168,10 +168,10 @@ jobs:
           docker run --rm ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
           uv pip install toml-rs==0.2.1 --system && \
           python -c 'import toml_rs; print(toml_rs.__version__)'
-          " 2>&1 | grep -q "initial-exec TLS resolves to dynamic definition"
+          " 2>&1 | tee /dev/stderr | grep -q "initial-exec TLS resolves to dynamic definition"
       - name: "latest"
         run: |
-          docker run --rm -it ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
+          docker run --rm ghcr.io/astral-sh/uv:python3.13-alpine sh -c "
           uv pip install toml-rs==0.2.2 --system && \
           python -c 'import toml_rs; print(toml_rs.__version__)'
           "
