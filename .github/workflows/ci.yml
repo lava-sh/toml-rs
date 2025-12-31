@@ -155,9 +155,46 @@ jobs:
         run: |
           pytest tests/
 
+  tests-alpine:
+    name: "tests (alpine / python 3.13)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+      - name: "Build image (0.2.1)"
+        run: |
+          docker build \
+          --build-arg CMD="uv pip install toml-rs==0.2.1 --system" \
+          -t toml_rs:0.2.1 \
+          -f Dockerfile.alpine .
+      - name: "Build image (latest)"
+        run: |
+          docker build \
+          --build-arg CMD="uv pip install maturin --system && maturin develop --release --features mimalloc" \
+          -t toml_rs:latest \
+          -f Dockerfile.alpine .
+      - name: "Run container (0.2.1)"
+        run: |
+          set +e
+          docker run --rm toml_rs:0.2.1
+          status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "❌ ERROR: toml-rs 0.2.1 unexpectedly succeeded"
+            exit 1
+          else
+            echo "✅ toml-rs 0.2.1 failed as expected"
+          fi
+      - name: "Run container (latest)"
+        run: |
+          docker run --rm toml_rs:latest
+
+
+
   linux:
     name: "linux (ubuntu-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -216,7 +253,7 @@ jobs:
 
   musllinux:
     name: "musllinux (ubuntu-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -263,7 +300,7 @@ jobs:
 
   windows:
     name: "windows (windows-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
     runs-on: windows-latest
     strategy:
       matrix:
@@ -301,7 +338,7 @@ jobs:
 
   macos:
     name: "macos (macos-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
     runs-on: macos-latest
     strategy:
       matrix:
@@ -366,6 +403,7 @@ jobs:
       macos,
       build-sdist,
       tests,
+      tests-alpine,
       cargo-clippy,
       cargo-fmt,
       zizmor,
