@@ -16,12 +16,22 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-zmij = "1.0.4"
+zmij = "1.0.5"
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 memchr = { version = "2.7.6", default-features = false }
-mimalloc = { version = "0.1.48", features = ["v3", "override", "local_dynamic_tls"], optional = true }
+
+[dependencies.mimalloc]
+optional = true
+version = "0.1.48"
+features = [
+    # mimalloc v3
+    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
+    "v3",
+    "override",
+    "local_dynamic_tls",
+]
 
 [dependencies.lexical-core]
 git = "https://github.com/Alexhuszagh/rust-lexical"
