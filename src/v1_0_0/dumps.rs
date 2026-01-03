@@ -11,7 +11,8 @@ use smallvec::SmallVec;
 use toml_edit_v1_0_0::{Array, InlineTable, Item, Offset, Table, Value};
 
 use crate::{
-    TOMLEncodeError, get_type, recursion_guard::RecursionGuard, to_toml_v1_0_0, toml_dt_v1_0_0,
+    get_type, recursion_guard::RecursionGuard, to_toml_v1_0_0, toml_dt_v1_0_0,
+    toml_rs::TOMLEncodeError,
 };
 
 pub(crate) fn validate_inline_paths_v1_0_0(

@@ -10,7 +10,9 @@ use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
 use toml_edit::{Array, InlineTable, Item, Offset, Table, Value};
 
-use crate::{TOMLEncodeError, get_type, recursion_guard::RecursionGuard, to_toml, toml_dt};
+use crate::{
+    get_type, recursion_guard::RecursionGuard, to_toml, toml_dt, toml_rs::TOMLEncodeError,
+};
 
 pub(crate) fn validate_inline_paths(
     doc: &Item,
