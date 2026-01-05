@@ -1,7 +1,7 @@
 mod normalize;
 mod recursion_guard;
-mod v1_0_0;
-mod v1_1_0;
+mod v1;
+mod v1_1;
 
 #[cfg(feature = "mimalloc")]
 #[global_allocator]
@@ -14,12 +14,12 @@ mod toml_rs {
 
     use crate::{
         normalize::normalize_line_ending,
-        v1_0_0::{
-            dumps::{python_to_toml_v1_0_0, validate_inline_paths_v1_0_0},
-            loads::toml_to_python_v1_0_0,
+        v1::{
+            dumps::{python_to_toml_v1, validate_inline_paths_v1},
+            loads::toml_to_python_v1,
             pretty::PrettyV100,
         },
-        v1_1_0::{
+        v1_1::{
             dumps::{python_to_toml, validate_inline_paths},
             loads::toml_to_python,
             pretty::Pretty,
@@ -27,8 +27,7 @@ mod toml_rs {
     };
 
     #[pymodule_export]
-    #[allow(non_upper_case_globals)]
-    const _version: &str = env!("CARGO_PKG_VERSION");
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
 
     import_exception!(toml_rs, TOMLDecodeError);
     import_exception!(toml_rs, TOMLEncodeError);
@@ -44,8 +43,8 @@ mod toml_rs {
             "1.0.0" => {
                 let normalized = normalize_line_ending(toml_string);
 
-                let parsed: toml_v1_0_0::Value = py
-                    .detach(|| toml_v1_0_0::from_str(&normalized))
+                let parsed: toml_v1::Value = py
+                    .detach(|| toml_v1::from_str(&normalized))
                     .map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
@@ -53,7 +52,7 @@ mod toml_rs {
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
-                let toml = toml_to_python_v1_0_0(py, parsed, parse_float)?;
+                let toml = toml_to_python_v1(py, parsed, parse_float)?;
                 Ok(toml.unbind())
             }
             "1.1.0" => {
@@ -88,16 +87,16 @@ mod toml_rs {
     ) -> PyResult<String> {
         match toml_version {
             "1.0.0" => {
-                use toml_edit_v1_0_0::{DocumentMut, Item::Table, visit_mut::VisitMut};
+                use toml_edit_v1::{DocumentMut, Item::Table, visit_mut::VisitMut};
 
                 let mut doc = DocumentMut::new();
 
-                if let Table(table) = python_to_toml_v1_0_0(py, obj, inline_tables.as_ref())? {
+                if let Table(table) = python_to_toml_v1(py, obj, inline_tables.as_ref())? {
                     *doc.as_table_mut() = table;
                 }
 
                 if let Some(ref paths) = inline_tables {
-                    validate_inline_paths_v1_0_0(doc.as_item(), paths)?;
+                    validate_inline_paths_v1(doc.as_item(), paths)?;
                 }
 
                 if pretty {

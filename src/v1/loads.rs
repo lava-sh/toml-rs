@@ -4,11 +4,11 @@ use pyo3::{
     prelude::*,
     types::{PyDate, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
-use toml_v1_0_0::{Value, value::Offset};
+use toml_v1::{Value, value::Offset};
 
 use crate::{create_py_datetime, recursion_guard::RecursionGuard};
 
-pub(crate) fn toml_to_python_v1_0_0<'py>(
+pub(crate) fn toml_to_python_v1<'py>(
     py: Python<'py>,
     value: Value,
     parse_float: Option<&Bound<'py, PyAny>>,
