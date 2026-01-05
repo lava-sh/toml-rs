@@ -15,10 +15,10 @@ from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 from ._toml_rs import (
     _dumps,
     _loads,
-    _version,
+    _VERSION,
 )
 
-__version__: str = _version
+__version__: str = _VERSION
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 

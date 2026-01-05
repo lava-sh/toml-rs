@@ -1,5 +1,5 @@
 // https://github.com/toml-rs/toml/blob/v0.23.7/crates/toml_edit/src/ser/pretty.rs
-use toml_edit_v1_0_0::{Array, DocumentMut, Item, Table, Value, visit_mut};
+use toml_edit_v1::{Array, DocumentMut, Item, Table, Value, visit_mut};
 
 pub(crate) struct PrettyV100 {
     in_value: bool,

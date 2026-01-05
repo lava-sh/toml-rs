@@ -8,14 +8,13 @@ use pyo3::{
 };
 use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
-use toml_edit_v1_0_0::{Array, InlineTable, Item, Offset, Table, Value};
+use toml_edit_v1::{Array, InlineTable, Item, Offset, Table, Value};
 
 use crate::{
-    get_type, recursion_guard::RecursionGuard, to_toml_v1_0_0, toml_dt_v1_0_0,
-    toml_rs::TOMLEncodeError,
+    get_type, recursion_guard::RecursionGuard, to_toml_v1, toml_dt_v1, toml_rs::TOMLEncodeError,
 };
 
-pub(crate) fn validate_inline_paths_v1_0_0(
+pub(crate) fn validate_inline_paths_v1(
     doc: &Item,
     inline_tables: &FxHashSet<String>,
 ) -> Result<(), PyErr> {
@@ -41,7 +40,7 @@ pub(crate) fn validate_inline_paths_v1_0_0(
     Ok(())
 }
 
-pub(crate) fn python_to_toml_v1_0_0<'py>(
+pub(crate) fn python_to_toml_v1<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
     inline_tables: Option<&FxHashSet<String>>,
@@ -63,21 +62,21 @@ fn to_toml<'py>(
     toml_path: &mut SmallVec<String, 16>,
 ) -> PyResult<Item> {
     if let Ok(s) = obj.cast::<PyString>() {
-        return to_toml_v1_0_0!(String, s.to_str()?.to_owned());
+        return to_toml_v1!(String, s.to_str()?.to_owned());
     }
     if let Ok(b) = obj.cast::<PyBool>() {
-        return to_toml_v1_0_0!(Boolean, b.is_true());
+        return to_toml_v1!(Boolean, b.is_true());
     }
     if let Ok(int) = obj.cast::<PyInt>() {
-        return to_toml_v1_0_0!(Integer, int.extract()?);
+        return to_toml_v1!(Integer, int.extract()?);
     }
     if let Ok(float) = obj.cast::<PyFloat>() {
-        return to_toml_v1_0_0!(Float, float.value());
+        return to_toml_v1!(Float, float.value());
     }
 
     if let Ok(py_datetime) = obj.cast::<PyDateTime>() {
-        let date = toml_dt_v1_0_0!(Date, py_datetime);
-        let time = toml_dt_v1_0_0!(Time, py_datetime);
+        let date = toml_dt_v1!(Date, py_datetime);
+        let time = toml_dt_v1!(Time, py_datetime);
 
         let offset = py_datetime.get_tzinfo().and_then(|tzinfo| {
             let utc_offset = tzinfo
@@ -93,16 +92,16 @@ fn to_toml<'py>(
             })
         });
 
-        let datetime = toml_dt_v1_0_0!(Datetime, Some(date), Some(time), offset);
-        return to_toml_v1_0_0!(Datetime, datetime);
+        let datetime = toml_dt_v1!(Datetime, Some(date), Some(time), offset);
+        return to_toml_v1!(Datetime, datetime);
     } else if let Ok(py_date) = obj.cast::<PyDate>() {
-        let date = toml_dt_v1_0_0!(Date, py_date);
-        let datetime = toml_dt_v1_0_0!(Datetime, Some(date), None, None);
-        return to_toml_v1_0_0!(Datetime, datetime);
+        let date = toml_dt_v1!(Date, py_date);
+        let datetime = toml_dt_v1!(Datetime, Some(date), None, None);
+        return to_toml_v1!(Datetime, datetime);
     } else if let Ok(py_time) = obj.cast::<PyTime>() {
-        let time = toml_dt_v1_0_0!(Time, py_time);
-        let datetime = toml_dt_v1_0_0!(Datetime, None, Some(time), None);
-        return to_toml_v1_0_0!(Datetime, datetime);
+        let time = toml_dt_v1!(Time, py_time);
+        let datetime = toml_dt_v1!(Datetime, None, Some(time), None);
+        return to_toml_v1!(Datetime, datetime);
     }
 
     if let Ok(dict) = obj.cast::<PyDict>() {
@@ -110,7 +109,7 @@ fn to_toml<'py>(
 
         if dict.is_empty() {
             recursion.exit();
-            return to_toml_v1_0_0!(TomlTable, Table::new());
+            return to_toml_v1!(TomlTable, Table::new());
         }
 
         let inline = inline_tables.is_some_and(|set| set.contains(&toml_path.join(".")));
@@ -142,7 +141,7 @@ fn to_toml<'py>(
                 }
             }
             recursion.exit();
-            to_toml_v1_0_0!(TomlInlineTable, inline_table)
+            to_toml_v1!(TomlInlineTable, inline_table)
         } else {
             let mut table = Table::new();
             for (k, v) in dict.iter() {
@@ -163,7 +162,7 @@ fn to_toml<'py>(
                 table.insert(key, item);
             }
             recursion.exit();
-            to_toml_v1_0_0!(TomlTable, table)
+            to_toml_v1!(TomlTable, table)
         };
     }
 
@@ -172,7 +171,7 @@ fn to_toml<'py>(
 
         if list.is_empty() {
             recursion.exit();
-            return to_toml_v1_0_0!(TomlArray, Array::new());
+            return to_toml_v1!(TomlArray, Array::new());
         }
 
         let mut array = Array::new();
@@ -195,7 +194,7 @@ fn to_toml<'py>(
             }
         }
         recursion.exit();
-        return to_toml_v1_0_0!(TomlArray, array);
+        return to_toml_v1!(TomlArray, array);
     }
 
     Err(TOMLEncodeError::new_err(format!(
