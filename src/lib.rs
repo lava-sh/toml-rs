@@ -27,7 +27,7 @@ mod toml_rs {
     };
 
     #[pymodule_export]
-    const VERSION: &str = env!("CARGO_PKG_VERSION");
+    const _VERSION: &str = env!("CARGO_PKG_VERSION");
 
     import_exception!(toml_rs, TOMLDecodeError);
     import_exception!(toml_rs, TOMLEncodeError);
