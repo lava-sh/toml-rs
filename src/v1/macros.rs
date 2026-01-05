@@ -32,18 +32,18 @@ macro_rules! to_toml_v1 {
         Ok(toml_edit_v1::Item::Table($value))
     };
     (TomlArray, $value:expr) => {
-        Ok(toml_edit_v1::Item::Value(
-            toml_edit_v1::Value::Array($value),
-        ))
+        Ok(toml_edit_v1::Item::Value(toml_edit_v1::Value::Array(
+            $value,
+        )))
     };
     (TomlInlineTable, $value:expr) => {
-        Ok(toml_edit_v1::Item::Value(
-            toml_edit_v1::Value::InlineTable($value),
-        ))
+        Ok(toml_edit_v1::Item::Value(toml_edit_v1::Value::InlineTable(
+            $value,
+        )))
     };
     ($var:ident, $value:expr) => {
-        Ok(toml_edit_v1::Item::Value(
-            toml_edit_v1::Value::$var(toml_edit_v1::Formatted::new($value)),
-        ))
+        Ok(toml_edit_v1::Item::Value(toml_edit_v1::Value::$var(
+            toml_edit_v1::Formatted::new($value),
+        )))
     };
 }
