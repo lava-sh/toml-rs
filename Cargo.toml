@@ -74,7 +74,7 @@ features = [
 ]
 
 [dependencies.toml]
-version = "0.9.10"
+version = "0.9.11"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)
