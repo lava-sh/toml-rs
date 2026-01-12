@@ -4,6 +4,7 @@ line-length = 90
 
 include = [
     "python/**.py",
+    "python/**.pyi",
     "tests/**.py",
 ]
 

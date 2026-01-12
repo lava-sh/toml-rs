@@ -546,14 +546,14 @@ ci = [
     { name = "pytest", specifier = "==9.0.2" },
     { name = "ruff", specifier = "==0.14.11" },
     { name = "rumdl", specifier = "==0.0.211" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = "==2.3.0" },
 ]
 dev = [
     { name = "maturin", specifier = "==1.11.4" },
     { name = "pytest", specifier = "==9.0.2" },
     { name = "ruff", specifier = "==0.14.11" },
     { name = "rumdl", specifier = "==0.0.211" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = "==2.3.0" },
     { name = "typos", specifier = "==1.42.0" },
     { name = "zizmor", specifier = "==1.20.0" },
 ]

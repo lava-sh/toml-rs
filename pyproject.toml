@@ -44,7 +44,9 @@ ci = [
     "maturin == 1.11.4",
     "pytest == 9.0.2",
     "rumdl == 0.0.211",
-    "tomli ; python_version<'3.11'",
+    # last `tomli` version which support TOML 1.0
+    # need to check compatibility
+    "tomli == 2.3.0 ; python_version<'3.11'",
 ]
 dev = [
     {include-group = "ci"},
