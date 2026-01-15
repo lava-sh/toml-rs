@@ -40,7 +40,7 @@ classifiers = [
 typos = ["typos == 1.42.0"]
 zizmor = ["zizmor == 1.20.0"]
 ci = [
-    "ruff == 0.14.11",
+    "ruff == 0.14.13",
     "maturin == 1.11.5",
     "pytest == 9.0.2",
     "rumdl == 0.0.211",
@@ -60,9 +60,9 @@ bench = [
     "qtoml",
     "rtoml",
     "tomli ; python_version<'3.11'",
-    "polars == 1.36.1",
+    "polars == 1.37.1",
     "altair == 6.0.0",
-    "vl-convert-python == 1.8.0",
+    "vl-convert-python == 1.9.0",
     "py-cpuinfo == 9.0.0",
 ]
 
