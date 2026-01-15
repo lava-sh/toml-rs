@@ -38,12 +38,13 @@ def benchmark(func: Callable, count: int) -> float:
 
 
 def plot_benchmark(
-        results: dict[str, float],
-        run_type: str,
-        save_path: Path,
+    results: dict[str, float],
+    run_type: str,
+    save_path: Path,
 ) -> None:
     df = (
-        pl.DataFrame({
+        pl
+        .DataFrame({
             "parser": [f"{name} ({get_lib_version(name)})" for name in results],
             "exec_time": list(results.values()),
         })
@@ -54,7 +55,8 @@ def plot_benchmark(
     )
 
     chart = (
-        alt.Chart(df)
+        alt
+        .Chart(df)
         .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
         .encode(
             x=alt.X(
@@ -66,7 +68,7 @@ def plot_benchmark(
             y=alt.Y(
                 "exec_time:Q",
                 title="Execution Time (seconds, lower=better)",
-                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.1)),
+                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.1)),  # type: ignore[operator]
             ),
             color=alt.Color(
                 "parser:N",
@@ -81,7 +83,8 @@ def plot_benchmark(
         )
     )
     text = (
-        chart.mark_text(
+        chart
+        .mark_text(
             align="center",
             baseline="bottom",
             dy=-2,

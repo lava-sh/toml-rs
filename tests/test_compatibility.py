@@ -11,7 +11,7 @@ from .test_data import VALID_PAIRS_1_0_0 as VALID_PAIRS
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib
+    import tomli as tomllib  # ty: ignore[unresolved-import, unused-ignore-comment]
 
 
 def test_toml():
@@ -41,6 +41,4 @@ def test_tomllib_vs_tomlrs(valid, expected):
     tomllib_ = normalize(convert(tomllib.loads(toml_str)))
     toml_rs_ = normalize(convert(toml_rs.loads(toml_str)))
 
-    assert tomllib_ == toml_rs_, (
-        f"Mismatch between tomllib and toml_rs for {valid.name}"
-    )
+    assert tomllib_ == toml_rs_, f"Mismatch between tomllib and toml_rs for {valid.name}"

@@ -106,7 +106,7 @@ def test_unsupported_version():
             ValueError,
             match="Unsupported TOML version",
     ):
-        tomllib.loads("x = 1", toml_version="2")
+        tomllib.loads("x = 1", toml_version="2")  # ty: ignore[invalid-argument-type]
 
 
 def test_big_int():
