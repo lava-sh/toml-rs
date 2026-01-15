@@ -11,7 +11,7 @@ from .test_data import VALID_PAIRS_1_0_0 as VALID_PAIRS
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib
+    import tomli as tomllib  # ty: ignore[unresolved-import, unused-ignore-comment]
 
 
 def test_toml():
