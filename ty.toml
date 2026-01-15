@@ -1,0 +1,9 @@
+[environment]
+python-version = "3.10" # MSPV
+
+[src]
+include = [
+    "python",
+    "tests",
+    "benchmark",
+]

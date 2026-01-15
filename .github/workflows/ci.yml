@@ -148,6 +148,9 @@ jobs:
       - name: "Run Ruff"
         run: |
           ruff check
+      - name: "Run ty"
+        run: |
+          ty check
       - name: "Run rumdl"
         run: |
           rumdl check .

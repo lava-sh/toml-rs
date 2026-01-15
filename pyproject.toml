@@ -40,6 +40,7 @@ classifiers = [
 typos = ["typos == 1.42.0"]
 zizmor = ["zizmor == 1.20.0"]
 ci = [
+    "ty == 0.0.12",
     "ruff == 0.14.13",
     "maturin == 1.11.5",
     "pytest == 9.0.2",

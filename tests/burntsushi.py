@@ -38,9 +38,9 @@ def convert(obj: Any):  # noqa: C901, PLR0911
             "value": str(obj),
         }
     if isinstance(obj, list):
-        return [convert(i) for i in obj]  # type: ignore[no-untyped-call]
+        return [convert(i) for i in obj]
     if isinstance(obj, dict):
-        return {k: convert(v) for k, v in obj.items()}  # type: ignore[no-untyped-call]
+        return {k: convert(v) for k, v in obj.items()}
     msg = "unsupported type"
     raise Exception(msg)  # noqa: TRY002
 

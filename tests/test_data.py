@@ -3,6 +3,7 @@ import math
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
+from typing import Literal
 
 import pytest
 import toml_rs as tomllib
@@ -87,7 +88,11 @@ def test_invalid_tomls(invalid: Path, toml_version: str) -> None:
     ],
     ids=[p[0].stem for p in VALID_PAIRS_1_0_0 + VALID_PAIRS_1_1_0],
 )
-def test_valid_tomls(valid: Path, expected: dict, toml_version: str) -> None:
+def test_valid_tomls(
+    valid: Path,
+    expected: dict,
+    toml_version: Literal["1.0.0", "1.1.0"],
+) -> None:
     toml_str = valid.read_bytes().decode("utf-8")
     try:
         toml_str.encode(encoding="ascii")
@@ -102,7 +107,7 @@ def test_valid_tomls(valid: Path, expected: dict, toml_version: str) -> None:
 
 
 def test_parse_big_nums() -> None:
-    big_int = 999 ** 999
+    big_int = 999**999
     big_float = float(f"{big_int}.{big_int}")
 
     t = f"x = {big_int}"
