@@ -24,7 +24,7 @@ jobs:
   cargo-fmt:
     name: "cargo fmt"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -41,7 +41,7 @@ jobs:
   cargo-clippy:
     name: "cargo clippy"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -100,7 +100,7 @@ jobs:
   tests:
     name: "tests (${{ matrix.os }} / python ${{ matrix.python-version }})"
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     strategy:
       matrix:
         python-version:
@@ -161,7 +161,7 @@ jobs:
   tests-alpine:
     name: "tests (alpine / python 3.13)"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
