@@ -3,6 +3,7 @@ name = "toml-rs"
 version = "0.2.2"
 edition = "2024"
 license = "Unlicense"
+rust-version = "1.95.0"
 repository = "https://github.com/lava-sh/toml-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
