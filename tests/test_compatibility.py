@@ -52,7 +52,11 @@ def test_tomllib_vs_tomlrs(valid: Path, expected: Path) -> None:
     assert tomllib_ == toml_rs_, f"Mismatch between tomllib and toml_rs for {valid.name}"
 
 
-@pytest.mark.skipif(platform.python_implementation() == "PyPy")
+@pytest.mark.skipif(
+    platform.python_implementation() == "PyPy",
+    reason="PyPy's `Decimal` parsing hits the int string "
+           "conversion digit limit for very large numbers.",
+)
 @pytest.mark.parametrize(
     "parse_float",
     [float, Decimal],
