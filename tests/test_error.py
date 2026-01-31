@@ -30,7 +30,7 @@ def test_line_and_col():
         "TOML parse error at line 1, column 5\n"
         "  |\n"
         "1 | x = 0x\n"
-        "  |     ^\n"
+        "  |     ^^\n"
         "invalid integer '0x'"
     )
 

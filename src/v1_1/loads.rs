@@ -56,7 +56,7 @@ fn to_python<'py>(
                     "invalid integer '{}'",
                     &doc[span.start..span.end.min(doc.len())]
                 ),
-                Some(span.start..span.start),
+                Some(span.start..span.end),
             );
             err.set_input(Some(doc));
 
