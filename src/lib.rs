@@ -41,7 +41,10 @@ mod toml_rs {
     ) -> PyResult<Py<PyAny>> {
         match toml_version {
             "1.0.0" => {
-                use toml_v1::de::{DeTable, DeValue::Table};
+                use toml_v1::{
+                    Spanned,
+                    de::{DeTable, DeValue},
+                };
 
                 let normalized = normalize_line_ending(toml_string);
 
@@ -52,11 +55,21 @@ mod toml_rs {
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
-                let toml = toml_to_python_v1(py, Table(parsed.into_inner()), parse_float)?;
+
+                let toml = toml_to_python_v1(
+                    py,
+                    Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    parse_float,
+                    &normalized,
+                )?;
+
                 Ok(toml.unbind())
             }
             "1.1.0" => {
-                use toml::de::{DeTable, DeValue::Table};
+                use toml::{
+                    Spanned,
+                    de::{DeTable, DeValue},
+                };
 
                 let normalized = normalize_line_ending(toml_string);
 
@@ -67,7 +80,14 @@ mod toml_rs {
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
-                let toml = toml_to_python(py, Table(parsed.into_inner()), parse_float)?;
+
+                let toml = toml_to_python(
+                    py,
+                    Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    parse_float,
+                    &normalized,
+                )?;
+
                 Ok(toml.unbind())
             }
             _ => Err(PyValueError::new_err(format!(

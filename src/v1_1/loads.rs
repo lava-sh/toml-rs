@@ -5,24 +5,37 @@ use pyo3::{
     prelude::*,
     types::{PyDate, PyDelta, PyDict, PyList, PyTime, PyTzInfo},
 };
-use toml::{de::DeValue, value::Offset};
+use toml::{Spanned, de::DeValue, value::Offset};
 
-use crate::{create_py_datetime, parse_int, recursion_guard::RecursionGuard};
+use crate::{
+    create_py_datetime, parse_int, recursion_guard::RecursionGuard, toml_rs::TOMLDecodeError,
+};
 
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
-    value: DeValue<'_>,
+    value: Spanned<DeValue<'_>>,
     parse_float: &Bound<'py, PyAny>,
+    source_doc: &str,
 ) -> PyResult<Bound<'py, PyAny>> {
-    to_python(py, value, parse_float, &mut RecursionGuard::default())
+    to_python(
+        py,
+        &value,
+        parse_float,
+        &mut RecursionGuard::default(),
+        source_doc,
+    )
 }
 
 fn to_python<'py>(
     py: Python<'py>,
-    value: DeValue<'_>,
+    de_value: &Spanned<DeValue<'_>>,
     parse_float: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
+    source_doc: &str,
 ) -> PyResult<Bound<'py, PyAny>> {
+    let value = de_value.get_ref();
+    let span = de_value.span();
+
     match value {
         DeValue::String(str) => str.into_bound_py_any(py),
         DeValue::Integer(int) => {
@@ -43,7 +56,11 @@ fn to_python<'py>(
                 return bigint.into_bound_py_any(py);
             }
 
-            Err(PyValueError::new_err(format!("invalid integer '{int}'")))
+            Err(TOMLDecodeError::new_err((
+                format!("invalid integer '{int}'"),
+                source_doc.to_string(),
+                span.start,
+            )))
         }
         DeValue::Float(float) => {
             let float_str = float.as_str();
@@ -93,7 +110,7 @@ fn to_python<'py>(
             recursion.enter()?;
             let py_list = PyList::empty(py);
             for item in array {
-                py_list.append(to_python(py, item.into_inner(), parse_float, recursion)?)?;
+                py_list.append(to_python(py, item, parse_float, recursion, source_doc)?)?;
             }
             recursion.exit();
             Ok(py_list.into_any())
@@ -106,8 +123,8 @@ fn to_python<'py>(
             recursion.enter()?;
             let py_dict = PyDict::new(py);
             for (k, v) in table {
-                let key = k.into_inner().into_owned();
-                let value = to_python(py, v.into_inner(), parse_float, recursion)?;
+                let key = k.get_ref().clone().into_owned();
+                let value = to_python(py, v, parse_float, recursion, source_doc)?;
                 py_dict.set_item(key, value)?;
             }
             recursion.exit();

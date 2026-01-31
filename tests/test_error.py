@@ -105,9 +105,3 @@ def test_unsupported_version():
             match="Unsupported TOML version",
     ):
         tomllib.loads("x = 1", toml_version="2")  # ty: ignore[invalid-argument-type]
-
-
-def test_big_int():
-    t = "x = 999_999_999_999_999_999_999_999"
-    with pytest.raises(tomllib.TOMLDecodeError):
-        tomllib.loads(t, toml_version="1.0.0")

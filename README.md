@@ -103,36 +103,7 @@ print(toml_rs.loads(t))
 # string values must be quoted, expected literal string
 ```
 
-2. Strict compliance with TOML v1.0.0
-
-From [TOML v1.0.0 spec](https://toml.io/en/v1.0.0#integer):
-
-> Arbitrary 64-bit signed integers (from `−2^63` to `2^63−1`) should be accepted and handled losslessly. If an integer cannot be represented losslessly, an error must be thrown.
-
-```python
-import tomllib
-
-t = "x = 999_999_999_999_999_999_999_999"
-print(tomllib.loads(t))
-# {'x': 999999999999999999999999} <== speс violation
-```
-
-```python
-import toml_rs
-
-t = "x = 999_999_999_999_999_999_999_999"
-print(toml_rs.loads(t))
-# toml_rs.TOMLDecodeError: TOML parse error at line 1, column 5
-#   |
-# 1 | x = 999_999_999_999_999_999_999_999
-#   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# invalid type: integer `999999999999999999999999` as i128, expected any valid TOML value
-```
-
-Note: TOML v1.1.0 [allows parsers to support integers and floats beyond `i64`/`f64` limits](https://github.com/toml-lang/toml/pull/1058),
- so the behavior will be the same as [`tomllib`](https://docs.python.org/3/library/tomllib.html)
-
-3. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
+2. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
 
 ```python
 from pathlib import Path
