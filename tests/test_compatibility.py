@@ -1,3 +1,4 @@
+import platform
 import sys
 import types
 from decimal import Decimal
@@ -51,6 +52,7 @@ def test_tomllib_vs_tomlrs(valid: Path, expected: Path) -> None:
     assert tomllib_ == toml_rs_, f"Mismatch between tomllib and toml_rs for {valid.name}"
 
 
+@pytest.mark.skipif(platform.python_implementation() == "PyPy")
 @pytest.mark.parametrize(
     "parse_float",
     [float, Decimal],
