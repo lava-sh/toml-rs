@@ -40,11 +40,11 @@ classifiers = [
 typos = ["typos == 1.42.1"]
 zizmor = ["zizmor == 1.22.0"]
 ci = [
-    "ty == 0.0.13",
+    "ty == 0.0.14",
     "ruff == 0.14.14",
     "maturin == 1.11.5",
     "pytest == 9.0.2",
-    "rumdl == 0.1.0",
+    "rumdl == 0.1.8",
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
     "tomli == 2.3.0 ; python_version<'3.11'",

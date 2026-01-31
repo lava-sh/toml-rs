@@ -3,6 +3,7 @@ __all__ = (
     "_init_only",
     "tests_path",
 )
+
 from pathlib import Path
 
 _init_only = {

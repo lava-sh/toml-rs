@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -16,11 +16,11 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-zmij = "1.0.17"
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 memchr = { version = "2.7.6", default-features = false }
+bytecount = { version = "0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
 optional = true
@@ -39,7 +39,6 @@ rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = [
     "radix",
-    "parse-floats",
     "parse-integers",
 ]
 
@@ -98,3 +97,4 @@ clippy.pedantic = { level = "warn", priority = -1 }
 
 clippy.let_and_return = "allow" # sometimes good to name what you are returning
 clippy.too_many_lines = "allow"
+clippy.similar_names = "allow"

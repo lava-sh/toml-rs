@@ -2,8 +2,6 @@
 # SPDX-FileCopyrightText: 2021 Taneli Hukkinen
 # Licensed to PSF under a Contributor Agreement.
 
-from __future__ import annotations
-
 from typing import Any
 
 import pytest
@@ -17,6 +15,24 @@ def test_line_and_col():
     msg = str(exc.value)
     assert "line 1, column 5" in msg
     assert "invalid mantissa" in msg
+
+    # invalid int
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("x = 0x")
+
+    exc = exc.value
+
+    assert exc.colno == 5
+    assert exc.lineno == 1
+    assert exc.pos == 4
+    assert exc.doc == "x = 0x"
+    assert str(exc.msg) == (
+        "TOML parse error at line 1, column 5\n"
+        "  |\n"
+        "1 | x = 0x\n"
+        "  |     ^^\n"
+        "invalid integer '0x'"
+    )
 
     # missing value
     with pytest.raises(tomllib.TOMLDecodeError) as exc:
@@ -56,11 +72,15 @@ def test_invalid_char_quotes():
 def test_type_error():
     with pytest.raises(TypeError) as exc:
         tomllib.loads(b"v = 1")  # type: ignore[arg-type]
-    assert str(exc.value) in ("Expected str object, not 'bytes'", "str object expected; got bytes")
+    assert str(exc.value) in (
+        "Expected str object, not 'bytes'", "str object expected; got bytes",
+    )
 
     with pytest.raises(TypeError) as exc:
         tomllib.loads(False)  # type: ignore[arg-type]  # noqa: FBT003
-    assert str(exc.value) in ("Expected str object, not 'bool'", "str object expected; got bool")
+    assert str(exc.value) in (
+        "Expected str object, not 'bool'", "str object expected; got bool",
+    )
 
 
 def test_invalid_parse_float():
@@ -107,9 +127,3 @@ def test_unsupported_version():
             match="Unsupported TOML version",
     ):
         tomllib.loads("x = 1", toml_version="2")  # ty: ignore[invalid-argument-type]
-
-
-def test_big_int():
-    t = "x = 999_999_999_999_999_999_999_999"
-    with pytest.raises(tomllib.TOMLDecodeError):
-        tomllib.loads(t, toml_version="1.0.0")

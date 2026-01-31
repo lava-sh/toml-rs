@@ -1,12 +1,13 @@
 import json
 import math
+import platform
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal
 
 import pytest
-import toml_rs as tomllib
+import toml_rs
 
 from .burntsushi import convert, normalize
 from .helpers import _init_only, tests_path
@@ -76,8 +77,8 @@ def test_invalid_tomls(invalid: Path, toml_version: str) -> None:
     except UnicodeDecodeError:
         # Some BurntSushi tests are not valid UTF-8. Skip those.
         pytest.skip(f"Invalid UTF-8: {invalid}")
-    with pytest.raises(tomllib.TOMLDecodeError):
-        tomllib.loads(toml_str)
+    with pytest.raises(toml_rs.TOMLDecodeError):
+        toml_rs.loads(toml_str)
 
 
 @pytest.mark.parametrize(
@@ -98,14 +99,19 @@ def test_valid_tomls(
         toml_str.encode(encoding="ascii")
     except UnicodeEncodeError:
         pytest.skip(f"Skipping Unicode content test: {valid.name}")
-    actual = tomllib.loads(toml_str, toml_version=toml_version)
+    actual = toml_rs.loads(toml_str, toml_version=toml_version)
     actual = convert(actual)
     expected_normalized = normalize(expected)
     assert actual == expected_normalized
     # Ensure that parsed toml's can be serialized back without error
-    tomllib.dumps(actual)
+    toml_rs.dumps(actual)
 
 
+@pytest.mark.skipif(
+    platform.python_implementation() == "PyPy",
+    reason="PyPy's `Decimal` parsing hits the int string "
+           "conversion digit limit for very large numbers.",
+)
 def test_parse_big_nums() -> None:
     big_int = 999**999
     big_float = float(f"{big_int}.{big_int}")
@@ -114,19 +120,19 @@ def test_parse_big_nums() -> None:
     t2 = f"x = {big_float}"
     t3 = f"x = {big_int + big_int}.{big_int}"
 
-    assert tomllib.loads(t, toml_version="1.1.0")["x"] == big_int
+    assert toml_rs.loads(t, toml_version="1.1.0")["x"] == big_int
     assert math.isclose(
-        tomllib.loads(t3, toml_version="1.1.0")["x"],
+        toml_rs.loads(t3, toml_version="1.1.0")["x"],
         big_float,
         abs_tol=1e-9,
     )
     assert math.isclose(
-        tomllib.loads(t3, toml_version="1.1.0", parse_float=Decimal)["x"],
+        toml_rs.loads(t3, toml_version="1.1.0", parse_float=Decimal)["x"],
         Decimal(big_float),
         abs_tol=1e-9,
     )
     assert math.isclose(
-        tomllib.loads(t2, toml_version="1.1.0")["x"],
+        toml_rs.loads(t2, toml_version="1.1.0")["x"],
         float("inf"),
         abs_tol=1e-9,
     )

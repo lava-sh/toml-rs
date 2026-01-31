@@ -1,3 +1,4 @@
+mod error;
 mod normalize;
 mod recursion_guard;
 mod v1;
@@ -36,27 +37,15 @@ mod toml_rs {
     fn load_toml_from_string(
         py: Python,
         toml_string: &str,
-        parse_float: Option<&Bound<'_, PyAny>>,
+        parse_float: &Bound<'_, PyAny>,
         toml_version: &str,
     ) -> PyResult<Py<PyAny>> {
         match toml_version {
             "1.0.0" => {
-                let normalized = normalize_line_ending(toml_string);
-
-                let parsed: toml_v1::Value =
-                    py.detach(|| toml_v1::from_str(&normalized))
-                        .map_err(|err| {
-                            TOMLDecodeError::new_err((
-                                err.to_string(),
-                                normalized.to_string(),
-                                err.span().map_or(0, |s| s.start),
-                            ))
-                        })?;
-                let toml = toml_to_python_v1(py, parsed, parse_float)?;
-                Ok(toml.unbind())
-            }
-            "1.1.0" => {
-                use toml::de::{DeTable, DeValue::Table};
+                use toml_v1::{
+                    Spanned,
+                    de::{DeTable, DeValue},
+                };
 
                 let normalized = normalize_line_ending(toml_string);
 
@@ -67,7 +56,39 @@ mod toml_rs {
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
-                let toml = toml_to_python(py, Table(parsed.into_inner()), parse_float)?;
+
+                let toml = toml_to_python_v1(
+                    py,
+                    &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    parse_float,
+                    &normalized,
+                )?;
+
+                Ok(toml.unbind())
+            }
+            "1.1.0" => {
+                use toml::{
+                    Spanned,
+                    de::{DeTable, DeValue},
+                };
+
+                let normalized = normalize_line_ending(toml_string);
+
+                let parsed = DeTable::parse(&normalized).map_err(|err| {
+                    TOMLDecodeError::new_err((
+                        err.to_string(),
+                        normalized.to_string(),
+                        err.span().map_or(0, |s| s.start),
+                    ))
+                })?;
+
+                let toml = toml_to_python(
+                    py,
+                    &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    parse_float,
+                    &normalized,
+                )?;
+
                 Ok(toml.unbind())
             }
             _ => Err(PyValueError::new_err(format!(
