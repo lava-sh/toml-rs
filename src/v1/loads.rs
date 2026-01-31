@@ -17,7 +17,6 @@ pub(crate) fn toml_to_python_v1<'py>(
     to_python(py, value, parse_float, &mut RecursionGuard::default())
 }
 
-#[inline]
 fn to_python<'py>(
     py: Python<'py>,
     value: DeValue<'_>,
