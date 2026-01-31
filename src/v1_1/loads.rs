@@ -19,7 +19,7 @@ pub(crate) fn toml_to_python<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     to_python(
         py,
-        &value,
+        value,
         parse_float,
         &mut RecursionGuard::default(),
         source_doc,
