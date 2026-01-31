@@ -16,14 +16,11 @@ pyo3 = { version = "0.27.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-bytecount = { version = "0.6.9", features = [
-    "generic-simd",
-    "runtime-dispatch-simd",
-] }
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
 memchr = { version = "2.7.6", default-features = false }
+bytecount = { version = "0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
 optional = true
