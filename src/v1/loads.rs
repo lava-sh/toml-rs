@@ -13,7 +13,7 @@ use crate::{
 
 pub(crate) fn toml_to_python_v1<'py>(
     py: Python<'py>,
-    value: Spanned<DeValue<'_>>,
+    value: &Spanned<DeValue<'_>>,
     parse_float: &Bound<'py, PyAny>,
     source_doc: &str,
 ) -> PyResult<Bound<'py, PyAny>> {
