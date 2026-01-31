@@ -54,11 +54,15 @@ def test_invalid_char_quotes():
 def test_type_error():
     with pytest.raises(TypeError) as exc:
         tomllib.loads(b"v = 1")  # type: ignore[arg-type]
-    assert str(exc.value) in ("Expected str object, not 'bytes'", "str object expected; got bytes")
+    assert str(exc.value) in (
+        "Expected str object, not 'bytes'", "str object expected; got bytes",
+    )
 
     with pytest.raises(TypeError) as exc:
         tomllib.loads(False)  # type: ignore[arg-type]  # noqa: FBT003
-    assert str(exc.value) in ("Expected str object, not 'bool'", "str object expected; got bool")
+    assert str(exc.value) in (
+        "Expected str object, not 'bool'", "str object expected; got bool",
+    )
 
 
 def test_invalid_parse_float():
