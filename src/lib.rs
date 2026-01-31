@@ -1,3 +1,4 @@
+mod error;
 mod normalize;
 mod recursion_guard;
 mod v1;

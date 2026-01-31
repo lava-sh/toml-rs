@@ -16,6 +16,24 @@ def test_line_and_col():
     assert "line 1, column 5" in msg
     assert "invalid mantissa" in msg
 
+    # invalid int
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("x = 0x")
+
+    exc = exc.value
+
+    assert exc.colno == 5
+    assert exc.lineno == 1
+    assert exc.pos == 4
+    assert exc.doc == "x = 0x"
+    assert str(exc.msg) == (
+        "TOML parse error at line 1, column 5\n"
+        "  |\n"
+        "1 | x = 0x\n"
+        "  |     ^\n"
+        "invalid integer '0x'"
+    )
+
     # missing value
     with pytest.raises(tomllib.TOMLDecodeError) as exc:
         tomllib.loads(".")

@@ -8,7 +8,8 @@ use pyo3::{
 use toml::{Spanned, de::DeValue, value::Offset};
 
 use crate::{
-    create_py_datetime, parse_int, recursion_guard::RecursionGuard, toml_rs::TOMLDecodeError,
+    create_py_datetime, error::TomlError, parse_int, recursion_guard::RecursionGuard,
+    toml_rs::TOMLDecodeError,
 };
 
 pub(crate) fn toml_to_python<'py>(
@@ -50,8 +51,17 @@ fn to_python<'py>(
                 return bigint.into_bound_py_any(py);
             }
 
+            let mut err = TomlError::custom(
+                format!(
+                    "invalid integer '{}'",
+                    &doc[span.start..span.end.min(doc.len())]
+                ),
+                Some(span.start..span.start),
+            );
+            err.set_input(Some(doc));
+
             Err(TOMLDecodeError::new_err((
-                format!("invalid integer '{int}'"),
+                err.to_string(),
                 doc.to_string(),
                 span.start,
             )))
