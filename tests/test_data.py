@@ -1,5 +1,6 @@
 import json
 import math
+import platform
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
@@ -106,6 +107,11 @@ def test_valid_tomls(
     toml_rs.dumps(actual)
 
 
+@pytest.mark.skipif(
+    platform.python_implementation() == "PyPy",
+    reason="PyPy's `Decimal` parsing hits the int string "
+           "conversion digit limit for very large numbers.",
+)
 def test_parse_big_nums() -> None:
     big_int = 999**999
     big_float = float(f"{big_int}.{big_int}")
