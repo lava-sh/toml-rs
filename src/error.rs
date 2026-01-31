@@ -39,15 +39,16 @@ fn translate_position(input: &[u8], index: usize) -> (usize, usize) {
         .enumerate()
         .find(|(_, b)| **b == b'\n')
         .map(|(nl, _)| index - nl - 1);
+
     let line_start = match nl {
         Some(nl) => nl + 1,
         None => 0,
     };
-    let line = input[0..line_start].iter().filter(|b| **b == b'\n').count();
+
+    let line = bytecount::count(&input[0..line_start], b'\n');
 
     let column = std::str::from_utf8(&input[line_start..=index])
-        .map(|s| s.chars().count() - 1)
-        .unwrap_or_else(|_| index - line_start);
+        .map_or_else(|_| index - line_start, |s| s.chars().count() - 1);
     let column = column + column_offset;
 
     (line, column)
@@ -55,6 +56,7 @@ fn translate_position(input: &[u8], index: usize) -> (usize, usize) {
 
 impl fmt::Display for TomlError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[allow(clippy::similar_names)]
         let mut context = false;
         if let (Some(input), Some(span)) = (&self.input, &self.span) {
             context = true;
