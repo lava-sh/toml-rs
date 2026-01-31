@@ -58,7 +58,7 @@ mod toml_rs {
 
                 let toml = toml_to_python_v1(
                     py,
-                    Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
                     &normalized,
                 )?;
@@ -83,7 +83,7 @@ mod toml_rs {
 
                 let toml = toml_to_python(
                     py,
-                    Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
+                    &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
                     &normalized,
                 )?;
