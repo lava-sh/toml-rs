@@ -12,7 +12,7 @@ use crate::{create_py_datetime, parse_int, recursion_guard::RecursionGuard};
 pub(crate) fn toml_to_python<'py>(
     py: Python<'py>,
     value: DeValue<'_>,
-    parse_float: Option<&Bound<'py, PyAny>>,
+    parse_float: &Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyAny>> {
     to_python(py, value, parse_float, &mut RecursionGuard::default())
 }
@@ -21,7 +21,7 @@ pub(crate) fn toml_to_python<'py>(
 fn to_python<'py>(
     py: Python<'py>,
     value: DeValue<'_>,
-    parse_float: Option<&Bound<'py, PyAny>>,
+    parse_float: &Bound<'py, PyAny>,
     recursion: &mut RecursionGuard,
 ) -> PyResult<Bound<'py, PyAny>> {
     match value {
@@ -47,23 +47,9 @@ fn to_python<'py>(
             Err(PyValueError::new_err(format!("invalid integer '{int}'")))
         }
         DeValue::Float(float) => {
-            let bytes = float.as_str().as_bytes();
+            let float_str = float.as_str();
 
-            let Ok(parse_f64) = lexical_core::parse::<f64>(bytes) else {
-                let Some(_) = parse_float else {
-                    return float.as_str().into_bound_py_any(py);
-                };
-                return Err(PyValueError::new_err(format!("invalid float '{float}'")));
-            };
-
-            let Some(f) = parse_float else {
-                return parse_f64.into_bound_py_any(py);
-            };
-
-            let mut buffer = zmij::Buffer::new();
-            let formatted = buffer.format(parse_f64);
-
-            let py_call = f.call1((formatted,))?;
+            let py_call = parse_float.call1((float_str,))?;
 
             if py_call.is_exact_instance_of::<PyDict>() || py_call.is_exact_instance_of::<PyList>()
             {
