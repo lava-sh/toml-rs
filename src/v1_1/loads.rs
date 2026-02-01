@@ -104,7 +104,7 @@ fn to_python<'py>(
                 )?;
                 Ok(py_time.into_any())
             }
-            _ => Err(PyValueError::new_err("Invalid datetime format")),
+            _ => unreachable!(),
         },
         DeValue::Array(array) => {
             if array.is_empty() {
