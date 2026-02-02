@@ -13,14 +13,15 @@ import qtoml
 import rtoml
 import toml
 import toml_rs
+import tomli_w
 import tomlkit
 
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib
+    import tomli as tomllib  # ty: ignore
 
-N = 5_000
+N = 2500
 
 
 def get_lib_version(lib: str) -> str:
@@ -129,12 +130,13 @@ def run(run_count: int) -> None:
         "tomlkit": lambda: tomlkit.parse(data),
     }
     dumps = {
-        "toml_rs": lambda: toml_rs.dumps(obj),
+        "toml_rs": lambda: toml_rs.dumps(obj, toml_version="1.1.0"),
         "rtoml": lambda: rtoml.dumps(obj),
         "pytomlpp": lambda: pytomlpp.dumps(obj),
         "toml": lambda: toml.dumps(obj),
         "qtoml": lambda: qtoml.dumps(obj),
         "tomlkit": lambda: tomlkit.dumps(obj),
+        "tomli-w": lambda: tomli_w.dumps(obj),
     }
     loads = {name: benchmark(func, run_count) for name, func in loads.items()}
     dumps = {name: benchmark(func, run_count) for name, func in dumps.items()}

@@ -6,6 +6,7 @@ include = [
     "python/**.py",
     "python/**.pyi",
     "tests/**.py",
+    "benchmark/run.py",
 ]
 
 [lint.isort]
@@ -30,6 +31,11 @@ ignore = [
     #______#
     "ARG001",
     "ARG002",
+]
+
+[lint.per-file-ignores]
+"benchmark/run.py" = [
+    "INP001",
 ]
 
 [lint.pycodestyle]
