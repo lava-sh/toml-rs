@@ -6,5 +6,4 @@ include = [
     "python/*.py",
     "python/*.pyi",
     "tests/*.py",
-    "benchmark/*.py"
 ]
