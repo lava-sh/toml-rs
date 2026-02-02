@@ -68,7 +68,12 @@ fn to_toml<'py>(
         return to_toml!(Boolean, b.is_true());
     }
     if let Ok(int) = obj.cast::<PyInt>() {
-        return to_toml!(Integer, int.extract()?);
+        return match int.extract::<i64>() {
+            Ok(value) => to_toml!(Integer, value),
+            Err(_) => Err(TOMLEncodeError::new_err(format!(
+                "Integer {int} is too large for TOML (max 64-bit signed int)"
+            ))),
+        };
     }
     if let Ok(float) = obj.cast::<PyFloat>() {
         return to_toml!(Float, float.value());
