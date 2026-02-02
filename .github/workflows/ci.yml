@@ -140,7 +140,7 @@ jobs:
           fi
       - name: "Install dependencies"
         run: |
-          uv pip install --group ci
+          uv pip install --group ci --group bench
       - name: "Run maturin (--release)"
         run: |
           rustc --version --verbose
