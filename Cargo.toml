@@ -45,9 +45,8 @@ features = [
 # TOML v1.0.0 support
 [dependencies.toml_edit_v1]
 git = "https://github.com/lava-sh/toml"
-branch = "for_python_toml_rs"
+rev = "37371f77831b7f11b310845544f7d41863023e3f"
 version = "0.23.10"
-package = "toml_edit_v1_0_0"
 features = [
     "serde",
     "unbounded",
@@ -55,9 +54,8 @@ features = [
 
 [dependencies.toml_v1]
 git = "https://github.com/lava-sh/toml"
-branch = "for_python_toml_rs"
+rev = "37371f77831b7f11b310845544f7d41863023e3f"
 version = "0.9.9"
-package = "toml_v1_0_0"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)
