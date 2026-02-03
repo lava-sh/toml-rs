@@ -2,3 +2,9 @@
 extend-exclude = [
     "tests/data/",
 ]
+
+[default.extend-words]
+# For lines:
+# 1. `"Path 'database.connectio' specified in"`
+# 2. `{"inline_tables": {"database.connectio"}},`
+connectio = "connectio"
