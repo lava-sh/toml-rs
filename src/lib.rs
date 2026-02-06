@@ -92,7 +92,7 @@ mod toml_rs {
                 Ok(toml.unbind())
             }
             _ => Err(PyValueError::new_err(format!(
-                "Unsupported TOML version: {toml_version}. Supported versions: 1.0.0, 1.1.0",
+                "Unsupported TOML version: {toml_version}",
             ))),
         }
     }
@@ -146,7 +146,7 @@ mod toml_rs {
                 Ok(doc.to_string())
             }
             _ => Err(PyValueError::new_err(format!(
-                "Unsupported TOML version: {toml_version}. Supported versions: 1.0.0, 1.1.0",
+                "Unsupported TOML version: {toml_version}",
             ))),
         }
     }
