@@ -72,6 +72,12 @@ macro_rules! to_toml {
             $value,
         )))
     };
+    (BigNum, $value:expr) => {{
+        let num = toml_edit::BigNum::new($value);
+        Ok(toml_edit::Item::Value(toml_edit::Value::BigNum(
+            toml_edit::Formatted::new(num),
+        )))
+    }};
     ($var:ident, $value:expr) => {
         Ok(toml_edit::Item::Value(toml_edit::Value::$var(
             toml_edit::Formatted::new($value),
