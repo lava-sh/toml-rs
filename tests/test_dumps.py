@@ -258,5 +258,5 @@ def test_big_nums(toml_version: Literal["1.0.0", "1.1.0"]) -> None:
     assert tomli_w.dumps(big_int) == toml_rs.dumps(big_int, toml_version=toml_version)
 
     # https://github.com/lava-sh/toml-rs/issues/118
-    big_float = {"float": f"{num}.{num}"}
+    big_float = {"float": float(f"{num}.{num}")}
     assert tomli_w.dumps(big_float) == toml_rs.dumps(big_float, toml_version=toml_version)
