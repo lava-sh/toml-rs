@@ -23,7 +23,7 @@ impl TomlError {
     }
 
     pub(crate) fn set_input(&mut self, input: Option<&str>) {
-        self.input = input.map(|s| s.into());
+        self.input = input.map(Into::into);
     }
 }
 
