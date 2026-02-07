@@ -68,10 +68,10 @@ fn to_toml<'py>(
         return to_toml!(Boolean, b.is_true());
     }
     if let Ok(int) = obj.cast::<PyInt>() {
-        return to_toml!(Integer, int.extract()?);
+        return to_toml!(BigNum, int.str()?.to_str()?);
     }
     if let Ok(float) = obj.cast::<PyFloat>() {
-        return to_toml!(Float, float.value());
+        return to_toml!(BigNum, float.str()?.to_str()?);
     }
 
     if let Ok(py_datetime) = obj.cast::<PyDateTime>() {

@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta, timezone
 from re import escape as e
+from typing import Literal
 
 import pytest
 import toml_rs
+import tomli_w
 
 
 @pytest.mark.parametrize(
@@ -245,3 +247,16 @@ connection = { host = "localhost", port = 5432 }
 credentials = { user = "admin", password = "secret" }
 """
     )
+
+
+@pytest.mark.parametrize("toml_version", ["1.0.0", "1.1.0"])
+def test_big_nums(toml_version: Literal["1.0.0", "1.1.0"]) -> None:
+    num = 999999999999999999999999999999999999999999999999999999999
+
+    # https://github.com/lava-sh/toml-rs/issues/117
+    big_int = {"int": num}
+    assert tomli_w.dumps(big_int) == toml_rs.dumps(big_int, toml_version=toml_version)
+
+    # https://github.com/lava-sh/toml-rs/issues/118
+    big_float = {"float": float(f"{num}.{num}")}
+    assert tomli_w.dumps(big_float) == toml_rs.dumps(big_float, toml_version=toml_version)

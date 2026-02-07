@@ -45,7 +45,7 @@ features = [
 # TOML v1.0.0 support
 [dependencies.toml_edit_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "37371f77831b7f11b310845544f7d41863023e3f"
+rev = "e2452d383bccf7f54d494b5a2e130772e037f1fc"
 version = "0.23.10"
 features = [
     "serde",
@@ -54,7 +54,7 @@ features = [
 
 [dependencies.toml_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "37371f77831b7f11b310845544f7d41863023e3f"
+rev = "e2452d383bccf7f54d494b5a2e130772e037f1fc"
 version = "0.9.9"
 features = [
     "fast_hash", # uses `foldhash`
@@ -64,6 +64,8 @@ features = [
 
 # TOML v1.1.0 support
 [dependencies.toml_edit]
+git = "https://github.com/lava-sh/toml"
+rev = "a6e62708503a5983d124b89a8e7db5ab8f6f5334"
 version = "0.24.0"
 features = [
     "serde",
@@ -71,6 +73,8 @@ features = [
 ]
 
 [dependencies.toml]
+git = "https://github.com/lava-sh/toml"
+rev = "a6e62708503a5983d124b89a8e7db5ab8f6f5334"
 version = "0.9.11"
 features = [
     "fast_hash", # uses `foldhash`

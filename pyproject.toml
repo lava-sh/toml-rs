@@ -48,6 +48,7 @@ ci = [
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
     "tomli == 2.3.0 ; python_version<'3.11'",
+    "tomli-w == 1.2.0",
 ]
 dev = [
     { include-group = "ci" },
