@@ -37,14 +37,14 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.43.0"]
+typos = ["typos == 1.43.3"]
 zizmor = ["zizmor == 1.22.0"]
 ci = [
-    "ty == 0.0.14",
+    "ty == 0.0.15",
     "ruff == 0.15.0",
     "maturin == 1.11.5",
     "pytest == 9.0.2",
-    "rumdl == 0.1.11",
+    "rumdl == 0.1.14",
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
     "tomli == 2.3.0 ; python_version<'3.11'",
