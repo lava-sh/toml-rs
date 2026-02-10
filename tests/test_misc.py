@@ -9,7 +9,7 @@ import pytest
 import toml_rs as tomllib
 
 
-def test_load():
+def test_load() -> None:
     content = "one=1 \n two='two' \n arr=[]"
     expected = {"one": 1, "two": "two", "arr": []}
     with TemporaryDirectory() as tmp_dir_path:
@@ -21,7 +21,7 @@ def test_load():
     assert actual == expected
 
 
-def test_incorrect_load():
+def test_incorrect_load() -> None:
     content = "one=1"
     with TemporaryDirectory() as tmp_dir_path:
         file_path = Path(tmp_dir_path) / "test.toml"
@@ -38,7 +38,7 @@ def test_incorrect_load():
         )
 
 
-def test_parse_float():
+def test_parse_float() -> None:
     doc = """
           val=0.1
           biggest1=inf
@@ -67,7 +67,7 @@ def test_parse_float():
             assert actual_val == expected_val
 
 
-def test_deepcopy():
+def test_deepcopy() -> None:
     doc = """
           [bliibaa.diibaa]
           offsettime=[1979-05-27T00:32:00.999999-07:00]
@@ -97,7 +97,7 @@ def test_deepcopy():
     assert obj_copy == expected_obj
 
 
-def test_inline_array_recursion_limit():
+def test_inline_array_recursion_limit() -> None:
     nest_count = 470
     recursive_array_toml = "arr = " + nest_count * "[" + nest_count * "]"
     tomllib.loads(recursive_array_toml)

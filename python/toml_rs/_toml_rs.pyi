@@ -4,12 +4,13 @@ from typing import Any, Literal, TypeAlias
 _VERSION: str
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
+ParseFloat: TypeAlias = Callable[[str], Any]
 
 def _loads(
     s: str,
     /,
     *,
-    parse_float: Callable[[str], Any] = ...,
+    parse_float: ParseFloat = ...,
     toml_version: TomlVersion = ...,
 ) -> dict[str, Any]: ...
 
