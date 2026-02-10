@@ -1,6 +1,6 @@
+import re
 from datetime import datetime, timedelta, timezone
-from re import escape as e
-from typing import Literal
+from typing import Any, Literal
 
 import pytest
 import toml_rs
@@ -8,7 +8,7 @@ import tomli_w
 
 
 @pytest.mark.parametrize(
-    ("v", "pattern", "kwargs"),
+    ("value", "pattern", "kwargs"),
     [
         (
             type("_Class", (), {}),
@@ -22,7 +22,7 @@ import tomli_w
         ),
         (
             {"x": 1 + 2j},
-            e("Cannot serialize (1+2j) (<class 'complex'>)"),
+            re.escape("Cannot serialize (1+2j) (<class 'complex'>)"),
             {},
         ),
         (
@@ -37,12 +37,12 @@ import tomli_w
         ),
         (
             {42: "value"},
-            e("TOML table keys must be strings, got 42 (<class 'int'>)"),
+            re.escape("TOML table keys must be strings, got 42 (<class 'int'>)"),
             {},
         ),
         (
             {"database": {"connection": {"host": "localhost"}}},
-            e(
+            re.escape(
                 "Path 'database.connectio' specified in"
                 " inline_tables does not exist in the toml",
             ),
@@ -50,17 +50,21 @@ import tomli_w
         ),
         (
             {"database": {"connection": {"host": "localhost"}, "port": 8080}},
-            e("Path 'database.port' does not point to a table"),
+            re.escape("Path 'database.port' does not point to a table"),
             {"inline_tables": {"database.port"}},
         ),
     ],
 )
-def test_incorrect_dumps(v, pattern, kwargs):
+def test_incorrect_dumps(
+        value: Any,
+        pattern: str | re.Pattern[str],
+        kwargs: dict[str, Any],
+) -> None:
     with pytest.raises(toml_rs.TOMLEncodeError, match=pattern):
-        toml_rs.dumps(v, **kwargs)
+        toml_rs.dumps(value, **kwargs)
 
 
-def test_dumps():
+def test_dumps() -> None:
     obj = {
         "title": "TOML Example",
         "float": float("-inf"),
@@ -96,7 +100,7 @@ server = "192.168.1.1"
     )
 
 
-def test_dumps_inline_tables():
+def test_dumps_inline_tables() -> None:
     obj = {
         "database": {
             "connection": {"host": "localhost", "port": 5432},
@@ -173,7 +177,7 @@ parameters = { timeout = 30, retries = 3 }
     )
 
 
-def test_dumps_pretty():
+def test_dumps_pretty() -> None:
     obj = {
         "example": {
             "array": ["item 1", "item 2", "item 3"],
@@ -213,7 +217,7 @@ value = 2
     )
 
 
-def test_dumps_pretty_with_inline_tables():
+def test_dumps_pretty_with_inline_tables() -> None:
     obj = {
         "array": ["item 1", "item 2", "item 3"],
         "database": {

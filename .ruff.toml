@@ -22,12 +22,12 @@ select = ["ALL"]
 ignore = [
     "D",
     "DOC",
-    "ANN",
     "CPY001",
-    "S101",
     #______#
     "PLR2004",
     "PLR6201",
+    #______#
+    "ANN401",
     #______#
     "ARG001",
     "ARG002",
@@ -37,6 +37,13 @@ ignore = [
 "benchmark/run.py" = [
     "INP001",
 ]
+"tests/**.py" = [
+    "S101",
+]
+
+[lint.mccabe]
+# https://docs.astral.sh/ruff/settings/#lint_mccabe_max-complexity
+max-complexity = 15
 
 [lint.pycodestyle]
 # E501 reports lines that exceed the length of 100.

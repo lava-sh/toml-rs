@@ -11,6 +11,7 @@ from ._toml_rs import (
 __version__: str = _VERSION
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
+ParseFloat: TypeAlias = Callable[[str], Any]
 
 DEFAULT_TOML_VERSION = "1.0.0"
 
@@ -19,7 +20,7 @@ def load(
     fp: BinaryIO,
     /,
     *,
-    parse_float: Callable[[str], Any] = float,
+    parse_float: ParseFloat = float,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
     toml_bytes = fp.read()
@@ -35,7 +36,7 @@ def loads(
     s: str,
     /,
     *,
-    parse_float: Callable[[str], Any] = float,
+    parse_float: ParseFloat = float,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
     if not isinstance(s, str):

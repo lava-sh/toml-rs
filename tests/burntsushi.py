@@ -13,36 +13,41 @@ _aliases = {
 }
 
 
-def convert(obj: Any):  # noqa: C901, PLR0911
-    if isinstance(obj, str):
-        return {"type": "string", "value": obj}
-    if isinstance(obj, bool):
-        return {"type": "bool", "value": str(obj).lower()}
-    if isinstance(obj, int):
-        return {"type": "integer", "value": str(obj)}
-    if isinstance(obj, float):
-        return {"type": "float", "value": _normalize_float_str(str(obj))}
-    if isinstance(obj, datetime.datetime):
-        val = _normalize_datetime_str(obj.isoformat())
-        if obj.tzinfo:
-            return {"type": "datetime", "value": val}
-        return {"type": "datetime-local", "value": val}
-    if isinstance(obj, datetime.time):
-        return {
-            "type": "time-local",
-            "value": _normalize_localtime_str(str(obj)),
-        }
-    if isinstance(obj, datetime.date):
-        return {
-            "type": "date-local",
-            "value": str(obj),
-        }
-    if isinstance(obj, list):
-        return [convert(i) for i in obj]
-    if isinstance(obj, dict):
-        return {k: convert(v) for k, v in obj.items()}
-    msg = "unsupported type"
-    raise Exception(msg)  # noqa: TRY002
+def convert(obj: Any) -> Any:  # noqa: PLR0911
+    match obj:
+        case str() as s:
+            return {"type": "string", "value": s}
+
+        case bool() as b:
+            return {"type": "bool", "value": str(b).lower()}
+
+        case int() as i:
+            return {"type": "integer", "value": str(i)}
+
+        case float() as f:
+            return {"type": "float", "value": _normalize_float_str(str(f))}
+
+        case datetime.datetime() as dt:
+            val = _normalize_datetime_str(dt.isoformat())
+            if dt.tzinfo:
+                return {"type": "datetime", "value": val}
+            return {"type": "datetime-local", "value": val}
+
+        case datetime.time() as time:
+            return {"type": "time-local", "value": _normalize_localtime_str(str(time))}
+
+        case datetime.date() as date:
+            return {"type": "date-local", "value": str(date)}
+
+        case list() as xs:
+            return [convert(i) for i in xs]
+
+        case dict() as m:
+            return {k: convert(v) for k, v in m.items()}
+
+        case _:
+            msg = "unsupported type"
+            raise Exception(msg)  # noqa: TRY002
 
 
 def normalize(obj: Any) -> Any:

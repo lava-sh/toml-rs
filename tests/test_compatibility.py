@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 import toml_rs
 
-from ._types import ParseFloat
 from .burntsushi import convert, normalize
 from .helpers import TOML
 from .test_data import VALID_PAIRS_1_0_0 as VALID_PAIRS
@@ -62,7 +61,7 @@ def test_tomllib_vs_tomlrs(valid: Path, expected: Path) -> None:
     [float, Decimal],
     ids=["float", "Decimal"],
 )
-def test_parse_float(parse_float: ParseFloat) -> None:
+def test_parse_float(parse_float: toml_rs._lib.ParseFloat) -> None:
     num = "9" * 47
     f = f"{num}.{num}"
     t = f"x = {f}"
