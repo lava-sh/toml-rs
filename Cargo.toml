@@ -19,7 +19,7 @@ pyo3 = { version = "0.28.0", features = [
 num-bigint = "0.4.6"
 rustc-hash = "2.1.1"
 smallvec = "2.0.0-alpha.12"
-memchr = { version = "2.7.6", default-features = false }
+memchr = { version = "2.8.0", default-features = false }
 bytecount = { version = "0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
