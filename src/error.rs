@@ -38,7 +38,7 @@ impl TomlError {
 // Unexpected `a`
 // Expected `digit`
 // While parsing a Time
-//While parsing a Date-Time
+// While parsing a Date-Time
 impl std::fmt::Display for TomlError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut context = false;
