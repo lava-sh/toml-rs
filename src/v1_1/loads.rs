@@ -98,8 +98,8 @@ fn to_python<'py>(
                     py,
                     time.hour,
                     time.minute,
-                    time.second,
-                    time.nanosecond / 1000,
+                    time.second.unwrap_or(0),
+                    time.nanosecond.unwrap_or(0) / 1000,
                     None,
                 )?;
                 Ok(py_time.into_any())

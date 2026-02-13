@@ -1,4 +1,21 @@
 #[macro_export]
+macro_rules! create_py_datetime_v1 {
+    ($py:expr, $date:expr, $time:expr, $tzinfo:expr) => {
+        pyo3::types::PyDateTime::new(
+            $py,
+            i32::from($date.year),
+            $date.month,
+            $date.day,
+            $time.hour,
+            $time.minute,
+            $time.second,
+            $time.nanosecond / 1000,
+            $tzinfo,
+        )
+    };
+}
+
+#[macro_export]
 macro_rules! toml_dt_v1 {
     (Date, $py_date:expr) => {
         toml_v1::value::Date {

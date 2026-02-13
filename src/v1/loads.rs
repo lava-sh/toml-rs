@@ -8,7 +8,7 @@ use pyo3::{
 use toml_v1::{Spanned, de::DeValue, value::Offset};
 
 use crate::{
-    create_py_datetime, error::TomlError, parse_int, recursion_guard::RecursionGuard,
+    create_py_datetime_v1, error::TomlError, parse_int, recursion_guard::RecursionGuard,
     toml_rs::TOMLDecodeError,
 };
 
@@ -84,10 +84,10 @@ fn to_python<'py>(
         DeValue::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let tzinfo = Some(&create_timezone_from_offset(py, offset)?);
-                Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
+                Ok(create_py_datetime_v1!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
-                Ok(create_py_datetime!(py, date, time, None)?.into_any())
+                Ok(create_py_datetime_v1!(py, date, time, None)?.into_any())
             }
             (Some(date), None, None) => {
                 let py_date = PyDate::new(py, i32::from(date.year), date.month, date.day)?;
