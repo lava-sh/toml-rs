@@ -8,8 +8,8 @@ macro_rules! create_py_datetime {
             $date.day,
             $time.hour,
             $time.minute,
-            $time.second,
-            $time.nanosecond / 1000,
+            $time.second.unwrap_or(0),
+            $time.nanosecond.unwrap_or(0) / 1000,
             $tzinfo,
         )
     };
@@ -45,8 +45,8 @@ macro_rules! toml_dt {
         toml::value::Time {
             hour: $py_time.get_hour(),
             minute: $py_time.get_minute(),
-            second: $py_time.get_second(),
-            nanosecond: $py_time.get_microsecond() * 1000,
+            second: Some($py_time.get_second()),
+            nanosecond: Some($py_time.get_microsecond() * 1000),
         }
     };
 
