@@ -11,20 +11,20 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.28.0", features = [
+pyo3 = { version = "=0.28.1", features = [
     "extension-module",
     "generate-import-lib",
     "num-bigint",
 ] }
-num-bigint = "0.4.6"
-rustc-hash = "2.1.1"
-smallvec = "2.0.0-alpha.12"
-memchr = { version = "2.8.0", default-features = false }
-bytecount = { version = "0.6.9", features = ["runtime-dispatch-simd"] }
+num-bigint = "=0.4.6"
+rustc-hash = "=2.1.1"
+smallvec = "=2.0.0-alpha.12"
+memchr = { version = "=2.8.0", default-features = false }
+bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
 optional = true
-version = "0.1.48"
+version = "=0.1.48"
 features = [
     # mimalloc v3
     # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
