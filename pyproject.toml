@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.12.0"]
+requires = ["maturin == 1.12.2"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -37,14 +37,14 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.43.4"]
+typos = ["typos == 1.43.5"]
 zizmor = ["zizmor == 1.22.0"]
 ci = [
     "ty == 0.0.17",
     "ruff == 0.15.1",
-    "maturin == 1.12.0",
+    "maturin == 1.12.2",
     "pytest == 9.0.2",
-    "rumdl == 0.1.21",
+    "rumdl == 0.1.22",
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
     "tomli == 2.3.0 ; python_version<'3.11'",
