@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -65,7 +65,7 @@ features = [
 # https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0
 [dependencies.toml_edit]
 git = "https://github.com/lava-sh/toml"
-rev = "4af9d3db47de81d85bb20d6ed699cc7afa5dd73c"
+rev = "52bd77754496b9044666d714229170b87e6fb915"
 features = [
     "serde",
     "unbounded",
@@ -73,7 +73,7 @@ features = [
 
 [dependencies.toml]
 git = "https://github.com/lava-sh/toml"
-rev = "4af9d3db47de81d85bb20d6ed699cc7afa5dd73c"
+rev = "52bd77754496b9044666d714229170b87e6fb915"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit to set own limit (999)

@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta, timezone
-from typing import Any, Literal
+from typing import Any
 
 import pytest
 import toml_rs
@@ -254,7 +254,7 @@ credentials = { user = "admin", password = "secret" }
 
 
 @pytest.mark.parametrize("toml_version", ["1.0.0", "1.1.0"])
-def test_big_nums(toml_version: Literal["1.0.0", "1.1.0"]) -> None:
+def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
     num = 999999999999999999999999999999999999999999999999999999999
 
     # https://github.com/lava-sh/toml-rs/issues/117

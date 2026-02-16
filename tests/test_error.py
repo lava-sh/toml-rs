@@ -5,6 +5,7 @@
 from typing import Any
 
 import pytest
+import toml_rs
 import toml_rs as tomllib
 
 
@@ -53,6 +54,12 @@ def test_line_and_col() -> None:
     msg = str(exc.value)
     assert "line 3, column" in msg
     assert "missing value" in msg
+
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("val = 0b_1")
+    msg = str(exc.value)
+    assert "line 1, column 8" in msg
+    assert "`_` may only go between digits, expected nothing" in msg
 
 
 def test_missing_value() -> None:
@@ -127,3 +134,10 @@ def test_unsupported_version() -> None:
             match="Unsupported TOML version",
     ):
         tomllib.loads("x = 1", toml_version="2")  # ty: ignore[invalid-argument-type]
+
+
+def test_incorrect_suffix(toml_version: toml_rs._lib.TomlVersion) -> None:
+    t1 = "x = -_1"
+
+    with pytest.raises(tomllib.TOMLDecodeError):
+        tomllib.loads(t1, toml_version=toml_version)
