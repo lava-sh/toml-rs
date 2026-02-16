@@ -253,7 +253,6 @@ credentials = { user = "admin", password = "secret" }
     )
 
 
-@pytest.mark.parametrize("toml_version", ["1.0.0", "1.1.0"])
 def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
     num = 999999999999999999999999999999999999999999999999999999999
 
