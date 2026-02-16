@@ -1,4 +1,4 @@
-// https://github.com/toml-rs/toml/blob/v0.24.0/crates/toml_edit/src/error.rs
+// https://github.com/toml-rs/toml/blob/v0.25.2/crates/toml_edit/src/error.rs
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct TomlError {
     message: String,

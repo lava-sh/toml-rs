@@ -4,7 +4,6 @@ import platform
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Literal
 
 import pytest
 import toml_rs
@@ -92,7 +91,7 @@ def test_invalid_tomls(invalid: Path, toml_version: str) -> None:
 def test_valid_tomls(
     valid: Path,
     expected: dict,
-    toml_version: Literal["1.0.0", "1.1.0"],
+    toml_version: toml_rs._lib.TomlVersion,
 ) -> None:
     toml_str = valid.read_bytes().decode("utf-8")
     try:
