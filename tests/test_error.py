@@ -58,7 +58,7 @@ def test_line_and_col() -> None:
     with pytest.raises(tomllib.TOMLDecodeError) as exc:
         tomllib.loads("val = 0b_1")
     msg = str(exc.value)
-    assert "line 1, column 8" in msg
+    assert "line 1, column 9" in msg
     assert "`_` may only go between digits, expected nothing" in msg
 
 
