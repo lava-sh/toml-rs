@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2021 Taneli Hukkinen
 # Licensed to PSF under a Contributor Agreement.
-
 from typing import Any
 
 import pytest
 import toml_rs
 import toml_rs as tomllib
+
+from .helpers import _dedent
 
 
 def test_line_and_col() -> None:
@@ -27,12 +28,41 @@ def test_line_and_col() -> None:
     assert exc.lineno == 1
     assert exc.pos == 4
     assert exc.doc == "x = 0x"
-    assert str(exc.msg) == (
-        "TOML parse error at line 1, column 5\n"
-        "  |\n"
-        "1 | x = 0x\n"
-        "  |     ^^\n"
-        "invalid integer '0x'"
+    assert (
+        str(exc.msg) ==
+        _dedent("""
+        TOML parse error at line 1, column 5
+          |
+        1 | x = 0x
+          |     ^^
+        invalid integer '0x'
+        """)
+    )
+
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("a = \"\"\"\r\"\"\"")  # noqa: Q003
+
+    assert str(exc.value.msg) == (
+        _dedent('''
+        TOML parse error at line 1, column 9
+          |
+        1 | a = """\r"""
+          |         ^
+        carriage return must be followed by newline, expected newline
+        ''')
+    )
+
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads("a = \"\"\"\b\"\"\"")  # noqa: Q003
+
+    assert str(exc.value.msg) == (
+        _dedent('''
+        TOML parse error at line 1, column 8
+          |
+        1 | a = """\b"""
+          |        ^
+        invalid multi-line basic string, expected `\\`, characters
+        ''')
     )
 
     # missing value
@@ -106,15 +136,16 @@ def test_invalid_parse_float() -> None:
 
 
 def test_tomldecodeerror_attributes() -> None:
-    data = """\
-title = "TOML Example"
+    data = _dedent("""
+    title = "TOML Example"
 
-[owner]
-name = "Tom Preston-Werner"
-dob = 1979-05-27T07:32:00-08:00
+    [owner]
+    name = "Tom Preston-Werner"
+    dob = 1979-05-27T07:32:00-08:00
 
-x =
-"""
+    x =
+    """)
+
     with pytest.raises(tomllib.TOMLDecodeError) as exc_info:
         tomllib.loads(data)
 
@@ -139,5 +170,8 @@ def test_unsupported_version() -> None:
 def test_incorrect_suffix(toml_version: toml_rs._lib.TomlVersion) -> None:
     t1 = "x = -_1"
 
-    with pytest.raises(tomllib.TOMLDecodeError):
+    with pytest.raises(
+            tomllib.TOMLDecodeError,
+            match="`_` may only go between digits, expected nothing",
+    ):
         tomllib.loads(t1, toml_version=toml_version)
