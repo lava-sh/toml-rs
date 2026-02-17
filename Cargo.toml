@@ -19,7 +19,6 @@ pyo3 = { version = "=0.28.1", features = [
 num-bigint = "=0.4.6"
 rustc-hash = "=2.1.1"
 smallvec = "=2.0.0-alpha.12"
-memchr = { version = "=2.8.0", default-features = false }
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
@@ -57,7 +56,7 @@ git = "https://github.com/lava-sh/toml"
 rev = "38f955b0116920f2bcbf21c678ffd133b3ed32cc"
 features = [
     "fast_hash", # uses `foldhash`
-    "unbounded", # disables default recursion limit to set own limit (999)
+    "unbounded", # disables default recursion limit
     "preserve_order", # save order
 ]
 
@@ -76,7 +75,7 @@ git = "https://github.com/lava-sh/toml"
 rev = "5cd3c1b8fe3b99774c8d302076a3ea284ed2b132"
 features = [
     "fast_hash", # uses `foldhash`
-    "unbounded", # disables default recursion limit to set own limit (999)
+    "unbounded", # disables default recursion limit
     "preserve_order", # save order
 ]
 

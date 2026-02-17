@@ -10,9 +10,7 @@ use rustc_hash::FxHashSet;
 use smallvec::SmallVec;
 use toml_edit::{Array, InlineTable, Item, Offset, Table, Value};
 
-use crate::{
-    get_type, recursion_guard::RecursionGuard, to_toml, toml_dt, toml_rs::TOMLEncodeError,
-};
+use crate::{get_type, to_toml, toml_dt, toml_rs::TOMLEncodeError};
 
 pub(crate) fn validate_inline_paths(
     doc: &Item,
@@ -48,18 +46,16 @@ pub(crate) fn python_to_toml<'py>(
     to_toml(
         py,
         obj,
-        &mut RecursionGuard::default(),
         inline_tables,
-        &mut SmallVec::<String, 16>::with_capacity(inline_tables.map_or(0, FxHashSet::len)),
+        &mut SmallVec::<String, 32>::with_capacity(inline_tables.map_or(0, FxHashSet::len)),
     )
 }
 
 fn to_toml<'py>(
     py: Python<'py>,
     obj: &Bound<'py, PyAny>,
-    recursion: &mut RecursionGuard,
     inline_tables: Option<&FxHashSet<String>>,
-    toml_path: &mut SmallVec<String, 16>,
+    toml_path: &mut SmallVec<String, 32>,
 ) -> PyResult<Item> {
     if let Ok(s) = obj.cast::<PyString>() {
         return to_toml!(String, s.to_str()?.to_owned());
@@ -105,10 +101,7 @@ fn to_toml<'py>(
     }
 
     if let Ok(dict) = obj.cast::<PyDict>() {
-        recursion.enter()?;
-
         if dict.is_empty() {
-            recursion.exit();
             return to_toml!(TomlTable, Table::new());
         }
 
@@ -116,6 +109,7 @@ fn to_toml<'py>(
 
         return if inline {
             let mut inline_table = InlineTable::new();
+
             for (k, v) in dict.iter() {
                 let key = k
                     .cast::<PyString>()
@@ -128,22 +122,22 @@ fn to_toml<'py>(
                     .to_str()?;
 
                 toml_path.push(key.to_owned());
-                let item = to_toml(py, &v, recursion, inline_tables, toml_path)?;
+                let item = to_toml(py, &v, inline_tables, toml_path)?;
                 toml_path.pop();
 
                 if let Item::Value(val) = item {
                     inline_table.insert(key, val);
                 } else {
-                    recursion.exit();
                     return Err(TOMLEncodeError::new_err(
                         "Inline tables can only contain values, not nested tables",
                     ));
                 }
             }
-            recursion.exit();
+
             to_toml!(TomlInlineTable, inline_table)
         } else {
             let mut table = Table::new();
+
             for (k, v) in dict.iter() {
                 let key = k
                     .cast::<PyString>()
@@ -156,27 +150,24 @@ fn to_toml<'py>(
                     .to_str()?;
 
                 toml_path.push(key.to_owned());
-                let item = to_toml(py, &v, recursion, inline_tables, toml_path)?;
+                let item = to_toml(py, &v, inline_tables, toml_path)?;
                 toml_path.pop();
 
                 table.insert(key, item);
             }
-            recursion.exit();
+
             to_toml!(TomlTable, table)
         };
     }
 
     if let Ok(list) = obj.cast::<PyList>() {
-        recursion.enter()?;
-
         if list.is_empty() {
-            recursion.exit();
             return to_toml!(TomlArray, Array::new());
         }
 
         let mut array = Array::new();
         for item in list.iter() {
-            let items = to_toml(py, &item, recursion, inline_tables, toml_path)?;
+            let items = to_toml(py, &item, inline_tables, toml_path)?;
             match items {
                 Item::Value(value) => {
                     array.push(value);
@@ -186,14 +177,13 @@ fn to_toml<'py>(
                     array.push(Value::InlineTable(inline_table));
                 }
                 _ => {
-                    recursion.exit();
                     return Err(TOMLEncodeError::new_err(
                         "Arrays can only contain values or inline tables",
                     ));
                 }
             }
         }
-        recursion.exit();
+
         return to_toml!(TomlArray, array);
     }
 
