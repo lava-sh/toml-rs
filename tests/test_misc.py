@@ -1,6 +1,5 @@
 import copy
 import datetime
-import sys
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
