@@ -1,5 +1,4 @@
 mod error;
-mod normalize;
 mod recursion_guard;
 mod v1;
 mod v1_1;
@@ -14,7 +13,6 @@ mod toml_rs {
     use rustc_hash::FxHashSet;
 
     use crate::{
-        normalize::normalize_line_ending,
         v1::{
             dumps::{python_to_toml_v1, validate_inline_paths_v1},
             loads::toml_to_python_v1,
@@ -47,12 +45,10 @@ mod toml_rs {
                     de::{DeTable, DeValue},
                 };
 
-                let normalized = normalize_line_ending(toml_string);
-
-                let parsed = DeTable::parse(&normalized).map_err(|err| {
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
-                        normalized.to_string(),
+                        toml_string.to_string(),
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
@@ -61,7 +57,7 @@ mod toml_rs {
                     py,
                     &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
-                    &normalized,
+                    toml_string,
                 )?;
 
                 Ok(toml.unbind())
@@ -72,12 +68,10 @@ mod toml_rs {
                     de::{DeTable, DeValue},
                 };
 
-                let normalized = normalize_line_ending(toml_string);
-
-                let parsed = DeTable::parse(&normalized).map_err(|err| {
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
-                        normalized.to_string(),
+                        toml_string.to_string(),
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
@@ -86,7 +80,7 @@ mod toml_rs {
                     py,
                     &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
-                    &normalized,
+                    toml_string,
                 )?;
 
                 Ok(toml.unbind())
