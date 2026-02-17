@@ -26,9 +26,6 @@ N = 500
 CPU = cpuinfo.get_cpu_info()["brand_raw"]
 PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
 
-CPU = cpuinfo.get_cpu_info()["brand_raw"]
-PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
-
 
 def get_lib_version(lib: str) -> str:
     if lib == "tomllib":
