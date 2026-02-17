@@ -21,7 +21,7 @@ if sys.version_info >= (3, 11):
 else:
     import tomli as tomllib  # ty: ignore
 
-N = 2500
+N = 50
 
 CPU = cpuinfo.get_cpu_info()["brand_raw"]
 PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
