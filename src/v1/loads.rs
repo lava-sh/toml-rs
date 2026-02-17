@@ -43,10 +43,6 @@ fn to_python<'py>(
                 return i_64.into_bound_py_any(py);
             }
 
-            if let Ok(i_128) = parse_int!(i128, bytes, &options, radix) {
-                return i_128.into_bound_py_any(py);
-            }
-
             if let Some(bigint) = num_bigint::BigInt::parse_bytes(bytes, radix) {
                 return bigint.into_bound_py_any(py);
             }
