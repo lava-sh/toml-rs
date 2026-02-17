@@ -183,7 +183,7 @@ jobs:
             ghcr.io/astral-sh/uv:python3.14-alpine sh -c "
             apk add --no-cache build-base curl && \
             curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal && \
-            source $HOME/.cargo/env && \
+            source /home/runner/.cargo/env && \
             rustup update stable
             uv pip install maturin[patchelf] --system && \
             maturin build --release --out /app/dist --features mimalloc && \
