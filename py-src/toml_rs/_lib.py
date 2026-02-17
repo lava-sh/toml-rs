@@ -89,15 +89,25 @@ class TOMLDecodeError(ValueError):
         msg = msg.rstrip()
         super().__init__(msg)
         lineno = doc.count("\n", 0, pos) + 1
+
         if lineno == 1:  # noqa: SIM108
             colno = pos + 1
         else:
             colno = pos - doc.rindex("\n", 0, pos)
+
         self.msg = msg
         self.doc = doc
         self.pos = pos
         self.colno = colno
         self.lineno = lineno
+
+    def __str__(self) -> str:
+        return (
+            self
+            .msg
+            .replace("\r", "\\r")
+            .replace("\b", "\\b")
+        )
 
 
 class TOMLEncodeError(TypeError):
