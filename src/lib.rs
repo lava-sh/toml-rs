@@ -45,7 +45,7 @@ mod toml_rs {
                     de::{DeTable, DeValue},
                 };
 
-                let parsed = DeTable::parse(&toml_string).map_err(|err| {
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
                         toml_string.to_string(),
@@ -57,7 +57,7 @@ mod toml_rs {
                     py,
                     &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
-                    &toml_string,
+                    toml_string,
                 )?;
 
                 Ok(toml.unbind())
@@ -68,7 +68,7 @@ mod toml_rs {
                     de::{DeTable, DeValue},
                 };
 
-                let parsed = DeTable::parse(&toml_string).map_err(|err| {
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
                         err.to_string(),
                         toml_string.to_string(),
@@ -80,7 +80,7 @@ mod toml_rs {
                     py,
                     &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
                     parse_float,
-                    &toml_string,
+                    toml_string,
                 )?;
 
                 Ok(toml.unbind())
