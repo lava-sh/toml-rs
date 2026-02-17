@@ -4,11 +4,11 @@
 
 ```bash
 # Linux / MacOS
-python3 -m venv .venv
+python3 -m venv .venv  # or uv venv .venv --seed
 source .venv/bin/activate
 
 # Windows
-py -m venv .venv
+py -m venv .venv  # or uv venv .venv --seed
 .venv\scripts\activate
 ```
 
