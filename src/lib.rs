@@ -70,7 +70,7 @@ mod toml_rs {
 
                 let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
-                        err.to_string().replace('\r', "\\r"),
+                        err.to_string(),
                         toml_string.to_string(),
                         err.span().map_or(0, |s| s.start),
                     ))
