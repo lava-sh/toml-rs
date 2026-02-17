@@ -23,6 +23,9 @@ else:
 
 N = 2500
 
+CPU = cpuinfo.get_cpu_info()["brand_raw"]
+PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
+
 
 def get_lib_version(lib: str) -> str:
     if lib == "tomllib":
@@ -43,16 +46,20 @@ def plot_benchmark(
     run_type: str,
     save_path: Path,
 ) -> None:
-    df = (
-        pl
-        .DataFrame({
-            "parser": [f"{name} ({get_lib_version(name)})" for name in results],
-            "exec_time": list(results.values()),
-        })
-        .sort("exec_time")
-        .with_columns([
-            (pl.col("exec_time") / pl.col("exec_time").min()).alias("slowdown"),
-        ])
+    df = pl.DataFrame({
+        "parser": list(results.keys()),
+        "exec_time": list(results.values()),
+    }).sort("exec_time")
+
+    df = df.with_columns(
+        (pl.col("exec_time") / pl.col("exec_time").min()).alias("slowdown"),
+    )
+
+    df = df.with_columns(
+        pl.Series(
+            "parser_label",
+            [f"{p}\n{get_lib_version(p.split()[0])}" for p in df["parser"]],
+        ),
     )
 
     chart = (
@@ -61,21 +68,22 @@ def plot_benchmark(
         .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
         .encode(
             x=alt.X(
-                "parser:N",
+                "parser_label:N",
                 sort=None,
-                title="Libraries",
-                axis=alt.Axis(labelAngle=0),
+                title="Parser",
+                axis=alt.Axis(
+                    labelAngle=0,
+                    labelExpr="split(datum.label, '\\n')",
+                    labelLineHeight=14,
+                ),
             ),
             y=alt.Y(
                 "exec_time:Q",
                 title="Execution Time (seconds, lower=better)",
-                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.1)),  # type: ignore[operator]
+                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.04)),
+                axis=alt.Axis(grid=False),
             ),
-            color=alt.Color(
-                "parser:N",
-                legend=None,
-                scale=alt.Scale(scheme="dark2"),
-            ),
+            color=alt.Color("parser:N", legend=None, scale=alt.Scale(scheme="dark2")),
             tooltip=[
                 alt.Tooltip("parser:N", title=""),
                 alt.Tooltip("exec_time:Q", title="Execution Time (s)", format=".4f"),
@@ -83,6 +91,7 @@ def plot_benchmark(
             ],
         )
     )
+
     text = (
         chart
         .mark_text(
@@ -98,15 +107,13 @@ def plot_benchmark(
         )
         .encode(text="label:N")
     )
-    os = f"{platform.system()} {platform.release()}"
-    cpu = cpuinfo.get_cpu_info()["brand_raw"]
-    py = platform.python_version()
+
     (chart + text).properties(
-        width=600,
-        height=400,
+        width=800,
+        height=600,
         title={
             "text": f"TOML parsers benchmark ({run_type})",
-            "subtitle": f"Python: {py} ({os}) | CPU: {cpu}",
+            "subtitle": f"Python: {PY_VERSION} | CPU: {CPU}",
         },
     ).save(save_path)
 
