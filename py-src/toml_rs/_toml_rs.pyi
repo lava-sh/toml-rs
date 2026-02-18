@@ -25,6 +25,5 @@ def _dumps(
 
 def _parse_from_string(
     toml_string: str,
-    *,
     toml_version: TomlVersion = ...,
 ) -> dict[str, Any]: ...
