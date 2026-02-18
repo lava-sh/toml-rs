@@ -2,11 +2,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
-from ._toml_rs import (
-    _VERSION,
-    _dumps,
-    _loads,
-)
+from ._toml_rs import _VERSION, _dumps, _loads, _parse_from_string
 
 __version__: str = _VERSION
 
@@ -82,6 +78,17 @@ def dumps(
         pretty=pretty,
         toml_version=toml_version,
     )
+
+
+def parse_from_string(
+    toml_string: str,
+    /,
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
+) -> dict[str, Any]:
+    if not isinstance(toml_string, str):
+        msg = f"Expected str object, not '{type(toml_string).__qualname__}'"
+        raise TypeError(msg)
+    return _parse_from_string(toml_string, toml_version=toml_version)
 
 
 class TOMLDecodeError(ValueError):

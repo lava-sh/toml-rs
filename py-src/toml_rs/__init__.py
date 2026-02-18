@@ -6,6 +6,7 @@ __all__ = (
     "dumps",
     "load",
     "loads",
+    "parse_from_string",
 )
 
 from ._lib import (
@@ -16,4 +17,5 @@ from ._lib import (
     dumps,
     load,
     loads,
+    parse_from_string,
 )

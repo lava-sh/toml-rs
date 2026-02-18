@@ -20,6 +20,7 @@ mod toml_rs {
         v1_1::{
             dumps::{python_to_toml, validate_inline_paths},
             loads::toml_to_python,
+            metadata::extract_metadata,
             pretty::Pretty,
         },
     };
@@ -137,6 +138,32 @@ mod toml_rs {
                 }
 
                 Ok(doc.to_string())
+            }
+            _ => Err(PyValueError::new_err(format!(
+                "Unsupported TOML version: {toml_version}",
+            ))),
+        }
+    }
+
+    #[pyfunction(name = "_parse_from_string")]
+    fn parse_toml_from_string(
+        py: Python,
+        toml_string: &str,
+        toml_version: &str,
+    ) -> PyResult<Py<PyAny>> {
+        match toml_version {
+            "1.1.0" => {
+                use toml::de::DeTable;
+
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
+                    TOMLDecodeError::new_err((
+                        err.to_string(),
+                        toml_string.to_string(),
+                        err.span().map_or(0, |s| s.start),
+                    ))
+                })?;
+                let metadata = extract_metadata(py, &parsed, toml_string)?;
+                Ok(metadata.unbind())
             }
             _ => Err(PyValueError::new_err(format!(
                 "Unsupported TOML version: {toml_version}",

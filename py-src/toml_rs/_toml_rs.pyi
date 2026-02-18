@@ -22,3 +22,9 @@ def _dumps(
     pretty: bool = False,
     toml_version: TomlVersion = ...,
 ) -> str: ...
+
+def _parse_from_string(
+    toml_string: str,
+    *,
+    toml_version: TomlVersion = ...,
+) -> dict[str, Any]: ...

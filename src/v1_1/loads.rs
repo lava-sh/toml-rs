@@ -128,7 +128,7 @@ fn to_python<'py>(
 }
 
 #[inline]
-fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
+pub(crate) fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
     const SECS_IN_DAY: i32 = 86_400;
 
     match offset {
