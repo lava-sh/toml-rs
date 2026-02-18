@@ -2,7 +2,12 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
-from ._toml_rs import _VERSION, _dumps, _loads, _parse_from_string
+from ._toml_rs import (
+    _VERSION,
+    _dumps,
+    _loads,
+    _parse_from_string,
+)
 
 __version__: str = _VERSION
 
@@ -109,12 +114,7 @@ class TOMLDecodeError(ValueError):
         self.lineno = lineno
 
     def __str__(self) -> str:
-        return (
-            self
-            .msg
-            .replace("\r", "\\r")
-            .replace("\b", "\\b")
-        )
+        return self.msg.replace("\r", "\\r").replace("\b", "\\b")
 
 
 class TOMLEncodeError(TypeError):
