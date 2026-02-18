@@ -43,9 +43,10 @@ features = [
     "parse-integers",
 ]
 
-# # # # # # TOML v1.0.0 support
-# https://github.com/lava-sh/toml/tree/for_python_toml_rs
-# # # # # #
+###########################################################
+#                   TOML v1.0.0 support                   #
+# https://github.com/lava-sh/toml/tree/for_python_toml_rs #
+###########################################################
 [dependencies.toml_v1]
 git = "https://github.com/lava-sh/toml"
 rev = "38f955b0116920f2bcbf21c678ffd133b3ed32cc"
@@ -63,9 +64,10 @@ features = [
     "unbounded",
 ]
 
-# # # # # # TOML v1.1.0 support
-# https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0
-# # # # # #
+##############################################################
+#                    TOML v1.1.0 support                     #
+# https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0 #
+##############################################################
 [dependencies.toml]
 git = "https://github.com/lava-sh/toml"
 rev = "9108a9e6d3912c901d39f07c482b92e46755107b"
