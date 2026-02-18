@@ -138,6 +138,7 @@ impl<'a> Collector<'a> {
         pos
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn emit_value(
         &mut self,
         full_key: String,
@@ -373,14 +374,7 @@ impl EventReceiver for Collector<'_> {
             let raw = self.slice(start, end);
 
             self.emit_value(
-                full_key,
-                key_line,
-                key_col,
-                key_span,
-                value,
-                start,
-                end,
-                raw,
+                full_key, key_line, key_col, key_span, value, start, end, raw,
             );
         }
     }
