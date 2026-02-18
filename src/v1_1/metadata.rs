@@ -4,7 +4,7 @@ use lexical_core::ParseIntegerOptions;
 use memchr::{memchr, memchr_iter, memrchr};
 use num_bigint::BigInt;
 use pyo3::{
-    Bound, IntoPyObjectExt,
+    Bound, IntoPyObjectExt, PyAny, PyResult, Python,
     prelude::*,
     types::{PyDate, PyDict, PyList, PyTime},
 };
@@ -557,15 +557,15 @@ fn build_dearray(items: Vec<Spanned<DeValue>>) -> DeArray {
     array
 }
 
-fn to_python<'py>(
+pub(crate) fn to_python<'py>(
     py: Python<'py>,
     value: &DeValue<'_>,
     span: Range<usize>,
     doc: &str,
 ) -> PyResult<Bound<'py, PyAny>> {
     match value {
-        DeValue::String(s) => s.into_bound_py_any(py),
-        DeValue::Boolean(b) => b.into_bound_py_any(py),
+        DeValue::String(str) => str.into_bound_py_any(py),
+        DeValue::Boolean(bool) => bool.into_bound_py_any(py),
         DeValue::Integer(int) => {
             let bytes = int.as_str().as_bytes();
             let radix = int.radix();
@@ -593,11 +593,11 @@ fn to_python<'py>(
                 span.start,
             )))
         }
-        DeValue::Float(f) => {
-            let bytes = f.as_str().as_bytes();
+        DeValue::Float(float) => {
+            let bytes = float.as_str().as_bytes();
             let parsed: f64 = lexical_core::parse(bytes).map_err(|e| {
                 TOMLDecodeError::new_err((
-                    format!("invalid float '{}': {e}", f.as_str()),
+                    format!("invalid float '{}': {e}", float.as_str()),
                     doc.to_string(),
                     span.start,
                 ))
@@ -626,9 +626,9 @@ fn to_python<'py>(
             .into_any()),
             _ => unreachable!(),
         },
-        DeValue::Array(items) => {
+        DeValue::Array(array) => {
             let py_list = PyList::empty(py);
-            for item in items {
+            for item in array {
                 py_list.append(to_python(py, item.get_ref(), item.span(), doc)?)?;
             }
             Ok(py_list.into_any())

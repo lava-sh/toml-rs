@@ -11,6 +11,8 @@ mod toml_rs {
     use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
     use rustc_hash::FxHashSet;
 
+    #[pymodule_export]
+    use crate::v1_1::document::TOMLDocument;
     use crate::{
         v1::{
             dumps::{python_to_toml_v1, validate_inline_paths_v1},
@@ -20,11 +22,10 @@ mod toml_rs {
         v1_1::{
             dumps::{python_to_toml, validate_inline_paths},
             loads::toml_to_python,
-            metadata::extract_metadata,
+            metadata::{extract_metadata, to_python},
             pretty::Pretty,
         },
     };
-
     #[pymodule_export]
     const _VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -153,7 +154,7 @@ mod toml_rs {
     ) -> PyResult<Py<PyAny>> {
         match toml_version {
             "1.1.0" => {
-                use toml::de::DeTable;
+                use toml::de::{DeTable, DeValue};
 
                 let parsed = DeTable::parse(toml_string).map_err(|err| {
                     TOMLDecodeError::new_err((
@@ -162,8 +163,22 @@ mod toml_rs {
                         err.span().map_or(0, |s| s.start),
                     ))
                 })?;
-                let metadata = extract_metadata(py, &parsed, toml_string)?;
-                Ok(metadata.unbind())
+
+                let meta = extract_metadata(py, &parsed, toml_string)?;
+
+                let span = parsed.span();
+                let inner = parsed.into_inner();
+                let value = to_python(py, &DeValue::Table(inner), span, toml_string)?;
+
+                let doc = Py::new(
+                    py,
+                    TOMLDocument {
+                        value: value.unbind(),
+                        meta: meta.unbind(),
+                    },
+                )?;
+
+                Ok(doc.into())
             }
             _ => Err(PyValueError::new_err(format!(
                 "Unsupported TOML version: {toml_version}",

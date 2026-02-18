@@ -4,6 +4,7 @@ from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
 from ._toml_rs import (
     _VERSION,
+    TOMLDocument,
     _dumps,
     _loads,
     _parse_from_string,
@@ -14,7 +15,7 @@ __version__: str = _VERSION
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]
 
-DEFAULT_TOML_VERSION = "1.0.0"
+DEFAULT_TOML_VERSION: TomlVersion = "1.0.0"
 
 
 def load(
@@ -89,7 +90,7 @@ def parse_from_string(
     toml_string: str,
     /,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
-) -> dict[str, Any]:
+) -> TOMLDocument:
     if not isinstance(toml_string, str):
         msg = f"Expected str object, not '{type(toml_string).__qualname__}'"
         raise TypeError(msg)

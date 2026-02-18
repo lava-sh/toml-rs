@@ -1,5 +1,6 @@
 __all__ = (
     "TOMLDecodeError",
+    "TOMLDocument",
     "TOMLEncodeError",
     "__version__",
     "dump",
@@ -11,6 +12,7 @@ __all__ = (
 
 from ._lib import (
     TOMLDecodeError,
+    TOMLDocument,
     TOMLEncodeError,
     __version__,
     dump,

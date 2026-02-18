@@ -1,3 +1,4 @@
+pub mod document;
 pub mod dumps;
 pub mod loads;
 pub mod macros;

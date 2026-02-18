@@ -1,5 +1,6 @@
 import datetime
 
+import pytest
 import toml_rs
 
 from .helpers import _dedent
@@ -15,7 +16,7 @@ def test_metadata() -> None:
     float_4 = 1e0_6
     float_5 = -2E-2
     """)
-    assert toml_rs.parse_from_string(nums, toml_version="1.1.0") == {
+    assert toml_rs.parse_from_string(nums, toml_version="1.1.0").meta == {
         "keys": {
             "float_3": {
                 "key": "float_3",
@@ -115,7 +116,7 @@ def test_metadata() -> None:
     text 3
     \"\"\"
     """)
-    assert toml_rs.parse_from_string(strings, toml_version="1.1.0") == {
+    assert toml_rs.parse_from_string(strings, toml_version="1.1.0").meta == {
         "keys": {
             "t1": {
                 "key": "t1",
@@ -200,7 +201,7 @@ def test_metadata() -> None:
       "omega"
     ]
     """)
-    assert toml_rs.parse_from_string(example, toml_version="1.1.0") == {
+    assert toml_rs.parse_from_string(example, toml_version="1.1.0").meta == {
         "keys": {
             "clients.data": {
                 "key": "clients.data",
@@ -365,7 +366,7 @@ def test_metadata() -> None:
         },
     }
     """)
-    assert toml_rs.parse_from_string(tbl, toml_version="1.1.0") == {
+    assert toml_rs.parse_from_string(tbl, toml_version="1.1.0").meta == {
         "keys": {
             "tbl": {
                 "key": "tbl",
@@ -421,3 +422,52 @@ def test_metadata() -> None:
             },
         },
     }
+
+
+def test_document_item_accessors() -> None:
+    toml = _dedent("""
+    ".x" = "text"
+
+    [a]
+    b = 1
+
+    [a.c]
+    d = 2
+
+    ".x" = 4
+
+    [".m.".p.".e"]
+    l = 99
+    """)
+    doc = toml_rs.parse_from_string(toml, toml_version="1.1.0")
+
+    assert doc.value["a"]["b"] == 1
+    assert doc.value["a"]["c"]["d"] == 2
+
+    assert doc.value["a"]["c"][".x"] == 4
+    assert doc.value[".m."]["p"][".e"]["l"] == 99
+
+    assert doc["a.b"] == 1
+    assert doc["a.c.d"] == 2
+
+    with pytest.raises(KeyError):
+        _ = doc[".m..p..e.l"]
+
+    with pytest.raises(KeyError):
+        _ = doc["a.err"]
+
+    assert doc[".x"] == "text"
+
+    doc["new.x.y"] = 3
+    assert doc["new.x.y"] == 3
+
+    del doc["a.c.d"]
+    with pytest.raises(KeyError):
+        _ = doc["a.c.d"]
+    assert "d" not in doc.value["a"]["c"]
+
+    with pytest.raises(KeyError):
+        del doc["a.c.d"]
+
+    with pytest.raises(KeyError):
+        del doc["a.nope.x"]
