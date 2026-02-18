@@ -1,7 +1,7 @@
 use std::{borrow::Cow, ops::Range};
 
-use hashbrown::HashMap;
 use lexical_core::ParseIntegerOptions;
+use memchr::{memchr, memchr_iter, memrchr};
 use num_bigint::BigInt;
 use pyo3::{
     Bound, IntoPyObjectExt,
@@ -23,6 +23,70 @@ use crate::{
     create_py_datetime, error::TomlError, parse_int, toml_rs::TOMLDecodeError,
     v1_1::loads::create_timezone_from_offset,
 };
+
+struct DocIndex<'a> {
+    doc: &'a str,
+    line_starts: Vec<usize>,
+}
+
+impl<'a> DocIndex<'a> {
+    fn new(doc: &'a str) -> Self {
+        let mut line_starts = Vec::new();
+        line_starts.push(0);
+        for i in memchr_iter(b'\n', doc.as_bytes()) {
+            line_starts.push(i + 1);
+        }
+        Self { doc, line_starts }
+    }
+
+    fn line_col(&self, pos: usize) -> (usize, usize) {
+        let pos = pos.min(self.doc.len());
+        let idx = self
+            .line_starts
+            .binary_search(&pos)
+            .unwrap_or_else(|i| i.saturating_sub(1));
+        let line = idx + 1;
+        let col = pos - self.line_starts[idx] + 1;
+        (line, col)
+    }
+
+    fn slice(&self, start: usize, end: usize) -> &str {
+        if start < end && end <= self.doc.len() {
+            &self.doc[start..end]
+        } else {
+            ""
+        }
+    }
+
+    fn find_open_back_to_line(&self, ch: u8, pos: usize) -> usize {
+        let bytes = self.doc.as_bytes();
+        if bytes.is_empty() {
+            return 0;
+        }
+        let pos = pos.min(bytes.len().saturating_sub(1));
+        let line_start = match memrchr(b'\n', &bytes[..=pos]) {
+            Some(i) => i + 1,
+            None => 0,
+        };
+        match memrchr(ch, &bytes[line_start..=pos]) {
+            Some(i) => line_start + i,
+            None => line_start,
+        }
+    }
+
+    fn find_close_forward_to_line(&self, ch: u8, pos: usize) -> usize {
+        let bytes = self.doc.as_bytes();
+        let pos = pos.min(bytes.len());
+        let line_end = match memchr(b'\n', &bytes[pos..]) {
+            Some(i) => pos + i,
+            None => bytes.len(),
+        };
+        match memchr(ch, &bytes[pos..line_end]) {
+            Some(i) => pos + i + 1,
+            None => line_end,
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 struct KeyMeta<'a> {
@@ -57,8 +121,8 @@ struct Inline<'a> {
 
 struct Collector<'a> {
     source: &'a Source<'a>,
-    doc: &'a str,
-    keys: HashMap<String, KeyMeta<'a>>,
+    idx: DocIndex<'a>,
+    keys: rustc_hash::FxHashMap<String, KeyMeta<'a>>,
     current_path: Vec<String>,
     parsing_table_header: bool,
     pending: Option<PendingKey>,
@@ -72,8 +136,8 @@ impl<'a> Collector<'a> {
     fn new(source: &'a Source<'a>, doc: &'a str) -> Self {
         Self {
             source,
-            doc,
-            keys: HashMap::new(),
+            idx: DocIndex::new(doc),
+            keys: rustc_hash::FxHashMap::default(),
             current_path: Vec::new(),
             parsing_table_header: false,
             pending: None,
@@ -92,52 +156,6 @@ impl<'a> Collector<'a> {
         }
     }
 
-    fn line_col(&self, pos: usize) -> (usize, usize) {
-        let line_start = self.doc[..pos].rfind('\n').map_or(0, |i| i + 1);
-        let line = self.doc[..pos].matches('\n').count() + 1;
-        let col = pos - line_start + 1;
-        (line, col)
-    }
-
-    fn slice(&self, start: usize, end: usize) -> String {
-        if start < end && end <= self.doc.len() {
-            self.doc[start..end].to_string()
-        } else {
-            String::new()
-        }
-    }
-
-    fn find_open_back_to_line(&self, ch: u8, mut pos: usize) -> usize {
-        let bytes = self.doc.as_bytes();
-        if pos >= bytes.len() {
-            pos = bytes.len().saturating_sub(1);
-        }
-        while pos > 0 {
-            if bytes[pos] == ch {
-                return pos;
-            }
-            if bytes[pos] == b'\n' {
-                break;
-            }
-            pos -= 1;
-        }
-        pos
-    }
-
-    fn find_close_forward_to_line(&self, ch: u8, mut pos: usize) -> usize {
-        let bytes = self.doc.as_bytes();
-        while pos < bytes.len() {
-            if bytes[pos] == ch {
-                return pos + 1;
-            }
-            if bytes[pos] == b'\n' {
-                break;
-            }
-            pos += 1;
-        }
-        pos
-    }
-
     #[allow(clippy::too_many_arguments)]
     fn emit_value(
         &mut self,
@@ -150,10 +168,12 @@ impl<'a> Collector<'a> {
         end: usize,
         raw: String,
     ) {
-        let (line_start, col) = self.line_col(start);
+        let (line_start, col) = self.idx.line_col(start);
 
-        let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
-        let (line_end, _) = self.line_col(end_pos);
+        let end_pos = end
+            .saturating_sub(1)
+            .min(self.idx.doc.len().saturating_sub(1));
+        let (line_end, _) = self.idx.line_col(end_pos);
 
         let meta = KeyMeta {
             // key
@@ -226,7 +246,7 @@ impl EventReceiver for Collector<'_> {
     }
 
     fn inline_table_open(&mut self, span: Span, _error: &mut dyn ErrorSink) -> bool {
-        let start = self.find_open_back_to_line(b'{', span.start());
+        let start = self.idx.find_open_back_to_line(b'{', span.start());
         if let Some(ctx) = self.push_inline_ctx_from_pending(start) {
             self.inline_stack.push(ctx);
         } else {
@@ -247,7 +267,7 @@ impl EventReceiver for Collector<'_> {
         let start = ctx.start;
         let mut end = span.end();
         if end <= start {
-            end = self.find_close_forward_to_line(b'}', span.start());
+            end = self.idx.find_close_forward_to_line(b'}', span.start());
         }
 
         let mut table = DeTable::new();
@@ -265,7 +285,7 @@ impl EventReceiver for Collector<'_> {
                 key_span,
             } = pk;
 
-            let raw = self.slice(start, end);
+            let raw = self.idx.slice(start, end).to_string();
 
             self.emit_value(
                 full_key,
@@ -286,10 +306,12 @@ impl EventReceiver for Collector<'_> {
             return;
         }
 
-        let raw = self.slice(start, end);
-        let (line_start, col) = self.line_col(start);
-        let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
-        let (line_end, _) = self.line_col(end_pos);
+        let raw = self.idx.slice(start, end).to_string();
+        let (line_start, col) = self.idx.line_col(start);
+        let end_pos = end
+            .saturating_sub(1)
+            .min(self.idx.doc.len().saturating_sub(1));
+        let (line_end, _) = self.idx.line_col(end_pos);
 
         self.keys.insert(
             ctx.full_key,
@@ -310,7 +332,7 @@ impl EventReceiver for Collector<'_> {
     }
 
     fn array_open(&mut self, span: Span, _error: &mut dyn ErrorSink) -> bool {
-        let start = self.find_open_back_to_line(b'[', span.start());
+        let start = self.idx.find_open_back_to_line(b'[', span.start());
         self.array_start_stack.push(start);
         self.array_stack.push(Vec::new());
         true
@@ -322,7 +344,7 @@ impl EventReceiver for Collector<'_> {
 
         let mut end = span.end();
         if end <= start {
-            end = self.find_close_forward_to_line(b']', span.start());
+            end = self.idx.find_close_forward_to_line(b']', span.start());
         }
 
         let arr = build_dearray(items);
@@ -345,7 +367,7 @@ impl EventReceiver for Collector<'_> {
                 key_span,
             } = pk;
 
-            let raw = self.slice(start, end);
+            let raw = self.idx.slice(start, end).to_string();
 
             self.emit_value(
                 full_key,
@@ -371,7 +393,7 @@ impl EventReceiver for Collector<'_> {
                 ..
             } = pk;
 
-            let raw = self.slice(start, end);
+            let raw = self.idx.slice(start, end).to_string();
 
             self.emit_value(
                 full_key, key_line, key_col, key_span, value, start, end, raw,
@@ -391,9 +413,9 @@ impl EventReceiver for Collector<'_> {
             .unwrap();
 
         let key_str = raw.as_str().to_string();
-        let (line, col) = self.line_col(span.start());
+        let (line, col) = self.idx.line_col(span.start());
 
-        if span.start() > 0 && self.doc.as_bytes()[span.start() - 1] == b'[' {
+        if span.start() > 0 && self.idx.doc.as_bytes()[span.start() - 1] == b'[' {
             self.parsing_table_header = true;
             self.current_path.clear();
         }
@@ -402,7 +424,7 @@ impl EventReceiver for Collector<'_> {
             self.current_path.push(key_str);
             self.pending = None;
             self.inline_pending = None;
-            if span.end() < self.doc.len() && self.doc.as_bytes()[span.end()] == b']' {
+            if span.end() < self.idx.doc.len() && self.idx.doc.as_bytes()[span.end()] == b']' {
                 self.parsing_table_header = false;
             }
             return;
@@ -625,7 +647,7 @@ fn to_python<'py>(
 
 fn build_py_dict<'py>(
     py: Python<'py>,
-    map: &HashMap<String, KeyMeta<'_>>,
+    map: &rustc_hash::FxHashMap<String, KeyMeta<'_>>,
     doc: &str,
 ) -> PyResult<Bound<'py, PyDict>> {
     let py_dict = PyDict::new(py);

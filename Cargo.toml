@@ -16,10 +16,10 @@ pyo3 = { version = "=0.28.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
+memchr = "=2.8.0"
 rustc-hash = "=2.1.1"
 num-bigint = "=0.4.6"
 smallvec = "=2.0.0-alpha.12"
-hashbrown = "=0.16.1"
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
 [dependencies.mimalloc]
