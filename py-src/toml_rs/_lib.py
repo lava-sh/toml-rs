@@ -114,7 +114,12 @@ class TOMLDecodeError(ValueError):
         self.lineno = lineno
 
     def __str__(self) -> str:
-        return self.msg.replace("\r", "\\r").replace("\b", "\\b")
+        return (
+            self
+            .msg
+            .replace("\r", "\\r")
+            .replace("\b", "\\b")
+        )
 
 
 class TOMLEncodeError(TypeError):
