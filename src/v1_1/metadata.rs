@@ -140,7 +140,10 @@ impl<'a> Collector<'a> {
 
     fn emit_value(
         &mut self,
-        pending: PendingKey,
+        full_key: String,
+        key_line: usize,
+        key_col: usize,
+        key_span: (usize, usize),
         value: DeValue<'a>,
         start: usize,
         end: usize,
@@ -152,10 +155,12 @@ impl<'a> Collector<'a> {
         let (line_end, _) = self.line_col(end_pos);
 
         let meta = KeyMeta {
-            key_line: pending.key_line,
-            key_col: pending.key_col,
-            key_span: pending.key_span,
+            // key
+            key_line,
+            key_col,
+            key_span,
             value,
+            // value
             value_raw: raw,
             value_line_start: line_start,
             value_line_end: line_end,
@@ -163,19 +168,19 @@ impl<'a> Collector<'a> {
             value_span: (start, end),
         };
 
-        self.keys.insert(pending.full_key, meta);
+        self.keys.insert(full_key, meta);
     }
 
     fn attach_value_to_inline(
         &mut self,
-        leaf_key: String,
+        leaf_key: &str,
         start: usize,
         end: usize,
         value: DeValue<'a>,
     ) {
         if let Some(ctx) = self.inline_stack.last_mut() {
             ctx.entries
-                .push((leaf_key, Spanned::new(start..end, value)));
+                .push((leaf_key.to_string(), Spanned::new(start..end, value)));
         }
     }
 
@@ -251,9 +256,28 @@ impl EventReceiver for Collector<'_> {
         let value = DeValue::Table(table);
 
         if let Some(pk) = self.inline_pending.take() {
+            let PendingKey {
+                full_key,
+                leaf_key,
+                key_line,
+                key_col,
+                key_span,
+            } = pk;
+
             let raw = self.slice(start, end);
-            self.emit_value(pk.clone(), value.clone(), start, end, raw);
-            self.attach_value_to_inline(pk.leaf_key.clone(), start, end, value);
+
+            self.emit_value(
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                value.clone(),
+                start,
+                end,
+                raw,
+            );
+
+            self.attach_value_to_inline(&leaf_key, start, end, value);
             return;
         }
 
@@ -262,24 +286,19 @@ impl EventReceiver for Collector<'_> {
         }
 
         let raw = self.slice(start, end);
-        let pk = PendingKey {
-            full_key: ctx.full_key,
-            leaf_key: String::new(),
-            key_line: 0,
-            key_col: 0,
-            key_span: (start, end),
-        };
         let (line_start, col) = self.line_col(start);
         let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
         let (line_end, _) = self.line_col(end_pos);
 
         self.keys.insert(
-            pk.full_key.clone(),
+            ctx.full_key,
             KeyMeta {
+                // key
                 key_line: 0,
                 key_col: 0,
                 key_span: (start, end),
                 value,
+                // value
                 value_raw: raw,
                 value_line_start: line_start,
                 value_line_end: line_end,
@@ -317,15 +336,52 @@ impl EventReceiver for Collector<'_> {
         }
 
         if let Some(pk) = self.inline_pending.take() {
+            let PendingKey {
+                full_key,
+                leaf_key,
+                key_line,
+                key_col,
+                key_span,
+            } = pk;
+
             let raw = self.slice(start, end);
-            self.emit_value(pk.clone(), value.clone(), start, end, raw);
-            self.attach_value_to_inline(pk.leaf_key.clone(), start, end, value);
+
+            self.emit_value(
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                value.clone(),
+                start,
+                end,
+                raw,
+            );
+
+            self.attach_value_to_inline(&leaf_key, start, end, value);
             return;
         }
 
         if let Some(pk) = self.pending.take() {
+            let PendingKey {
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                ..
+            } = pk;
+
             let raw = self.slice(start, end);
-            self.emit_value(pk, value, start, end, raw);
+
+            self.emit_value(
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                value,
+                start,
+                end,
+                raw,
+            );
         }
     }
 
@@ -429,14 +485,50 @@ impl EventReceiver for Collector<'_> {
         }
 
         if let Some(pk) = self.inline_pending.take() {
+            let PendingKey {
+                full_key,
+                leaf_key,
+                key_line,
+                key_col,
+                key_span,
+            } = pk;
+
             let raw = raw_str.to_string();
-            self.emit_value(pk.clone(), value.clone(), span.start(), span.end(), raw);
-            self.attach_value_to_inline(pk.leaf_key.clone(), span.start(), span.end(), value);
+
+            self.emit_value(
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                value.clone(),
+                span.start(),
+                span.end(),
+                raw,
+            );
+
+            self.attach_value_to_inline(&leaf_key, span.start(), span.end(), value);
             return;
         }
 
         if let Some(pk) = self.pending.take() {
-            self.emit_value(pk, value, span.start(), span.end(), raw_str.to_string());
+            let PendingKey {
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                ..
+            } = pk;
+
+            self.emit_value(
+                full_key,
+                key_line,
+                key_col,
+                key_span,
+                value,
+                span.start(),
+                span.end(),
+                raw_str.to_string(),
+            );
         }
     }
 }
