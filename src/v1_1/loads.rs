@@ -39,8 +39,8 @@ fn to_python<'py>(
                 return i_64.into_bound_py_any(py);
             }
 
-            if let Some(bigint) = num_bigint::BigInt::parse_bytes(bytes, radix) {
-                return bigint.into_bound_py_any(py);
+            if let Some(big_int) = num_bigint::BigInt::parse_bytes(bytes, radix) {
+                return big_int.into_bound_py_any(py);
             }
 
             let mut err = TomlError::custom(
