@@ -16,7 +16,7 @@ def test_metadata() -> None:
     float_4 = 1e0_6
     float_5 = -2E-2
     """)
-    assert toml_rs.parse_from_string(nums, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(nums, toml_version="1.1.0").meta == {
         "keys": {
             "float_3": {
                 "key": "float_3",
@@ -116,7 +116,7 @@ def test_metadata() -> None:
     text 3
     \"\"\"
     """)
-    assert toml_rs.parse_from_string(strings, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(strings, toml_version="1.1.0").meta == {
         "keys": {
             "t1": {
                 "key": "t1",
@@ -201,7 +201,7 @@ def test_metadata() -> None:
       "omega"
     ]
     """)
-    assert toml_rs.parse_from_string(example, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(example, toml_version="1.1.0").meta == {
         "keys": {
             "clients.data": {
                 "key": "clients.data",
@@ -366,7 +366,7 @@ def test_metadata() -> None:
         },
     }
     """)
-    assert toml_rs.parse_from_string(tbl, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(tbl, toml_version="1.1.0").meta == {
         "keys": {
             "tbl": {
                 "key": "tbl",
@@ -439,7 +439,7 @@ def test_document_item_accessors() -> None:
     [".m.".p.".e"]
     l = 99
     """)
-    doc = toml_rs.parse_from_string(toml, toml_version="1.1.0")
+    doc = toml_rs.load_with_metadata(toml, toml_version="1.1.0")
 
     assert doc.value["a"]["b"] == 1
     assert doc.value["a"]["c"]["d"] == 2

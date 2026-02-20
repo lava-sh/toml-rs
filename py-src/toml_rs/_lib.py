@@ -86,14 +86,21 @@ def dumps(
     )
 
 
-def parse_from_string(
-    toml_string: str,
+def load_with_metadata(
+    toml: str | BinaryIO,
     /,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> TOMLDocument:
-    if not isinstance(toml_string, str):
-        msg = f"Expected str object, not '{type(toml_string).__qualname__}'"
-        raise TypeError(msg)
+    if isinstance(toml, str):
+        toml_string = toml
+    else:
+        toml_bytes = toml.read()
+        try:
+            toml_string = toml_bytes.decode()
+        except AttributeError:
+            msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+            raise TypeError(msg) from None
+
     return _parse_from_string(toml_string, toml_version=toml_version)
 
 

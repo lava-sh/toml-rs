@@ -22,17 +22,6 @@ num-bigint = "=0.4.6"
 smallvec = "=2.0.0-alpha.12"
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
-[dependencies.mimalloc]
-optional = true
-version = "=0.1.48"
-features = [
-    # mimalloc v3
-    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
-    "v3",
-    "override",
-    "local_dynamic_tls",
-]
-
 [dependencies.lexical-core]
 git = "https://github.com/Alexhuszagh/rust-lexical"
 rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
@@ -103,9 +92,31 @@ features = [
     "unbounded",
 ]
 
+[dependencies.mimalloc]
+optional = true
+version = "=0.1.48"
+features = [
+    # mimalloc v3
+    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
+    "v3",
+    "override",
+    "local_dynamic_tls",
+]
+
+[dependencies.snmalloc-rs]
+optional = true
+version = "=0.3.8"
+features = [
+    "lto",
+    "build_cc",
+    "native-cpu",
+    "local_dynamic_tls",
+]
+
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
+snmalloc = ["dep:snmalloc-rs"]
 
 [profile.release]
 lto = "fat"

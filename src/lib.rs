@@ -5,7 +5,11 @@ mod v1_1;
 
 #[cfg(feature = "mimalloc")]
 #[global_allocator]
-static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
+#[cfg(feature = "snmalloc")]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
 
 #[pyo3::pymodule(name = "_toml_rs")]
 mod toml_rs {

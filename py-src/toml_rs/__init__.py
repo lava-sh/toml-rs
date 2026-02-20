@@ -6,8 +6,8 @@ __all__ = (
     "dump",
     "dumps",
     "load",
+    "load_with_metadata",
     "loads",
-    "parse_from_string",
 )
 
 from ._lib import (
@@ -18,6 +18,6 @@ from ._lib import (
     dump,
     dumps,
     load,
+    load_with_metadata,
     loads,
-    parse_from_string,
 )
