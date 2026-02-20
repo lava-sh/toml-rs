@@ -6,7 +6,7 @@ use num_bigint::BigInt;
 use pyo3::{
     Bound, IntoPyObjectExt, PyAny, PyResult, Python,
     prelude::*,
-    types::{PyDate, PyDict, PyList, PyTime},
+    types::{PyDate, PyDict, PyList, PyTime, PyTuple},
 };
 use toml::{
     Spanned,
@@ -656,7 +656,10 @@ fn build_py_dict<'py>(
         d.set_item("key", key)?;
         d.set_item("key_line", meta.key_line)?;
         d.set_item("key_col", meta.key_col)?;
-        d.set_item("key_span", [meta.key_span.0, meta.key_span.1])?;
+        d.set_item(
+            "key_span",
+            PyTuple::new(py, [meta.key_span.0, meta.key_span.1])?,
+        )?;
         d.set_item(
             "value",
             to_python(py, &meta.value, meta.value_span.0..meta.value_span.1, doc)?,
@@ -665,10 +668,16 @@ fn build_py_dict<'py>(
         if meta.value_line_start == meta.value_line_end {
             d.set_item("value_line", meta.value_line_start)?;
         } else {
-            d.set_item("value_line", [meta.value_line_start, meta.value_line_end])?;
+            d.set_item(
+                "value_line",
+                PyTuple::new(py, [meta.value_line_start, meta.value_line_end])?,
+            )?;
         }
         d.set_item("value_col", meta.value_col)?;
-        d.set_item("value_span", [meta.value_span.0, meta.value_span.1])?;
+        d.set_item(
+            "value_span",
+            PyTuple::new(py, [meta.value_span.0, meta.value_span.1])?,
+        )?;
         py_dict.set_item(key, d)?;
     }
     Ok(py_dict)

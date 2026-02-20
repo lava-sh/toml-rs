@@ -10,12 +10,12 @@ class KeyMeta(TypedDict, total=False):
     key: str
     key_line: int
     key_col: int
-    key_span: list[int]
+    key_span: tuple[int, int]
     value: Any
     value_raw: str
-    value_line: int | list[int]
+    value_line: int | tuple[int, int]
     value_col: int
-    value_span: list[int]
+    value_span: tuple[int, int]
 
 class DocumentMeta(TypedDict):
     keys: dict[str, KeyMeta]

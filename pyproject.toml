@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.12.2"]
+requires = ["maturin == 1.12.3"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -41,8 +41,8 @@ typos = ["typos == 1.43.5"]
 zizmor = ["zizmor == 1.22.0"]
 ci = [
     "ty == 0.0.17",
-    "ruff == 0.15.1",
-    "maturin == 1.12.2",
+    "ruff == 0.15.2",
+    "maturin == 1.12.3",
     "pytest == 9.0.2",
     "rumdl == 0.1.22",
     # last `tomli` version which support TOML 1.0
