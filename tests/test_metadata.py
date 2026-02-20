@@ -147,10 +147,10 @@ def test_metadata() -> None:
                 "key_span": (24, 26),
                 "value": "text\ntext1\n\ntext 2\n\n\n\ntext 3\n",
                 "value_col": 6,
-                "value_line": [
+                "value_line": (
                     3,
                     11,
-                ],
+                ),
                 "value_raw": "'''text\ntext1\n\ntext 2\n\n\n\ntext 3\n'''",
                 "value_span": (29, 64),
             },
@@ -161,10 +161,10 @@ def test_metadata() -> None:
                 "key_span": (65, 67),
                 "value": "text\ntext1\ntext 2\n\ntext 3\n",
                 "value_col": 6,
-                "value_line": [
+                "value_line": (
                     12,
                     17,
-                ],
+                ),
                 "value_raw": '"""text\ntext1\ntext 2\n\ntext 3\n"""',
                 "value_span": (70, 102),
             },
@@ -194,7 +194,7 @@ def test_metadata() -> None:
       dc = "eqdc10"
 
     [clients]
-    data = [ ["gamma", "delta"], (1, 2) ]
+    data = [ ["gamma", "delta"], [1, 2] ]
 
     hosts = [
       "alpha",
@@ -208,10 +208,10 @@ def test_metadata() -> None:
                 "key_col": 1,
                 "key_line": 24,
                 "key_span": (316, 320),
-                "value": [["gamma", "delta"], (1, 2)],
+                "value": [["gamma", "delta"], [1, 2]],
                 "value_col": 8,
                 "value_line": 24,
-                "value_raw": '[ ["gamma", "delta"], (1, 2) ]',
+                "value_raw": '[ ["gamma", "delta"], [1, 2] ]',
                 "value_span": (323, 353),
             },
             "clients.hosts": {
@@ -221,10 +221,10 @@ def test_metadata() -> None:
                 "key_span": (355, 360),
                 "value": ["alpha", "omega"],
                 "value_col": 9,
-                "value_line": [
+                "value_line": (
                     26,
                     29,
-                ],
+                ),
                 "value_raw": '[\n  "alpha",\n  "omega"\n]',
                 "value_span": (363, 387),
             },
@@ -402,10 +402,10 @@ def test_metadata() -> None:
                 "key_span": (51, 75),
                 "value": {"key": 1},
                 "value_col": 17,
-                "value_line": [
+                "value_line": (
                     3,
                     5,
-                ],
+                ),
                 "value_raw": "{\n        key = 1,\n    }",
                 "value_span": (51, 75),
             },
