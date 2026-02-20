@@ -1,3 +1,4 @@
+mod document;
 mod error;
 mod v1;
 mod v1_1;
@@ -12,7 +13,7 @@ mod toml_rs {
     use rustc_hash::FxHashSet;
 
     #[pymodule_export]
-    use crate::v1_1::document::TOMLDocument;
+    use crate::document::TOMLDocument;
     use crate::{
         v1::{
             dumps::{python_to_toml_v1, validate_inline_paths_v1},
