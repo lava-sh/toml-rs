@@ -596,9 +596,9 @@ pub(crate) fn to_python<'py>(
         }
         DeValue::Float(float) => {
             let bytes = float.as_str().as_bytes();
-            let parsed: f64 = lexical_core::parse(bytes).map_err(|e| {
+            let parsed: f64 = lexical_core::parse(bytes).map_err(|err| {
                 TOMLDecodeError::new_err((
-                    format!("invalid float '{}': {e}", float.as_str()),
+                    format!("invalid float '{}': {err}", float.as_str()),
                     doc.to_string(),
                     span.start,
                 ))
