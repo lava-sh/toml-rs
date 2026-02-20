@@ -116,7 +116,7 @@ jobs:
       - name: "Install rumdl"
         run: |
           uv pip install --group rumdl --system
-      - name: "Run typos"
+      - name: "Run rumdl"
         run: |
           rumdl check .
 
@@ -174,9 +174,6 @@ jobs:
       - name: "Run ty"
         run: |
           ty check
-      - name: "Run rumdl"
-        run: |
-          rumdl check .
       - name: "Run pytest"
         run: |
           pytest tests/
