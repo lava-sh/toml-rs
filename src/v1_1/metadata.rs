@@ -571,12 +571,12 @@ pub(crate) fn to_python<'py>(
             let radix = int.radix();
             let options = ParseIntegerOptions::new();
 
-            if let Ok(i64v) = parse_int!(i64, bytes, &options, radix) {
-                return i64v.into_bound_py_any(py);
+            if let Ok(i_64) = parse_int!(i64, bytes, &options, radix) {
+                return i_64.into_bound_py_any(py);
             }
 
-            if let Some(big) = BigInt::parse_bytes(bytes, radix) {
-                return big.into_bound_py_any(py);
+            if let Some(big_int) = BigInt::parse_bytes(bytes, radix) {
+                return big_int.into_bound_py_any(py);
             }
 
             let mut err = TomlError::custom(
@@ -587,6 +587,7 @@ pub(crate) fn to_python<'py>(
                 Some(span.start..span.end),
             );
             err.set_input(Some(doc));
+
             Err(TOMLDecodeError::new_err((
                 err.to_string(),
                 doc.to_string(),
