@@ -10,10 +10,12 @@ on:
       - "*"
     paths-ignore:
       - "README.md"
+      - "CONTRIBUTING.md"
   pull_request:
     paths-ignore:
       - "benchmark/**"
       - "README.md"
+      - "CONTRIBUTING.md"
   workflow_dispatch:
 
 concurrency:
@@ -59,22 +61,22 @@ jobs:
     name: "zizmor"
     runs-on: ubuntu-latest
     steps:
-     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-       with:
-         persist-credentials: false
-     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-       with:
-         python-version: "3.13"
-     - name: "Install uv"
-       uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
-       with:
-         enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
-     - name: "Install zizmor"
-       run: |
-         uv pip install --group zizmor --system
-     - name: "Run zizmor"
-       run: |
-         zizmor .github/
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        with:
+          enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
+      - name: "Install zizmor"
+        run: |
+          uv pip install --group zizmor --system
+      - name: "Run zizmor"
+        run: |
+          zizmor .github/
 
   typos:
     name: "typos"
@@ -96,6 +98,27 @@ jobs:
       - name: "Run typos"
         run: |
           typos --config .typos.toml
+
+  rumdl:
+    name: "rumdl"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.13"
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@eac588ad8def6316056a12d4907a9d4d84ff7a3b # v7.3.0
+        with:
+          enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
+      - name: "Install rumdl"
+        run: |
+          uv pip install --group rumdl --system
+      - name: "Run typos"
+        run: |
+          rumdl check .
 
   tests:
     name: "tests (${{ matrix.os }} / python ${{ matrix.python-version }})"
@@ -176,7 +199,7 @@ jobs:
         run: |
           mkdir -p /tmp/__build
           cp -r py-src src Cargo.toml pyproject.toml README.md /tmp/__build/
-      
+          
           docker run --rm \
             -v /tmp/__build:/app \
             -w /app \
@@ -193,7 +216,15 @@ jobs:
 
   linux:
     name: "linux (ubuntu-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [
+      tests,
+      tests-alpine,
+      cargo-fmt,
+      cargo-clippy,
+      zizmor,
+      typos,
+      rumdl,
+    ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -252,7 +283,15 @@ jobs:
 
   musllinux:
     name: "musllinux (ubuntu-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [
+      tests,
+      tests-alpine,
+      cargo-fmt,
+      cargo-clippy,
+      zizmor,
+      typos,
+      rumdl,
+    ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -285,7 +324,7 @@ jobs:
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
           target: ${{ matrix.platform.target }}
-          args: > 
+          args: >
             --release --out dist 
             --interpreter ${{ matrix.platform.interpreter }} 
             --features mimalloc
@@ -299,7 +338,15 @@ jobs:
 
   windows:
     name: "windows (windows-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [
+      tests,
+      tests-alpine,
+      cargo-fmt,
+      cargo-clippy,
+      zizmor,
+      typos,
+      rumdl,
+    ]
     runs-on: windows-latest
     strategy:
       matrix:
@@ -324,7 +371,7 @@ jobs:
         uses: PyO3/maturin-action@b1bd829e37fef14c63f19162034228a2f3dc1021 # v1.50.0
         with:
           target: ${{ matrix.platform.target }}
-          args: > 
+          args: >
             --release --out dist
             --interpreter ${{ matrix.platform.interpreter }} 
             --features mimalloc
@@ -337,7 +384,15 @@ jobs:
 
   macos:
     name: "macos (macos-latest / ${{ matrix.platform.target }})"
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, zizmor, typos ]
+    needs: [
+      tests,
+      tests-alpine,
+      cargo-fmt,
+      cargo-clippy,
+      zizmor,
+      typos,
+      rumdl,
+    ]
     runs-on: macos-latest
     strategy:
       matrix:
@@ -407,6 +462,7 @@ jobs:
       cargo-fmt,
       zizmor,
       typos,
+      rumdl,
     ]
     permissions:
       # Use to sign the release artifacts

@@ -39,12 +39,12 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.43.5"]
 zizmor = ["zizmor == 1.22.0"]
+rumdl = ["rumdl == 0.1.22"]
 ci = [
     "ty == 0.0.17",
     "ruff == 0.15.2",
     "maturin == 1.12.3",
     "pytest == 9.0.2",
-    "rumdl == 0.1.22",
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
     "tomli == 2.3.0 ; python_version<'3.11'",
@@ -53,6 +53,7 @@ ci = [
 dev = [
     { include-group = "ci" },
     { include-group = "typos" },
+    { include-group = "rumdl" },
     { include-group = "zizmor" },
 ]
 bench = [
