@@ -17,6 +17,7 @@ mod toml_rs {
         v1::{
             dumps::{python_to_toml_v1, validate_inline_paths_v1},
             loads::toml_to_python_v1,
+            metadata::{extract_metadata_v1, to_python_v1},
             pretty::PrettyV1,
         },
         v1_1::{
@@ -153,6 +154,33 @@ mod toml_rs {
         toml_version: &str,
     ) -> PyResult<Py<PyAny>> {
         match toml_version {
+            "1.0.0" => {
+                use toml_v1::de::{DeTable, DeValue};
+
+                let parsed = DeTable::parse(toml_string).map_err(|err| {
+                    TOMLDecodeError::new_err((
+                        err.to_string(),
+                        toml_string.to_string(),
+                        err.span().map_or(0, |s| s.start),
+                    ))
+                })?;
+
+                let meta = extract_metadata_v1(py, &parsed, toml_string)?;
+
+                let span = parsed.span();
+                let inner = parsed.into_inner();
+                let value = to_python_v1(py, &DeValue::Table(inner), span, toml_string)?;
+
+                let doc = Py::new(
+                    py,
+                    TOMLDocument {
+                        value: value.unbind(),
+                        meta: meta.unbind(),
+                    },
+                )?;
+
+                Ok(doc.into())
+            }
             "1.1.0" => {
                 use toml::de::{DeTable, DeValue};
 
