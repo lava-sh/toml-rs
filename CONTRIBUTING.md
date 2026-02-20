@@ -82,7 +82,8 @@ pytest tests/
 
 ## Running security audit for GitHub Actions
 
-We use [zizmor](https://github.com/zizmorcore/zizmor) to audit our GitHub Actions workflows for security issues. To run it do:
+We use [zizmor](https://github.com/zizmorcore/zizmor) to audit our GitHub Actions workflows for security issues. To run
+it do:
 
 ```bash
 zizmor .github/
@@ -94,4 +95,30 @@ We use [typos](https://github.com/crate-ci/typos) to check our code for spelling
 
 ```bash
 typos
+```
+
+## Building with alternative allocators
+
+Project supports compilation with alternative memory
+allocators: [mimalloc](https://github.com/microsoft/mimalloc/tree/dev3)
+and [snmalloc](https://github.com/microsoft/snmalloc).
+
+[Mimalloc](https://github.com/microsoft/mimalloc/tree/dev3) is used by default.
+
+Building with [mimalloc](https://github.com/microsoft/mimalloc/tree/dev3):
+
+```bash
+maturin develop --release --features mimalloc
+```
+
+Building with [snmalloc](https://github.com/microsoft/snmalloc):
+
+```bash
+maturin develop --release --features snmalloc
+```
+
+Building with default allocator:
+
+```bash
+maturin develop --release
 ```
