@@ -41,7 +41,7 @@ py -m venv .venv  # or uv venv .venv --seed
 via pip:
 
 ```bash
-uv pip install -e . --group dev
+pip install -e . --group dev
 ```
 
 via [uv](https://github.com/astral-sh/uv):
