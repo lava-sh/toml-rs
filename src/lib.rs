@@ -152,8 +152,8 @@ mod toml_rs {
         }
     }
 
-    #[pyfunction(name = "_parse_from_string")]
-    fn parse_toml_from_string(
+    #[pyfunction(name = "_parse_metadata_from_string")]
+    fn parse_metadata_from_string(
         py: Python,
         toml_string: &str,
         toml_version: &str,

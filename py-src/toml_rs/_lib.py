@@ -7,7 +7,7 @@ from ._toml_rs import (
     TOMLDocument,
     _dumps,
     _loads,
-    _parse_from_string,
+    _parse_metadata_from_string,
 )
 
 __version__: str = _VERSION
@@ -101,7 +101,7 @@ def load_with_metadata(
             msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
             raise TypeError(msg) from None
 
-    return _parse_from_string(toml_string, toml_version=toml_version)
+    return _parse_metadata_from_string(toml_string, toml_version=toml_version)
 
 
 class TOMLDecodeError(ValueError):
