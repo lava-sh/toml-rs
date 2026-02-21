@@ -15,7 +15,7 @@ mod toml_rs {
         v1::{
             dumps::{python_to_toml_v1, validate_inline_paths_v1},
             loads::toml_to_python_v1,
-            pretty::PrettyV100,
+            pretty::PrettyV1,
         },
         v1_1::{
             dumps::{python_to_toml, validate_inline_paths},
@@ -114,7 +114,7 @@ mod toml_rs {
                 }
 
                 if pretty {
-                    PrettyV100::new(inline_tables.is_none()).visit_document_mut(&mut doc);
+                    PrettyV1::new(inline_tables.is_none()).visit_document_mut(&mut doc);
                 }
 
                 Ok(doc.to_string())

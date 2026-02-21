@@ -1,4 +1,4 @@
-// https://github.com/toml-rs/toml/blob/v0.24.0/crates/toml_edit/src/ser/pretty.rs
+// https://github.com/toml-rs/toml/blob/v0.25.3/crates/toml_edit/src/ser/pretty.rs
 use toml_edit::{Array, DocumentMut, Item, Table, Value, visit_mut};
 
 pub(crate) struct Pretty {
