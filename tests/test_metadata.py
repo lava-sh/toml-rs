@@ -797,4 +797,3 @@ def test_document_item_accessors() -> None:
 
     with pytest.raises(KeyError):
         del doc["a.nope.x"]
-
