@@ -51,14 +51,6 @@ impl<'a> DocIndex<'a> {
         (line, col)
     }
 
-    fn slice(&self, start: usize, end: usize) -> &str {
-        if start < end && end <= self.doc.len() {
-            &self.doc[start..end]
-        } else {
-            ""
-        }
-    }
-
     fn find_open_back_to_line(&self, ch: u8, pos: usize) -> usize {
         let bytes = self.doc.as_bytes();
         if bytes.is_empty() {
@@ -156,7 +148,7 @@ struct KeyLoc {
 
 #[derive(Clone)]
 struct ValueLoc {
-    raw: String,
+    raw_span: Option<Range<usize>>,
     line: (usize, usize),
     col: (usize, usize),
 }
@@ -232,6 +224,30 @@ struct Collector<'a, 'py> {
 }
 
 impl<'a, 'py> Collector<'a, 'py> {
+    fn empty_value_loc() -> ValueLoc {
+        ValueLoc {
+            raw_span: None,
+            line: (0, 0),
+            col: (0, 0),
+        }
+    }
+
+    fn default_table_node() -> MetaNode {
+        MetaNode::Table {
+            key: None,
+            value: Self::empty_value_loc(),
+            children: rustc_hash::FxHashMap::default(),
+        }
+    }
+
+    fn default_array_node() -> MetaNode {
+        MetaNode::Array {
+            key: None,
+            value: Self::empty_value_loc(),
+            items: Vec::new(),
+        }
+    }
+
     fn new(py: Python<'py>, source: &'a Source<'a>, doc: &'a str) -> Self {
         Self {
             py,
@@ -265,22 +281,37 @@ impl<'a, 'py> Collector<'a, 'py> {
         keys.join(".")
     }
 
-    fn make_key_loc(&self, key: String, key_raw: String, start: usize, end: usize) -> KeyLoc {
+    fn header_key_is_last_segment(&self, pos: usize) -> bool {
+        let bytes = self.idx.doc.as_bytes();
+        let end = self.header_end.min(bytes.len());
+        let mut i = pos.min(end);
+
+        while i < end {
+            match bytes[i] {
+                b']' => return true,
+                b'.' => return false,
+                _ => i += 1,
+            }
+        }
+        false
+    }
+
+    fn make_key_loc(&self, key: &str, key_raw: &str, start: usize, end: usize) -> KeyLoc {
         let (line, _) = self.idx.line_col(start);
         let col = self.idx.col_range_same_line(start, end);
         KeyLoc {
-            key,
-            key_raw,
+            key: key.to_owned(),
+            key_raw: key_raw.to_owned(),
             key_line: line,
             key_col: col,
         }
     }
 
-    fn make_value_loc(&self, start: usize, end: usize, raw: String) -> ValueLoc {
+    fn make_value_loc(&self, start: usize, end: usize) -> ValueLoc {
         let value_line = self.idx.value_line_range(start, end);
         let value_col = self.idx.value_col_range_first_line(start, end);
         ValueLoc {
-            raw,
+            raw_span: Some(start..end),
             line: value_line,
             col: value_col,
         }
@@ -305,15 +336,7 @@ impl<'a, 'py> Collector<'a, 'py> {
             match cur {
                 MetaNode::Root { children } | MetaNode::Table { children, .. } => children,
                 _ => {
-                    *cur = MetaNode::Table {
-                        key: None,
-                        value: ValueLoc {
-                            raw: String::new(),
-                            line: (0, 0),
-                            col: (0, 0),
-                        },
-                        children: rustc_hash::FxHashMap::default(),
-                    };
+                    *cur = Collector::default_table_node();
                     match cur {
                         MetaNode::Table { children, .. } => children,
                         _ => unreachable!(),
@@ -326,15 +349,7 @@ impl<'a, 'py> Collector<'a, 'py> {
             if let MetaNode::Array { items, .. } = cur {
                 items
             } else {
-                *cur = MetaNode::Array {
-                    key: None,
-                    value: ValueLoc {
-                        raw: String::new(),
-                        line: (0, 0),
-                        col: (0, 0),
-                    },
-                    items: Vec::new(),
-                };
+                *cur = Collector::default_array_node();
                 match cur {
                     MetaNode::Array { items, .. } => items,
                     _ => unreachable!(),
@@ -354,28 +369,12 @@ impl<'a, 'py> Collector<'a, 'py> {
                     }
                     cur = children
                         .entry(k.clone())
-                        .or_insert_with(|| MetaNode::Table {
-                            key: None,
-                            value: ValueLoc {
-                                raw: String::new(),
-                                line: (0, 0),
-                                col: (0, 0),
-                            },
-                            children: rustc_hash::FxHashMap::default(),
-                        });
+                        .or_insert_with(Collector::default_table_node);
                 }
                 PathSeg::Index(idx) => {
                     let items = ensure_array_items(cur);
                     while items.len() <= *idx {
-                        items.push(MetaNode::Table {
-                            key: None,
-                            value: ValueLoc {
-                                raw: String::new(),
-                                line: (0, 0),
-                                col: (0, 0),
-                            },
-                            children: rustc_hash::FxHashMap::default(),
-                        });
+                        items.push(Collector::default_table_node());
                     }
                     if is_last {
                         items[*idx] = node;
@@ -418,73 +417,38 @@ impl<'a, 'py> Collector<'a, 'py> {
         Some(p)
     }
 
+    fn take_pending_key(&mut self) -> Option<PendingKey> {
+        self.inline_pending.take().or_else(|| self.pending.take())
+    }
+
+    fn container_path_fallback(&self) -> Vec<PathSeg> {
+        self.current_array_item_path().unwrap_or_default()
+    }
+
     fn start_array_ctx(&mut self, span: Span) -> ArrayCtx {
         let start = self.idx.find_open_back_to_line(b'[', span.start());
-
-        if let Some(pk) = self.inline_pending.take() {
-            return ArrayCtx {
-                path: pk.path,
-                start,
-                key_loc: Some(pk.key_loc),
-                items: Vec::new(),
-            };
-        }
-        if let Some(pk) = self.pending.take() {
-            return ArrayCtx {
-                path: pk.path,
-                start,
-                key_loc: Some(pk.key_loc),
-                items: Vec::new(),
-            };
-        }
-        if let Some(p) = self.current_array_item_path() {
-            return ArrayCtx {
-                path: p,
-                start,
-                key_loc: None,
-                items: Vec::new(),
-            };
-        }
+        let (path, key_loc) = match self.take_pending_key() {
+            Some(pk) => (pk.path, Some(pk.key_loc)),
+            None => (self.container_path_fallback(), None),
+        };
         ArrayCtx {
-            path: Vec::new(),
+            path,
             start,
-            key_loc: None,
+            key_loc,
             items: Vec::new(),
         }
     }
 
     fn start_inline_ctx(&mut self, span: Span) -> InlineCtx {
         let start = self.idx.find_open_back_to_line(b'{', span.start());
-
-        if let Some(pk) = self.inline_pending.take() {
-            return InlineCtx {
-                path: pk.path,
-                start,
-                key_loc: Some(pk.key_loc),
-                children: rustc_hash::FxHashMap::default(),
-            };
-        }
-        if let Some(pk) = self.pending.take() {
-            return InlineCtx {
-                path: pk.path,
-                start,
-                key_loc: Some(pk.key_loc),
-                children: rustc_hash::FxHashMap::default(),
-            };
-        }
-        if let Some(p) = self.current_array_item_path() {
-            return InlineCtx {
-                path: p,
-                start,
-                key_loc: None,
-                children: rustc_hash::FxHashMap::default(),
-            };
-        }
-
+        let (path, key_loc) = match self.take_pending_key() {
+            Some(pk) => (pk.path, Some(pk.key_loc)),
+            None => (self.container_path_fallback(), None),
+        };
         InlineCtx {
-            path: Vec::new(),
+            path,
             start,
-            key_loc: None,
+            key_loc,
             children: rustc_hash::FxHashMap::default(),
         }
     }
@@ -495,7 +459,7 @@ impl<'a, 'py> Collector<'a, 'py> {
                 if key.is_none() {
                     *key = Some(key_loc);
                 }
-                if value.raw.is_empty() {
+                if value.raw_span.is_none() {
                     *value = value_loc;
                 }
             }
@@ -595,14 +559,17 @@ impl<'a, 'py> Collector<'a, 'py> {
 impl EventReceiver for Collector<'_, '_> {
     fn array_table_open(&mut self, span: Span, _error: &mut dyn ErrorSink) {
         self.parsing_table_header = true;
-        self.header_is_array = false;
+        self.header_is_array = true;
         self.header_keys.clear();
         self.header_key_locs.clear();
         self.pending = None;
         self.inline_pending = None;
 
         self.header_start = self.idx.find_open_back_to_line(b'[', span.start());
-        self.header_end = self.idx.find_table_header_end(self.header_start, false);
+        if self.header_start > 0 && self.idx.doc.as_bytes()[self.header_start - 1] == b'[' {
+            self.header_start -= 1;
+        }
+        self.header_end = self.idx.find_table_header_end(self.header_start, true);
     }
 
     fn array_table_close(&mut self, _span: Span, _error: &mut dyn ErrorSink) {
@@ -628,8 +595,7 @@ impl EventReceiver for Collector<'_, '_> {
             end = self.idx.find_close_forward_to_line(b'}', span.start());
         }
 
-        let raw = self.idx.slice(start, end).to_string();
-        let value_loc = self.make_value_loc(start, end, raw);
+        let value_loc = self.make_value_loc(start, end);
 
         let node = MetaNode::Table {
             key: inline_ctx.key_loc.take(),
@@ -671,8 +637,7 @@ impl EventReceiver for Collector<'_, '_> {
             end = self.idx.find_close_forward_to_line(b']', span.start());
         }
 
-        let raw = self.idx.slice(start, end).to_string();
-        let value_loc = self.make_value_loc(start, end, raw);
+        let value_loc = self.make_value_loc(start, end);
 
         let node = MetaNode::Array {
             key: array_ctx.key_loc.take(),
@@ -706,8 +671,8 @@ impl EventReceiver for Collector<'_, '_> {
             .get(Event::new_unchecked(EventKind::SimpleKey, None, span))
             .unwrap();
 
-        let key_raw = raw.as_str().to_string();
-        let key = key_raw.trim_matches('"').trim_matches('\'').to_string();
+        let key_raw = raw.as_str();
+        let key = key_raw.trim_matches('"').trim_matches('\'');
 
         if span.start() > 0 && self.idx.doc.as_bytes()[span.start() - 1] == b'[' {
             self.parsing_table_header = true;
@@ -726,16 +691,16 @@ impl EventReceiver for Collector<'_, '_> {
                 .find_table_header_end(self.header_start, self.header_is_array);
         }
 
-        let key_loc = self.make_key_loc(key.clone(), key_raw, span.start(), span.end());
+        let key_loc = self.make_key_loc(key, key_raw, span.start(), span.end());
 
         if self.parsing_table_header {
-            self.header_keys.push(key.clone());
+            self.header_keys.push(key.to_owned());
             self.header_key_locs.push(key_loc);
 
             self.pending = None;
             self.inline_pending = None;
 
-            if span.end() < self.idx.doc.len() && self.idx.doc.as_bytes()[span.end()] == b']' {
+            if self.header_key_is_last_segment(span.end()) {
                 self.parsing_table_header = false;
 
                 let hdr = Self::header_key_string(&self.header_keys);
@@ -761,17 +726,13 @@ impl EventReceiver for Collector<'_, '_> {
                                 key_col: (0, 0),
                             });
 
-                    let raw_hdr = self
-                        .idx
-                        .slice(self.header_start, self.header_end)
-                        .to_string();
-                    let hdr_loc = self.make_value_loc(self.header_start, self.header_end, raw_hdr);
+                    let hdr_loc = self.make_value_loc(self.header_start, self.header_end);
 
                     self.ensure_aot_array_at(
                         &aot_path,
                         top_key_loc,
                         ValueLoc {
-                            raw: String::new(),
+                            raw_span: None,
                             line: hdr_loc.line,
                             col: hdr_loc.col,
                         },
@@ -793,12 +754,12 @@ impl EventReceiver for Collector<'_, '_> {
         }
 
         if let Some(inline_ctx) = self.inline_stack.last() {
-            let pk = Self::pending_for_inline_child(&inline_ctx.path, &key, key_loc);
+            let pk = Self::pending_for_inline_child(&inline_ctx.path, key, key_loc);
             self.inline_pending = Some(pk);
             return;
         }
 
-        let pk = self.pending_for_key(&key, key_loc);
+        let pk = self.pending_for_key(key, key_loc);
         self.pending = Some(pk);
     }
 
@@ -813,8 +774,6 @@ impl EventReceiver for Collector<'_, '_> {
             .get(Event::new_unchecked(EventKind::Scalar, encoding, span))
             .unwrap();
 
-        let raw_str = raw.as_str().to_string();
-
         let mut decoded = Cow::Borrowed("");
         let kind = raw.decode_scalar(&mut decoded, error);
 
@@ -823,7 +782,7 @@ impl EventReceiver for Collector<'_, '_> {
             .unwrap_or_else(|_| self.py.None().into_py_any(self.py).unwrap());
 
         if let Some(pk) = self.inline_pending.take() {
-            let value_loc = self.make_value_loc(span.start(), span.end(), raw_str);
+            let value_loc = self.make_value_loc(span.start(), span.end());
             let node = MetaNode::Scalar {
                 key: Some(pk.key_loc),
                 value: value_loc,
@@ -842,7 +801,7 @@ impl EventReceiver for Collector<'_, '_> {
         }
 
         if let Some(pk) = self.pending.take() {
-            let value_loc = self.make_value_loc(span.start(), span.end(), raw_str);
+            let value_loc = self.make_value_loc(span.start(), span.end());
             let node = MetaNode::Scalar {
                 key: Some(pk.key_loc),
                 value: value_loc,
@@ -853,7 +812,7 @@ impl EventReceiver for Collector<'_, '_> {
         }
 
         if self.array_stack.last().is_some() {
-            let value_loc = self.make_value_loc(span.start(), span.end(), raw_str);
+            let value_loc = self.make_value_loc(span.start(), span.end());
             if let Some(parent_arr) = self.array_stack.last_mut() {
                 parent_arr.items.push(MetaNode::Scalar {
                     key: None,
@@ -881,8 +840,18 @@ fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>>
     }
 }
 
+fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
+    match &value.raw_span {
+        Some(span) if span.start < span.end && span.end <= doc.len() => {
+            Cow::Borrowed(&doc[span.start..span.end])
+        }
+        _ => Cow::Borrowed(""),
+    }
+}
+
 fn build_scalar_dict<'py>(
     py: Python<'py>,
+    doc: &str,
     key: Option<&KeyLoc>,
     value: &ValueLoc,
     py_value: &Py<PyAny>,
@@ -896,7 +865,8 @@ fn build_scalar_dict<'py>(
         py_dict.set_item("key_col", build_key_col(py, k.key_col)?)?;
     }
 
-    py_dict.set_item("value_raw", value.raw.as_str())?;
+    let value_raw = value_raw(doc, value);
+    py_dict.set_item("value_raw", value_raw.as_ref())?;
     py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
     py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
     py_dict.set_item("value", py_value.bind(py))?;
@@ -904,43 +874,47 @@ fn build_scalar_dict<'py>(
     Ok(py_dict.into_any())
 }
 
-fn build_container_dict<'py>(
+fn set_value_fields<'py>(
     py: Python<'py>,
-    key: &KeyLoc,
+    doc: &str,
+    py_dict: &Bound<'py, PyDict>,
+    value: &ValueLoc,
+    py_value: Bound<'py, PyAny>,
+) -> PyResult<()> {
+    let value_raw = value_raw(doc, value);
+    py_dict.set_item("value_raw", value_raw.as_ref())?;
+    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
+    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
+    py_dict.set_item("value", py_value)?;
+    Ok(())
+}
+
+fn build_dict<'py>(
+    py: Python<'py>,
+    doc: &str,
+    key: Option<&KeyLoc>,
     value: &ValueLoc,
     py_value: Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let py_dict = PyDict::new(py);
-    py_dict.set_item("key", key.key.as_str())?;
-    py_dict.set_item("key_raw", key.key_raw.as_str())?;
-    py_dict.set_item("key_line", key.key_line)?;
-    py_dict.set_item("key_col", build_key_col(py, key.key_col)?)?;
-    py_dict.set_item("value_raw", value.raw.as_str())?;
-    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
-    py_dict.set_item("value", py_value)?;
+
+    if let Some(k) = key {
+        py_dict.set_item("key", k.key.as_str())?;
+        py_dict.set_item("key_raw", k.key_raw.as_str())?;
+        py_dict.set_item("key_line", k.key_line)?;
+        py_dict.set_item("key_col", build_key_col(py, k.key_col)?)?;
+    }
+
+    set_value_fields(py, doc, &py_dict, value, py_value)?;
     Ok(py_dict.into_any())
 }
 
-fn build_container_no_key<'py>(
-    py: Python<'py>,
-    value: &ValueLoc,
-    py_value: Bound<'py, PyAny>,
-) -> PyResult<Bound<'py, PyAny>> {
-    let py_dict = PyDict::new(py);
-    py_dict.set_item("value_raw", value.raw.as_str())?;
-    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
-    py_dict.set_item("value", py_value)?;
-    Ok(py_dict.into_any())
-}
-
-fn build_nodes_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py, PyAny>> {
+fn build_nodes<'py>(py: Python<'py>, doc: &str, node: &MetaNode) -> PyResult<Bound<'py, PyAny>> {
     match node {
         MetaNode::Root { children } => {
             let py_dict = PyDict::new(py);
             for (k, v) in children {
-                py_dict.set_item(k.as_str(), build_nodes_node(py, v)?)?;
+                py_dict.set_item(k.as_str(), build_nodes(py, doc, v)?)?;
             }
             Ok(py_dict.into_any())
         }
@@ -949,7 +923,7 @@ fn build_nodes_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py
             key,
             value,
             py_value,
-        } => build_scalar_dict(py, key.as_ref(), value, py_value),
+        } => build_scalar_dict(py, doc, key.as_ref(), value, py_value),
 
         MetaNode::Table {
             key,
@@ -958,16 +932,16 @@ fn build_nodes_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py
         } => {
             let py_value_dict = PyDict::new(py);
             for (ck, cv) in children {
-                py_value_dict.set_item(ck.as_str(), build_nodes_node(py, cv)?)?;
+                py_value_dict.set_item(ck.as_str(), build_nodes(py, doc, cv)?)?;
             }
 
             match key.as_ref() {
-                Some(k) => build_container_dict(py, k, value, py_value_dict.into_any()),
+                Some(k) => build_dict(py, doc, Some(k), value, py_value_dict.into_any()),
                 None => {
-                    if value.raw.is_empty() {
+                    if value.raw_span.is_none() {
                         Ok(py_value_dict.into_any())
                     } else {
-                        build_container_no_key(py, value, py_value_dict.into_any())
+                        build_dict(py, doc, None, value, py_value_dict.into_any())
                     }
                 }
             }
@@ -976,16 +950,16 @@ fn build_nodes_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py
         MetaNode::Array { key, value, items } => {
             let py_list = PyList::empty(py);
             for it in items {
-                py_list.append(build_nodes_node(py, it)?)?;
+                py_list.append(build_nodes(py, doc, it)?)?;
             }
 
             match key.as_ref() {
-                Some(k) => build_container_dict(py, k, value, py_list.into_any()),
+                Some(k) => build_dict(py, doc, Some(k), value, py_list.into_any()),
                 None => {
-                    if value.raw.is_empty() {
+                    if value.raw_span.is_none() {
                         Ok(py_list.into_any())
                     } else {
-                        build_container_no_key(py, value, py_list.into_any())
+                        build_dict(py, doc, None, value, py_list.into_any())
                     }
                 }
             }
@@ -1007,7 +981,7 @@ pub(crate) fn extract_metadata<'py>(
     parse_document(&tokens, &mut collector, &mut errors);
 
     let py_dict = PyDict::new(py);
-    py_dict.set_item("nodes", build_nodes_node(py, &collector.root)?)?;
+    py_dict.set_item("nodes", build_nodes(py, doc, &collector.root)?)?;
     Ok(py_dict.into_any())
 }
 
@@ -1091,9 +1065,8 @@ pub(crate) fn to_python<'py>(
         DeValue::Table(table) => {
             let py_dict = PyDict::new(py);
             for (k, v) in table {
-                let key = k.get_ref().clone().into_owned();
                 let val = to_python(py, v.get_ref(), v.span(), doc)?;
-                py_dict.set_item(key, val)?;
+                py_dict.set_item(k.get_ref().as_ref(), val)?;
             }
             Ok(py_dict.into_any())
         }

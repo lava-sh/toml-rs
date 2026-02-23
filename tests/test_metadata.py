@@ -734,6 +734,19 @@ def test_metadata() -> None:
         },
     }
 
+    product_ = _dedent("""
+    [[ product ]]
+    name = "Hammer"
+
+    [[ product ]]
+    name = "Nail"
+    """)
+    doc = toml_rs.load_with_metadata(product_, toml_version="1.0.0").meta
+    assert doc["nodes"]["product"]["value"][0]["value"]["name"]["value"] == "Hammer"
+    assert doc["nodes"]["product"]["value"][1]["value"]["name"]["value"] == "Nail"
+    assert doc["nodes"]["product"]["value"][0]["value_raw"] == "[[ product ]]"
+    assert doc["nodes"]["product"]["value"][1]["value_raw"] == "[[ product ]]"
+
 
 def test_document_item_accessors() -> None:
     toml = _dedent("""
@@ -771,6 +784,8 @@ def test_document_item_accessors() -> None:
 
     doc["new.x.y"] = 3
     assert doc["new.x.y"] == 3
+    assert doc.value["new"]["x"]["y"] == 3
+    assert "new.x.y" not in doc.value
 
     del doc["a.c.d"]
     with pytest.raises(KeyError):
