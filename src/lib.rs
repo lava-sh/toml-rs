@@ -7,6 +7,10 @@ mod v1_1;
 #[global_allocator]
 static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
+#[cfg(feature = "snmalloc")]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
+
 #[pyo3::pymodule(name = "_toml_rs")]
 mod toml_rs {
     use pyo3::{exceptions::PyValueError, import_exception, prelude::*};
