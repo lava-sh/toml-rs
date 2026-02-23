@@ -103,20 +103,9 @@ features = [
     "local_dynamic_tls",
 ]
 
-[dependencies.snmalloc-rs]
-optional = true
-version = "=0.3.8"
-features = [
-    "lto",
-    "build_cc",
-    "native-cpu",
-    "local_dynamic_tls",
-]
-
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
-snmalloc = ["dep:snmalloc-rs"]
 
 [profile.release]
 lto = "fat"

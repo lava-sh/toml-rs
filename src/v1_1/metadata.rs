@@ -88,6 +88,35 @@ impl<'a> DocIndex<'a> {
         }
     }
 
+    fn find_table_header_end(&self, start: usize, is_array: bool) -> usize {
+        let bytes = self.doc.as_bytes();
+        if bytes.is_empty() {
+            return 0;
+        }
+
+        let start = start.min(bytes.len().saturating_sub(1));
+        let line_end = match memchr(b'\n', &bytes[start..]) {
+            Some(i) => start + i,
+            None => bytes.len(),
+        };
+
+        if is_array {
+            let mut i = start;
+            while i + 1 < line_end {
+                if bytes[i] == b']' && bytes[i + 1] == b']' {
+                    return i + 2;
+                }
+                i += 1;
+            }
+            line_end
+        } else {
+            match memchr(b']', &bytes[start..line_end]) {
+                Some(i) => start + i + 1,
+                None => line_end,
+            }
+        }
+    }
+
     fn col_range_same_line(&self, start: usize, end: usize) -> (usize, usize) {
         let (_, c1) = self.line_col(start);
         let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
@@ -125,10 +154,11 @@ struct KeyLoc {
     key_col: (usize, usize),
 }
 
+#[derive(Clone)]
 struct ValueLoc {
-    value_raw: String,
-    value_line: (usize, usize),
-    value_col: (usize, usize),
+    raw: String,
+    line: (usize, usize),
+    col: (usize, usize),
 }
 
 enum MetaNode {
@@ -250,9 +280,9 @@ impl<'a, 'py> Collector<'a, 'py> {
         let value_line = self.idx.value_line_range(start, end);
         let value_col = self.idx.value_col_range_first_line(start, end);
         ValueLoc {
-            value_raw: raw,
-            value_line,
-            value_col,
+            raw,
+            line: value_line,
+            col: value_col,
         }
     }
 
@@ -273,15 +303,14 @@ impl<'a, 'py> Collector<'a, 'py> {
             cur: &mut MetaNode,
         ) -> &mut rustc_hash::FxHashMap<String, MetaNode> {
             match cur {
-                MetaNode::Root { children } => children,
-                MetaNode::Table { children, .. } => children,
+                MetaNode::Root { children } | MetaNode::Table { children, .. } => children,
                 _ => {
                     *cur = MetaNode::Table {
                         key: None,
                         value: ValueLoc {
-                            value_raw: String::new(),
-                            value_line: (0, 0),
-                            value_col: (0, 0),
+                            raw: String::new(),
+                            line: (0, 0),
+                            col: (0, 0),
                         },
                         children: rustc_hash::FxHashMap::default(),
                     };
@@ -294,22 +323,21 @@ impl<'a, 'py> Collector<'a, 'py> {
         }
 
         fn ensure_array_items(cur: &mut MetaNode) -> &mut Vec<MetaNode> {
-            match cur {
-                MetaNode::Array { items, .. } => items,
-                _ => {
-                    *cur = MetaNode::Array {
-                        key: None,
-                        value: ValueLoc {
-                            value_raw: String::new(),
-                            value_line: (0, 0),
-                            value_col: (0, 0),
-                        },
-                        items: Vec::new(),
-                    };
-                    match cur {
-                        MetaNode::Array { items, .. } => items,
-                        _ => unreachable!(),
-                    }
+            if let MetaNode::Array { items, .. } = cur {
+                items
+            } else {
+                *cur = MetaNode::Array {
+                    key: None,
+                    value: ValueLoc {
+                        raw: String::new(),
+                        line: (0, 0),
+                        col: (0, 0),
+                    },
+                    items: Vec::new(),
+                };
+                match cur {
+                    MetaNode::Array { items, .. } => items,
+                    _ => unreachable!(),
                 }
             }
         }
@@ -329,9 +357,9 @@ impl<'a, 'py> Collector<'a, 'py> {
                         .or_insert_with(|| MetaNode::Table {
                             key: None,
                             value: ValueLoc {
-                                value_raw: String::new(),
-                                value_line: (0, 0),
-                                value_col: (0, 0),
+                                raw: String::new(),
+                                line: (0, 0),
+                                col: (0, 0),
                             },
                             children: rustc_hash::FxHashMap::default(),
                         });
@@ -342,9 +370,9 @@ impl<'a, 'py> Collector<'a, 'py> {
                         items.push(MetaNode::Table {
                             key: None,
                             value: ValueLoc {
-                                value_raw: String::new(),
-                                value_line: (0, 0),
-                                value_col: (0, 0),
+                                raw: String::new(),
+                                line: (0, 0),
+                                col: (0, 0),
                             },
                             children: rustc_hash::FxHashMap::default(),
                         });
@@ -357,6 +385,29 @@ impl<'a, 'py> Collector<'a, 'py> {
                 }
             }
         }
+    }
+
+    fn get_node_mut_at(&mut self, path: &[PathSeg]) -> Option<&mut MetaNode> {
+        let mut cur = &mut self.root;
+        for seg in path {
+            match seg {
+                PathSeg::Key(key) => {
+                    cur = match cur {
+                        MetaNode::Root { children } | MetaNode::Table { children, .. } => {
+                            children.get_mut(key)?
+                        }
+                        _ => return None,
+                    };
+                }
+                PathSeg::Index(idx) => {
+                    cur = match cur {
+                        MetaNode::Array { items, .. } => items.get_mut(*idx)?,
+                        _ => return None,
+                    };
+                }
+            }
+        }
+        Some(cur)
     }
 
     fn current_array_item_path(&self) -> Option<Vec<PathSeg>> {
@@ -439,23 +490,37 @@ impl<'a, 'py> Collector<'a, 'py> {
     }
 
     fn ensure_aot_array_at(&mut self, aot_path: &[PathSeg], key_loc: KeyLoc, value_loc: ValueLoc) {
-        let node = MetaNode::Array {
-            key: Some(key_loc),
-            value: value_loc,
-            items: Vec::new(),
-        };
-        self.insert_node_at(aot_path, node);
+        if let Some(existing) = self.get_node_mut_at(aot_path) {
+            if let MetaNode::Array { key, value, .. } = existing {
+                if key.is_none() {
+                    *key = Some(key_loc);
+                }
+                if value.raw.is_empty() {
+                    *value = value_loc;
+                }
+            }
+            return;
+        }
+
+        self.insert_node_at(
+            aot_path,
+            MetaNode::Array {
+                key: Some(key_loc),
+                value: value_loc,
+                items: Vec::new(),
+            },
+        );
     }
 
     fn scalar_to_py_obj(
         &self,
         kind: ScalarKind,
-        decoded: &Cow<'_, str>,
+        decoded: &str,
         raw_span: Range<usize>,
     ) -> PyResult<Py<PyAny>> {
         let py = self.py;
         match kind {
-            ScalarKind::String => decoded.as_ref().into_py_any(py),
+            ScalarKind::String => decoded.into_py_any(py),
             ScalarKind::Boolean(v) => v.into_py_any(py),
             ScalarKind::Integer(radix) => {
                 let bytes = decoded.as_bytes();
@@ -484,7 +549,7 @@ impl<'a, 'py> Collector<'a, 'py> {
                 let bytes = decoded.as_bytes();
                 let parsed: f64 = lexical_core::parse(bytes).map_err(|err| {
                     TOMLDecodeError::new_err((
-                        format!("invalid float '{}': {err}", decoded.as_ref()),
+                        format!("invalid float '{decoded}': {err}"),
                         self.doc.to_string(),
                         raw_span.start,
                     ))
@@ -494,7 +559,7 @@ impl<'a, 'py> Collector<'a, 'py> {
             ScalarKind::DateTime => {
                 let dt = decoded.parse::<Datetime>().map_err(|_| {
                     TOMLDecodeError::new_err((
-                        format!("invalid datetime '{}'", decoded.as_ref()),
+                        format!("invalid datetime '{decoded}'"),
                         self.doc.to_string(),
                         raw_span.start,
                     ))
@@ -527,7 +592,7 @@ impl<'a, 'py> Collector<'a, 'py> {
     }
 }
 
-impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
+impl EventReceiver for Collector<'_, '_> {
     fn array_table_open(&mut self, span: Span, _error: &mut dyn ErrorSink) {
         self.parsing_table_header = true;
         self.header_is_array = false;
@@ -537,7 +602,7 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
         self.inline_pending = None;
 
         self.header_start = self.idx.find_open_back_to_line(b'[', span.start());
-        self.header_end = self.idx.find_close_forward_to_line(b']', span.start());
+        self.header_end = self.idx.find_table_header_end(self.header_start, false);
     }
 
     fn array_table_close(&mut self, _span: Span, _error: &mut dyn ErrorSink) {
@@ -572,18 +637,18 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
             children: std::mem::take(&mut inline_ctx.children),
         };
 
-        if let Some(parent_inline) = self.inline_stack.last_mut() {
-            if let Some(PathSeg::Key(leaf)) = inline_ctx.path.last() {
-                parent_inline.children.insert(leaf.clone(), node);
-                return;
-            }
+        if let Some(parent_inline) = self.inline_stack.last_mut()
+            && let Some(PathSeg::Key(leaf)) = inline_ctx.path.last()
+        {
+            parent_inline.children.insert(leaf.clone(), node);
+            return;
         }
 
-        if let Some(parent_arr) = self.array_stack.last_mut() {
-            if matches!(inline_ctx.path.last(), Some(PathSeg::Index(_))) {
-                parent_arr.items.push(node);
-                return;
-            }
+        if let Some(parent_arr) = self.array_stack.last_mut()
+            && matches!(inline_ctx.path.last(), Some(PathSeg::Index(_)))
+        {
+            parent_arr.items.push(node);
+            return;
         }
 
         self.insert_node_at(&inline_ctx.path, node);
@@ -620,11 +685,11 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
             return;
         }
 
-        if let Some(parent_inline) = self.inline_stack.last_mut() {
-            if let Some(PathSeg::Key(leaf)) = array_ctx.path.last() {
-                parent_inline.children.insert(leaf.clone(), node);
-                return;
-            }
+        if let Some(parent_inline) = self.inline_stack.last_mut()
+            && let Some(PathSeg::Key(leaf)) = array_ctx.path.last()
+        {
+            parent_inline.children.insert(leaf.clone(), node);
+            return;
         }
 
         self.insert_node_at(&array_ctx.path, node);
@@ -650,7 +715,15 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
             self.header_keys.clear();
             self.header_key_locs.clear();
             self.header_start = self.idx.find_open_back_to_line(b'[', span.start());
-            self.header_end = self.idx.find_close_forward_to_line(b']', span.start());
+            if self.header_is_array
+                && self.header_start > 0
+                && self.idx.doc.as_bytes()[self.header_start - 1] == b'['
+            {
+                self.header_start -= 1;
+            }
+            self.header_end = self
+                .idx
+                .find_table_header_end(self.header_start, self.header_is_array);
         }
 
         let key_loc = self.make_key_loc(key.clone(), key_raw, span.start(), span.end());
@@ -698,9 +771,9 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
                         &aot_path,
                         top_key_loc,
                         ValueLoc {
-                            value_raw: String::new(),
-                            value_line: hdr_loc.value_line,
-                            value_col: hdr_loc.value_col,
+                            raw: String::new(),
+                            line: hdr_loc.line,
+                            col: hdr_loc.col,
                         },
                     );
 
@@ -746,7 +819,7 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
         let kind = raw.decode_scalar(&mut decoded, error);
 
         let py_value = self
-            .scalar_to_py_obj(kind, &decoded, span.start()..span.end())
+            .scalar_to_py_obj(kind, decoded.as_ref(), span.start()..span.end())
             .unwrap_or_else(|_| self.py.None().into_py_any(self.py).unwrap());
 
         if let Some(pk) = self.inline_pending.take() {
@@ -757,11 +830,11 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
                 py_value,
             };
 
-            if let Some(inline_ctx) = self.inline_stack.last_mut() {
-                if let Some(PathSeg::Key(leaf)) = pk.path.last() {
-                    inline_ctx.children.insert(leaf.clone(), node);
-                    return;
-                }
+            if let Some(inline_ctx) = self.inline_stack.last_mut()
+                && let Some(PathSeg::Key(leaf)) = pk.path.last()
+            {
+                inline_ctx.children.insert(leaf.clone(), node);
+                return;
             }
 
             self.insert_node_at(&pk.path, node);
@@ -792,11 +865,19 @@ impl<'a, 'py> EventReceiver for Collector<'a, 'py> {
     }
 }
 
-fn build_value_line<'py>(py: Python<'py>, (l1, l2): (usize, usize)) -> PyResult<Bound<'py, PyAny>> {
+fn build_value_line(py: Python, (l1, l2): (usize, usize)) -> PyResult<Bound<PyAny>> {
     if l1 == l2 {
         Ok(l1.into_bound_py_any(py)?)
     } else {
         Ok(PyTuple::new(py, [l1, l2])?.into_any())
+    }
+}
+
+fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
+    if c1 == c2 {
+        Ok(c1.into_bound_py_any(py)?)
+    } else {
+        Ok(PyTuple::new(py, [c1, c2])?.into_any())
     }
 }
 
@@ -812,15 +893,12 @@ fn build_scalar_dict<'py>(
         py_dict.set_item("key", k.key.as_str())?;
         py_dict.set_item("key_raw", k.key_raw.as_str())?;
         py_dict.set_item("key_line", k.key_line)?;
-        py_dict.set_item("key_col", PyTuple::new(py, [k.key_col.0, k.key_col.1])?)?;
+        py_dict.set_item("key_col", build_key_col(py, k.key_col)?)?;
     }
 
-    py_dict.set_item("value_raw", value.value_raw.as_str())?;
-    py_dict.set_item("value_line", build_value_line(py, value.value_line)?)?;
-    py_dict.set_item(
-        "value_col",
-        PyTuple::new(py, [value.value_col.0, value.value_col.1])?,
-    )?;
+    py_dict.set_item("value_raw", value.raw.as_str())?;
+    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
+    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
     py_dict.set_item("value", py_value.bind(py))?;
 
     Ok(py_dict.into_any())
@@ -836,13 +914,10 @@ fn build_container_dict<'py>(
     py_dict.set_item("key", key.key.as_str())?;
     py_dict.set_item("key_raw", key.key_raw.as_str())?;
     py_dict.set_item("key_line", key.key_line)?;
-    py_dict.set_item("key_col", PyTuple::new(py, [key.key_col.0, key.key_col.1])?)?;
-    py_dict.set_item("value_raw", value.value_raw.as_str())?;
-    py_dict.set_item("value_line", build_value_line(py, value.value_line)?)?;
-    py_dict.set_item(
-        "value_col",
-        PyTuple::new(py, [value.value_col.0, value.value_col.1])?,
-    )?;
+    py_dict.set_item("key_col", build_key_col(py, key.key_col)?)?;
+    py_dict.set_item("value_raw", value.raw.as_str())?;
+    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
+    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
     py_dict.set_item("value", py_value)?;
     Ok(py_dict.into_any())
 }
@@ -853,22 +928,19 @@ fn build_container_no_key<'py>(
     py_value: Bound<'py, PyAny>,
 ) -> PyResult<Bound<'py, PyAny>> {
     let py_dict = PyDict::new(py);
-    py_dict.set_item("value_raw", value.value_raw.as_str())?;
-    py_dict.set_item("value_line", build_value_line(py, value.value_line)?)?;
-    py_dict.set_item(
-        "value_col",
-        PyTuple::new(py, [value.value_col.0, value.value_col.1])?,
-    )?;
+    py_dict.set_item("value_raw", value.raw.as_str())?;
+    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
+    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
     py_dict.set_item("value", py_value)?;
     Ok(py_dict.into_any())
 }
 
-fn build_tree_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py, PyAny>> {
+fn build_nodes_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py, PyAny>> {
     match node {
         MetaNode::Root { children } => {
             let py_dict = PyDict::new(py);
             for (k, v) in children {
-                py_dict.set_item(k.as_str(), build_tree_node(py, v)?)?;
+                py_dict.set_item(k.as_str(), build_nodes_node(py, v)?)?;
             }
             Ok(py_dict.into_any())
         }
@@ -886,13 +958,13 @@ fn build_tree_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py,
         } => {
             let py_value_dict = PyDict::new(py);
             for (ck, cv) in children {
-                py_value_dict.set_item(ck.as_str(), build_tree_node(py, cv)?)?;
+                py_value_dict.set_item(ck.as_str(), build_nodes_node(py, cv)?)?;
             }
 
             match key.as_ref() {
                 Some(k) => build_container_dict(py, k, value, py_value_dict.into_any()),
                 None => {
-                    if value.value_raw.is_empty() {
+                    if value.raw.is_empty() {
                         Ok(py_value_dict.into_any())
                     } else {
                         build_container_no_key(py, value, py_value_dict.into_any())
@@ -904,13 +976,13 @@ fn build_tree_node<'py>(py: Python<'py>, node: &MetaNode) -> PyResult<Bound<'py,
         MetaNode::Array { key, value, items } => {
             let py_list = PyList::empty(py);
             for it in items {
-                py_list.append(build_tree_node(py, it)?)?;
+                py_list.append(build_nodes_node(py, it)?)?;
             }
 
             match key.as_ref() {
                 Some(k) => build_container_dict(py, k, value, py_list.into_any()),
                 None => {
-                    if value.value_raw.is_empty() {
+                    if value.raw.is_empty() {
                         Ok(py_list.into_any())
                     } else {
                         build_container_no_key(py, value, py_list.into_any())
@@ -935,7 +1007,7 @@ pub(crate) fn extract_metadata<'py>(
     parse_document(&tokens, &mut collector, &mut errors);
 
     let py_dict = PyDict::new(py);
-    py_dict.set_item("tree", build_tree_node(py, &collector.root)?)?;
+    py_dict.set_item("nodes", build_nodes_node(py, &collector.root)?)?;
     Ok(py_dict.into_any())
 }
 

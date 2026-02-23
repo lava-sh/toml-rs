@@ -8,17 +8,16 @@ ParseFloat: TypeAlias = Callable[[str], Any]
 
 class KeyMeta(TypedDict, total=False):
     key: str
+    key_raw: str
     key_line: int
-    key_col: int
-    key_span: tuple[int, int]
+    key_col: int | tuple[int, int]
     value: Any
     value_raw: str
     value_line: int | tuple[int, int]
-    value_col: int
-    value_span: tuple[int, int]
+    value_col: int | tuple[int, int]
 
 class DocumentMeta(TypedDict):
-    keys: dict[str, KeyMeta]
+    nodes: dict[str, KeyMeta]
 
 class TOMLDocument(Protocol):
     value: dict[str, Any]
@@ -45,7 +44,7 @@ def _dumps(
     toml_version: TomlVersion = ...,
 ) -> str: ...
 
-def _parse_from_string(
+def _parse_metadata_from_string(
     toml_string: str,
     toml_version: TomlVersion = ...,
 ) -> TOMLDocument: ...
