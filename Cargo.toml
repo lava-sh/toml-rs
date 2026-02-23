@@ -103,17 +103,6 @@ features = [
     "local_dynamic_tls",
 ]
 
-[dependencies.mimalloc]
-optional = true
-version = "=0.1.48"
-features = [
-    # mimalloc v3
-    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
-    "v3",
-    "override",
-    "local_dynamic_tls",
-]
-
 [dependencies.snmalloc-rs]
 optional = true
 version = "=0.3.8"
