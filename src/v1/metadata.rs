@@ -872,6 +872,14 @@ fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>>
     }
 }
 
+fn build_value_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
+    if c1 == c2 {
+        Ok(c1.into_bound_py_any(py)?)
+    } else {
+        Ok(PyTuple::new(py, [c1, c2])?.into_any())
+    }
+}
+
 fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
     match &value.raw_span {
         Some(span) if span.start < span.end && span.end <= doc.len() => {
@@ -900,7 +908,7 @@ fn build_scalar_dict<'py>(
     let value_raw = value_raw(doc, value);
     py_dict.set_item("value_raw", value_raw.as_ref())?;
     py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
+    py_dict.set_item("value_col", build_value_col(py, value.col)?)?;
     py_dict.set_item("value", py_value.bind(py))?;
 
     Ok(py_dict.into_any())
@@ -916,7 +924,7 @@ fn set_value_fields<'py>(
     let value_raw = value_raw(doc, value);
     py_dict.set_item("value_raw", value_raw.as_ref())?;
     py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", PyTuple::new(py, [value.col.0, value.col.1])?)?;
+    py_dict.set_item("value_col", build_value_col(py, value.col)?)?;
     py_dict.set_item("value", py_value)?;
     Ok(())
 }
