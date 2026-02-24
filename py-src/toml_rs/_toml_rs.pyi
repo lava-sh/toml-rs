@@ -1,10 +1,31 @@
 from collections.abc import Callable
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal, Protocol, TypeAlias, TypedDict
 
 _VERSION: str
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]
+
+class KeyMeta(TypedDict, total=False):
+    key: str
+    key_raw: str
+    key_line: int
+    key_col: int | tuple[int, int]
+    value: Any
+    value_raw: str
+    value_line: int | tuple[int, int]
+    value_col: int | tuple[int, int]
+
+class DocumentMeta(TypedDict):
+    nodes: dict[str, KeyMeta]
+
+class TOMLDocument(Protocol):
+    value: dict[str, Any]
+    meta: DocumentMeta
+
+    def __getitem__(self, key: str, /) -> Any: ...
+    def __setitem__(self, key: str, value: Any, /) -> None: ...
+    def __delitem__(self, key: str, /) -> None: ...
 
 def _loads(
     s: str,
@@ -22,3 +43,8 @@ def _dumps(
     pretty: bool = False,
     toml_version: TomlVersion = ...,
 ) -> str: ...
+
+def _parse_metadata_from_string(
+    toml_string: str,
+    toml_version: TomlVersion = ...,
+) -> TOMLDocument: ...

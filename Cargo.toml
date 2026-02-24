@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -16,8 +16,9 @@ pyo3 = { version = "=0.28.2", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-num-bigint = "=0.4.6"
+memchr = "=2.8.0"
 rustc-hash = "=2.1.1"
+num-bigint = "=0.4.6"
 smallvec = "=2.0.0-alpha.12"
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
@@ -27,6 +28,7 @@ rev = "59382e249f8fd0dd384ed1f180b38d168cf9fcbb"
 default-features = false
 features = [
     "radix",
+    "parse-floats",
     "parse-integers",
 ]
 
@@ -34,14 +36,6 @@ features = [
 #                   TOML v1.0.0 support                   #
 # https://github.com/lava-sh/toml/tree/for_python_toml_rs #
 ###########################################################
-[dependencies.toml_edit_v1]
-git = "https://github.com/lava-sh/toml"
-rev = "dbabedc01d10ffd69900ef75cfef992991b52a5b"
-features = [
-    "serde",
-    "unbounded",
-]
-
 [dependencies.toml_v1]
 git = "https://github.com/lava-sh/toml"
 rev = "dbabedc01d10ffd69900ef75cfef992991b52a5b"
@@ -51,18 +45,27 @@ features = [
     "preserve_order", # save order
 ]
 
-##############################################################
-#                    TOML v1.1.0 support                     #
-# https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0 #
-##############################################################
-[dependencies.toml_edit]
+[dependencies.toml_parser_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "e74064df12929a6152423f93dde35b34891eaa64"
+rev = "dbabedc01d10ffd69900ef75cfef992991b52a5b"
+features = [
+    "std",
+    "simd",
+    "unsafe",
+]
+
+[dependencies.toml_edit_v1]
+git = "https://github.com/lava-sh/toml"
+rev = "dbabedc01d10ffd69900ef75cfef992991b52a5b"
 features = [
     "serde",
     "unbounded",
 ]
 
+##############################################################
+#                    TOML v1.1.0 support                     #
+# https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0 #
+##############################################################
 [dependencies.toml]
 git = "https://github.com/lava-sh/toml"
 rev = "e74064df12929a6152423f93dde35b34891eaa64"
@@ -70,6 +73,23 @@ features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit
     "preserve_order", # save order
+]
+
+[dependencies.toml_parser]
+git = "https://github.com/lava-sh/toml"
+rev = "e74064df12929a6152423f93dde35b34891eaa64"
+features = [
+    "std",
+    "simd",
+    "unsafe",
+]
+
+[dependencies.toml_edit]
+git = "https://github.com/lava-sh/toml"
+rev = "e74064df12929a6152423f93dde35b34891eaa64"
+features = [
+    "serde",
+    "unbounded",
 ]
 
 [dependencies.mimalloc]

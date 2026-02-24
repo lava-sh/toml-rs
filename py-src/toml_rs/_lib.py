@@ -4,8 +4,10 @@ from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
 from ._toml_rs import (
     _VERSION,
+    TOMLDocument,
     _dumps,
     _loads,
+    _parse_metadata_from_string,
 )
 
 __version__: str = _VERSION
@@ -82,6 +84,24 @@ def dumps(
         pretty=pretty,
         toml_version=toml_version,
     )
+
+
+def load_with_metadata(
+    toml: str | BinaryIO,
+    /,
+    toml_version: TomlVersion = DEFAULT_TOML_VERSION,
+) -> TOMLDocument:
+    if isinstance(toml, str):
+        toml_string = toml
+    else:
+        toml_bytes = toml.read()
+        try:
+            toml_string = toml_bytes.decode()
+        except AttributeError:
+            msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
+            raise TypeError(msg) from None
+
+    return _parse_metadata_from_string(toml_string, toml_version=toml_version)
 
 
 class TOMLDecodeError(ValueError):
