@@ -748,6 +748,7 @@ def test_metadata() -> None:
 def test_document_item_accessors() -> None:
     toml = _dedent("""
     ".x" = "text"
+    "k.l" = 7
 
     [a]
     b = 1
@@ -784,6 +785,11 @@ def test_document_item_accessors() -> None:
     assert doc.value["new"]["x"]["y"] == 3
     assert "new.x.y" not in doc.value
 
+    doc["k.l"] = 8
+    assert doc["k.l"] == 8
+    assert doc.value["k.l"] == 8
+    assert "k" not in doc.value
+
     del doc["a.c.d"]
     with pytest.raises(KeyError):
         _ = doc["a.c.d"]
@@ -805,3 +811,17 @@ def test_document_item_accessors() -> None:
     assert quoted.meta["nodes"]["'foo'"]["key_raw"] == "\"'foo'\""
     assert quoted.meta["nodes"]['"bar"']["key"] == '"bar"'
     assert quoted.meta["nodes"]['"bar"']["key_raw"] == "'\"bar\"'"
+
+    escaped_quoted = toml_rs.load_with_metadata(
+        _dedent('''
+        "a\\u0041b" = 1
+        "a\\"b" = 2
+        '''),
+        toml_version="1.1.0",
+    )
+
+    assert escaped_quoted.value == {"aAb": 1, 'a"b': 2}
+    assert escaped_quoted.meta["nodes"]["aAb"]["key"] == "aAb"
+    assert escaped_quoted.meta["nodes"]["aAb"]["key_raw"] == '"a\\u0041b"'
+    assert escaped_quoted.meta["nodes"]['a"b']["key"] == 'a"b'
+    assert escaped_quoted.meta["nodes"]['a"b']["key_raw"] == '"a\\"b"'

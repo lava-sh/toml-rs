@@ -205,6 +205,28 @@ impl<'a, 'py> Collector<'a, 'py> {
         keys.join(".")
     }
 
+    fn decode_key(key_raw: &str) -> String {
+        let source = toml_parser::Source::new(key_raw);
+        let mut errors = Vec::new();
+        let keys = toml_edit::parse_key_path(source, &mut errors);
+        if errors.is_empty()
+            && let [key] = keys.as_slice()
+        {
+            return key.get().to_string();
+        }
+
+        if let Some(stripped) = key_raw.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
+            stripped.to_string()
+        } else if let Some(stripped) = key_raw
+            .strip_prefix('\'')
+            .and_then(|s| s.strip_suffix('\''))
+        {
+            stripped.to_string()
+        } else {
+            key_raw.to_string()
+        }
+    }
+
     fn header_key_is_last_segment(&self, pos: usize) -> bool {
         let bytes = self.idx.doc.as_bytes();
         let end = self.header_end.min(bytes.len());
@@ -605,17 +627,7 @@ impl EventReceiver for Collector<'_, '_> {
             .unwrap();
 
         let key_raw = raw.as_str();
-        let key =
-            if let Some(stripped) = key_raw.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
-                stripped
-            } else if let Some(stripped) = key_raw
-                .strip_prefix('\'')
-                .and_then(|s| s.strip_suffix('\''))
-            {
-                stripped
-            } else {
-                key_raw
-            };
+        let key = Self::decode_key(key_raw);
 
         if span.start() > 0 && self.idx.doc.as_bytes()[span.start() - 1] == b'[' {
             self.parsing_table_header = true;
@@ -634,10 +646,10 @@ impl EventReceiver for Collector<'_, '_> {
                 .find_table_header_end(self.header_start, self.header_is_array);
         }
 
-        let key_loc = self.make_key_loc(key, key_raw, span.start(), span.end());
+        let key_loc = self.make_key_loc(&key, key_raw, span.start(), span.end());
 
         if self.parsing_table_header {
-            self.header_keys.push(key.to_owned());
+            self.header_keys.push(key.clone());
             self.header_key_locs.push(key_loc);
 
             self.pending = None;
@@ -697,12 +709,12 @@ impl EventReceiver for Collector<'_, '_> {
         }
 
         if let Some(inline_ctx) = self.inline_stack.last() {
-            let pk = Self::pending_for_inline_child(&inline_ctx.path, key, key_loc);
+            let pk = Self::pending_for_inline_child(&inline_ctx.path, &key, key_loc);
             self.inline_pending = Some(pk);
             return;
         }
 
-        let pk = self.pending_for_key(key, key_loc);
+        let pk = self.pending_for_key(&key, key_loc);
         self.pending = Some(pk);
     }
 

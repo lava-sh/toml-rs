@@ -72,6 +72,11 @@ impl TOMLDocument {
         let val = self.value.bind(py);
 
         if let Ok(s) = key.extract::<&str>() {
+            if val.get_item(s).is_ok() {
+                val.set_item(s, &value)?;
+                return Ok(());
+            }
+
             if let Some(parts) = parse_key_path(s) {
                 if parts.len() == 1 {
                     let part = &parts[0];
