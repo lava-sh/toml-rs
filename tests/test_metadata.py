@@ -813,10 +813,10 @@ def test_document_item_accessors() -> None:
     assert quoted.meta["nodes"]['"bar"']["key_raw"] == "'\"bar\"'"
 
     escaped_quoted = toml_rs.load_with_metadata(
-        _dedent('''
+        _dedent("""
         "a\\u0041b" = 1
         "a\\"b" = 2
-        '''),
+        """),
         toml_version="1.1.0",
     )
 
