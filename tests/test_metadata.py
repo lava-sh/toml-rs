@@ -715,9 +715,6 @@ def test_metadata() -> None:
                         "value_raw": "[[product]]",
                     },
                 ],
-                "value_col": (1, 11),
-                "value_line": 10,
-                "value_raw": "",
             },
             "x": {
                 "t": {

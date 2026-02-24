@@ -822,11 +822,13 @@ fn set_value_fields<'py>(
     value: &ValueLoc,
     py_value: Bound<'py, PyAny>,
 ) -> PyResult<()> {
-    let value_raw = value_raw(doc, value);
-    py_dict.set_item("value_raw", value_raw.as_ref())?;
-    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", build_value_col(py, value.col)?)?;
     py_dict.set_item("value", py_value)?;
+    if value.raw_span.is_some() {
+        let value_raw = value_raw(doc, value);
+        py_dict.set_item("value_raw", value_raw.as_ref())?;
+        py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
+        py_dict.set_item("value_col", build_value_col(py, value.col)?)?;
+    }
     Ok(())
 }
 
