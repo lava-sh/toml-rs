@@ -39,7 +39,7 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.43.5"]
 zizmor = ["zizmor == 1.22.0"]
-rumdl = ["rumdl == 0.1.26"]
+rumdl = ["rumdl == 0.1.27"]
 ci = [
     "ty == 0.0.18",
     "ruff == 0.15.2",
