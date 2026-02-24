@@ -1,3 +1,4 @@
+mod core;
 mod document;
 mod error;
 mod v1;
