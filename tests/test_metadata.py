@@ -794,3 +794,14 @@ def test_document_item_accessors() -> None:
 
     with pytest.raises(KeyError):
         del doc["a.nope.x"]
+
+    quoted = toml_rs.load_with_metadata(
+        "\"'foo'\" = 1\n'\"bar\"' = 2",
+        toml_version="1.1.0",
+    )
+
+    assert quoted.value == {"'foo'": 1, '"bar"': 2}
+    assert quoted.meta["nodes"]["'foo'"]["key"] == "'foo'"
+    assert quoted.meta["nodes"]["'foo'"]["key_raw"] == "\"'foo'\""
+    assert quoted.meta["nodes"]['"bar"']["key"] == '"bar"'
+    assert quoted.meta["nodes"]['"bar"']["key_raw"] == "'\"bar\"'"

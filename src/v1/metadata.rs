@@ -605,7 +605,17 @@ impl EventReceiver for Collector<'_, '_> {
             .unwrap();
 
         let key_raw = raw.as_str();
-        let key = key_raw.trim_matches('"').trim_matches('\'');
+        let key =
+            if let Some(stripped) = key_raw.strip_prefix('"').and_then(|s| s.strip_suffix('"')) {
+                stripped
+            } else if let Some(stripped) = key_raw
+                .strip_prefix('\'')
+                .and_then(|s| s.strip_suffix('\''))
+            {
+                stripped
+            } else {
+                key_raw
+            };
 
         if span.start() > 0 && self.idx.doc.as_bytes()[span.start() - 1] == b'[' {
             self.parsing_table_header = true;
