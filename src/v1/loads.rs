@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use toml_v1::{Spanned, de::DeValue};
 
-use crate::{create_py_datetime_v1, impl_to_python};
+use crate::{create_py_datetime_v1, impl_loads};
 
 pub(crate) fn toml_to_python_v1<'py>(
     py: Python<'py>,
@@ -12,7 +12,7 @@ pub(crate) fn toml_to_python_v1<'py>(
     to_python(py, value, parse_float, doc)
 }
 
-impl_to_python!(
+impl_loads!(
     create_py_datetime_v1,
     |time: &toml_v1::value::Time| time.second,
     |time: &toml_v1::value::Time| time.nanosecond / 1000
