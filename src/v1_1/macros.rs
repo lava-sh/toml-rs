@@ -16,22 +16,6 @@ macro_rules! create_py_datetime {
 }
 
 #[macro_export]
-macro_rules! get_type {
-    ($obj:expr) => {
-        format!(
-            "{} ({})",
-            $obj.repr()
-                .map(|s| s.to_string())
-                .unwrap_or_else(|_| String::from("<unknown>")),
-            $obj.get_type()
-                .repr()
-                .map(|s| s.to_string())
-                .unwrap_or_else(|_| String::from("<unknown>"))
-        )
-    };
-}
-
-#[macro_export]
 macro_rules! toml_dt {
     (Date, $py_date:expr) => {
         toml::value::Date {
@@ -82,30 +66,5 @@ macro_rules! to_toml {
         Ok(toml_edit::Item::Value(toml_edit::Value::$var(
             toml_edit::Formatted::new($value),
         )))
-    };
-}
-
-#[macro_export]
-macro_rules! parse_int {
-    ($int:ty, $bytes:expr, $options:expr, $radix:expr) => {
-        match $radix {
-            2 => lexical_core::parse_with_options::<
-                $int,
-                { lexical_core::NumberFormatBuilder::from_radix(2) },
-            >($bytes, $options),
-            8 => lexical_core::parse_with_options::<
-                $int,
-                { lexical_core::NumberFormatBuilder::from_radix(8) },
-            >($bytes, $options),
-            10 => lexical_core::parse_with_options::<
-                $int,
-                { lexical_core::NumberFormatBuilder::from_radix(10) },
-            >($bytes, $options),
-            16 => lexical_core::parse_with_options::<
-                $int,
-                { lexical_core::NumberFormatBuilder::from_radix(16) },
-            >($bytes, $options),
-            _ => unreachable!(),
-        }
     };
 }
