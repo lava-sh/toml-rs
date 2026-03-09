@@ -18,8 +18,6 @@ jobs:
             emsdk-version: "3.1.27"
             rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
-              -Z allow-features=let_chains,integer_sign_cast
-              -Z crate-attr=feature(let_chains,integer_sign_cast)
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
               -C relocation-model=pic
@@ -30,8 +28,6 @@ jobs:
             emsdk-version: "3.1.46"
             rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
-              -Z allow-features=let_chains,integer_sign_cast
-              -Z crate-attr=feature(let_chains,integer_sign_cast)
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
               -C relocation-model=pic
@@ -44,8 +40,6 @@ jobs:
             emsdk-version: "3.1.58"
             rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
-              -Z allow-features=let_chains,integer_sign_cast
-              -Z crate-attr=feature(let_chains,integer_sign_cast)
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
               -C relocation-model=pic
