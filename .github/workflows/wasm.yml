@@ -16,7 +16,7 @@ jobs:
             # pyodide: 0.22.0 - ???
             pyodide-version: "0.22.0"
             emsdk-version: "3.1.27"
-            rust-toolchain: "nightly-2025-02-17"
+            rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
               -Z allow-features=let_chains,integer_sign_cast
               -Z crate-attr=feature(let_chains,integer_sign_cast)
@@ -28,7 +28,7 @@ jobs:
             # pyodide: 0.25.0 - 0.25.1
             pyodide-version: "0.25.0, 0.25.1"
             emsdk-version: "3.1.46"
-            rust-toolchain: "nightly-2025-02-17"
+            rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
               -Z allow-features=let_chains,integer_sign_cast
               -Z crate-attr=feature(let_chains,integer_sign_cast)
@@ -42,7 +42,7 @@ jobs:
             # 0.26.0a5 - 0.27.7 (emscripten 3.1.58)
             pyodide-version: "0.26.0a5, 0.27.7"
             emsdk-version: "3.1.58"
-            rust-toolchain: "nightly-2025-02-17"
+            rust-toolchain: "nightly-2025-10-23"
             rustflags: >-
               -Z allow-features=let_chains,integer_sign_cast
               -Z crate-attr=feature(let_chains,integer_sign_cast)
@@ -85,19 +85,6 @@ jobs:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
       - name: "Install maturin"
         run: uv pip install --group maturin --system
-      - name: "Patch MSRV in toml crates"
-        run: |
-          set -eux
-          cargo fetch
-          
-          # registry crates
-          find ~/.cargo/registry/src -name Cargo.toml \
-            -exec sed -i 's/rust-version = "1\.92[^"]*"/rust-version = "1.87"/g' {} +
-          
-          # git dependencies
-          find ~/.cargo/git/checkouts -name Cargo.toml \
-            -exec sed -i 's/rust-version = "1\.92[^"]*"/rust-version = "1.87"/g' {} +
-
       - name: "Build wasm wheel"
         env:
           RUSTUP_TOOLCHAIN: ${{ matrix.platform.rust-toolchain }}
