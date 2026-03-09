@@ -440,7 +440,8 @@ impl<'a, 'py> Collector<'a, 'py> {
                 })?;
                 let bound_any: Bound<'py, PyAny> = match (dt.date, dt.time, dt.offset) {
                     (Some(date), Some(time), Some(offset)) => {
-                        let tzinfo = Some(&create_timezone_from_offset(py, offset)?);
+                        let py_tzinfo = create_timezone_from_offset(py, offset)?;
+                        let tzinfo = Some(&py_tzinfo);
                         create_py_datetime!(py, date, time, tzinfo)?.into_any()
                     }
                     (Some(date), Some(time), None) => {
@@ -955,7 +956,8 @@ pub(crate) fn to_python<'py>(
         }
         DeValue::Datetime(dt) => match (dt.date, dt.time, dt.offset) {
             (Some(date), Some(time), Some(offset)) => {
-                let tzinfo = Some(&create_timezone_from_offset(py, offset)?);
+                let py_tzinfo = create_timezone_from_offset(py, offset)?;
+                let tzinfo = Some(&py_tzinfo);
                 Ok(create_py_datetime!(py, date, time, tzinfo)?.into_any())
             }
             (Some(date), Some(time), None) => {
