@@ -16,7 +16,7 @@ jobs:
             # pyodide: 0.22.0 - ???
             pyodide-version: "0.22.0"
             emsdk-version: "3.1.27"
-            rust-toolchain: "nightly-2025-03-01"
+            rust-toolchain: "nightly-2025-02-17"
             rustflags: >-
               -Z allow-features=let_chains
               -Z crate-attr=feature(let_chains)
@@ -28,7 +28,7 @@ jobs:
             # pyodide: 0.25.0 - 0.25.1
             pyodide-version: "0.25.0, 0.25.1"
             emsdk-version: "3.1.46"
-            rust-toolchain: "nightly-2025-03-01"
+            rust-toolchain: "nightly-2025-02-17"
             rustflags: >-
               -Z allow-features=let_chains
               -Z crate-attr=feature(let_chains)
@@ -42,7 +42,7 @@ jobs:
             # 0.26.0a5 - 0.27.7 (emscripten 3.1.58)
             pyodide-version: "0.26.0a5, 0.27.7"
             emsdk-version: "3.1.58"
-            rust-toolchain: "nightly-2025-03-01"
+            rust-toolchain: "nightly-2026-03-06"
             rustflags: >-
               -Z allow-features=let_chains
               -Z crate-attr=feature(let_chains)
