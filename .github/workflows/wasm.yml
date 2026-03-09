@@ -89,10 +89,15 @@ jobs:
         run: |
           set -eux
           cargo fetch
-          for crate in serde_spanned toml_datetime toml_edit_v1 toml_parser_v1 toml_v1 toml_writer; do
-            find ~/.cargo -path "*$crate*/Cargo.toml" \
-              -exec sed -i 's/rust-version = "1.92"/rust-version = "1.87"/g' {} +
-          done
+          
+          # registry crates
+          find ~/.cargo/registry/src -name Cargo.toml \
+            -exec sed -i 's/rust-version = "1\.92[^"]*"/rust-version = "1.87"/g' {} +
+          
+          # git dependencies
+          find ~/.cargo/git/checkouts -name Cargo.toml \
+            -exec sed -i 's/rust-version = "1\.92[^"]*"/rust-version = "1.87"/g' {} +
+
       - name: "Build wasm wheel"
         env:
           RUSTUP_TOOLCHAIN: ${{ matrix.platform.rust-toolchain }}
