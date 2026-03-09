@@ -85,6 +85,12 @@ jobs:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
       - name: "Install maturin"
         run: uv pip install --group maturin --system
+      - name: "Fetch cargo dependencies"
+        run: cargo fetch
+      - name: "Patch toml_datetime for old Rust"
+        run: |
+          find ~/.cargo/git/checkouts -path "*toml_datetime/src/datetime.rs" -exec sed -E -i \
+          's/([A-Za-z0-9_\.]+)\.is_multiple_of\(([0-9]+)\)/(\1 % \2 == 0)/g' {} +
       - name: "Build wasm wheel"
         env:
           RUSTUP_TOOLCHAIN: ${{ matrix.platform.rust-toolchain }}
