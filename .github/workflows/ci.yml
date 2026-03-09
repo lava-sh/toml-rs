@@ -118,7 +118,7 @@ jobs:
           rumdl check .
 
   tests-alpine:
-    name: "tests (alpine / python 3.13)"
+    name: "tests / alpine / python 3.13"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
