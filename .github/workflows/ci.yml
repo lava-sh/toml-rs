@@ -202,15 +202,15 @@ jobs:
     uses: ./.github/workflows/macos.yml
 
   wasm:
-    #needs: [
-    #  tests,
-    #  tests-alpine,
-    #  cargo-fmt,
-    #  cargo-clippy,
-    #  zizmor,
-    #  typos,
-    #  rumdl,
-    #]
+    needs: [
+      tests,
+      tests-alpine,
+      cargo-fmt,
+      cargo-clippy,
+      zizmor,
+      typos,
+      rumdl,
+    ]
     uses: ./.github/workflows/wasm.yml
 
   build-sdist:
