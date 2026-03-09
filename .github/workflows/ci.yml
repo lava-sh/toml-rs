@@ -248,6 +248,7 @@ jobs:
       zizmor,
       typos,
       rumdl,
+      wasm,
     ]
     permissions:
       # Use to sign the release artifacts
