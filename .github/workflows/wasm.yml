@@ -42,8 +42,10 @@ jobs:
             # 0.26.0a5 - 0.27.7 (emscripten 3.1.58)
             pyodide-version: "0.26.0a5, 0.27.7"
             emsdk-version: "3.1.58"
-            rust-toolchain: "nightly-2026-03-06"
+            rust-toolchain: "nightly-2025-02-17"
             rustflags: >-
+              -Z allow-features=let_chains
+              -Z crate-attr=feature(let_chains)
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
               -C relocation-model=pic
