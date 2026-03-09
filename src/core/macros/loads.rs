@@ -64,9 +64,9 @@ macro_rules! impl_loads {
                 DeValue::Datetime(datetime) => {
                     match (datetime.date, datetime.time, datetime.offset) {
                         (Some(date), Some(time), Some(offset)) => {
-                            let tzinfo = Some(&$crate::core::loads::create_timezone_from_offset(
-                                py, offset,
-                            )?);
+                            let py_tzinfo =
+                                $crate::core::loads::create_timezone_from_offset(py, offset)?;
+                            let tzinfo = Some(&py_tzinfo);
                             Ok($create_py_datetime!(py, date, time, tzinfo)?.into_any())
                         }
                         (Some(date), Some(time), None) => {
