@@ -1,5 +1,5 @@
-name: "Set cargo version from git tag"
-description: "Set cargo version from git tag"
+name: "Get lib version from git tag"
+description: "Get lib version from git tag"
 
 runs:
   using: "composite"
