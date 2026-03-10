@@ -33,7 +33,6 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Software Development :: Libraries",
-    "License :: OSI Approved :: The Unlicense (Unlicense)",
 ]
 
 [dependency-groups]
