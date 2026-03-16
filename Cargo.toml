@@ -38,7 +38,7 @@ features = [
 ###########################################################
 [dependencies.toml_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "e44e1c9955a5c38603ddf069c02173af9907949c"
+rev = "5078b745d494e4f5963faf33506432d436cb3154"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit
@@ -47,7 +47,7 @@ features = [
 
 [dependencies.toml_parser_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "e44e1c9955a5c38603ddf069c02173af9907949c"
+rev = "5078b745d494e4f5963faf33506432d436cb3154"
 features = [
     "std",
     "simd",
@@ -56,7 +56,7 @@ features = [
 
 [dependencies.toml_edit_v1]
 git = "https://github.com/lava-sh/toml"
-rev = "e44e1c9955a5c38603ddf069c02173af9907949c"
+rev = "5078b745d494e4f5963faf33506432d436cb3154"
 features = [
     "serde",
     "unbounded",
