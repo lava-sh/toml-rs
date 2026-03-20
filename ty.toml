@@ -3,7 +3,7 @@ python-version = "3.10"
 
 [src]
 include = [
-    "python/*.py",
-    "python/*.pyi",
+    "py-src/*.py",
+    "py-src/*.pyi",
     "tests/*.py",
 ]
