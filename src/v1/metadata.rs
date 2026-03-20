@@ -112,6 +112,13 @@ struct Collector<'a, 'py> {
 }
 
 impl<'a, 'py> Collector<'a, 'py> {
+    fn take_last_key(path: Vec<PathSeg>) -> Option<String> {
+        match path.into_iter().next_back()? {
+            PathSeg::Key(key) => Some(key),
+            PathSeg::Index(_) => None,
+        }
+    }
+
     fn doc_slice(&self, span: Range<usize>) -> &str {
         self.doc.get(span).unwrap_or("")
     }
@@ -600,16 +607,19 @@ impl EventReceiver for Collector<'_, '_> {
             value: value_loc,
             children: std::mem::take(&mut inline_ctx.children),
         };
+        let inline_path_has_key = matches!(inline_ctx.path.last(), Some(PathSeg::Key(_)));
+        let inline_path_has_index = matches!(inline_ctx.path.last(), Some(PathSeg::Index(_)));
 
-        if let Some(parent_inline) = self.inline_stack.last_mut()
-            && let Some(PathSeg::Key(leaf)) = inline_ctx.path.last()
+        if inline_path_has_key
+            && let Some(parent_inline) = self.inline_stack.last_mut()
+            && let Some(leaf) = Self::take_last_key(std::mem::take(&mut inline_ctx.path))
         {
-            parent_inline.children.insert(leaf.clone(), node);
+            parent_inline.children.insert(leaf, node);
             return;
         }
 
         if let Some(parent_arr) = self.array_stack.last_mut()
-            && matches!(inline_ctx.path.last(), Some(PathSeg::Index(_)))
+            && inline_path_has_index
         {
             parent_arr.items.push(node);
             return;
@@ -642,16 +652,18 @@ impl EventReceiver for Collector<'_, '_> {
             value: value_loc,
             items: std::mem::take(&mut array_ctx.items),
         };
+        let array_path_has_key = matches!(array_ctx.path.last(), Some(PathSeg::Key(_)));
 
         if let Some(parent) = self.array_stack.last_mut() {
             parent.items.push(node);
             return;
         }
 
-        if let Some(parent_inline) = self.inline_stack.last_mut()
-            && let Some(PathSeg::Key(leaf)) = array_ctx.path.last()
+        if array_path_has_key
+            && let Some(parent_inline) = self.inline_stack.last_mut()
+            && let Some(leaf) = Self::take_last_key(std::mem::take(&mut array_ctx.path))
         {
-            parent_inline.children.insert(leaf.clone(), node);
+            parent_inline.children.insert(leaf, node);
             return;
         }
 
@@ -692,7 +704,7 @@ impl EventReceiver for Collector<'_, '_> {
         let key_loc = self.make_key_loc(&key, key_raw, span.start(), span.end());
 
         if self.parsing_table_header {
-            self.header_keys.push(key.clone());
+            self.header_keys.push(key);
             self.header_key_locs.push(key_loc);
 
             self.pending = None;
@@ -782,18 +794,20 @@ impl EventReceiver for Collector<'_, '_> {
             .scalar_to_py_obj(kind, decoded.as_ref(), span.start()..span.end())
             .unwrap_or_else(|_| self.py.None().into_py_any(self.py).unwrap());
 
-        if let Some(pk) = self.inline_pending.take() {
+        if let Some(mut pk) = self.inline_pending.take() {
             let value_loc = self.make_value_loc(span.start(), span.end());
             let node = MetaNode::Scalar {
                 key: Some(pk.key_loc),
                 value: value_loc,
                 py_value,
             };
+            let inline_path_has_key = matches!(pk.path.last(), Some(PathSeg::Key(_)));
 
-            if let Some(inline_ctx) = self.inline_stack.last_mut()
-                && let Some(PathSeg::Key(leaf)) = pk.path.last()
+            if inline_path_has_key
+                && let Some(inline_ctx) = self.inline_stack.last_mut()
+                && let Some(leaf) = Self::take_last_key(std::mem::take(&mut pk.path))
             {
-                inline_ctx.children.insert(leaf.clone(), node);
+                inline_ctx.children.insert(leaf, node);
                 return;
             }
 
