@@ -319,6 +319,29 @@ impl<'a, 'py> Collector<'a, 'py> {
         Some(cur)
     }
 
+    fn get_node_at(&self, path: &[PathSeg]) -> Option<&MetaNode> {
+        let mut cur = &self.root;
+        for seg in path {
+            match seg {
+                PathSeg::Key(key) => {
+                    cur = match cur {
+                        MetaNode::Root { children } | MetaNode::Table { children, .. } => {
+                            children.get(key)?
+                        }
+                        _ => return None,
+                    };
+                }
+                PathSeg::Index(idx) => {
+                    cur = match cur {
+                        MetaNode::Array { items, .. } => items.get(*idx)?,
+                        _ => return None,
+                    };
+                }
+            }
+        }
+        Some(cur)
+    }
+
     fn current_array_item_path(&self) -> Option<Vec<PathSeg>> {
         let ctx = self.array_stack.last()?;
         let idx = ctx.items.len();
@@ -333,6 +356,25 @@ impl<'a, 'py> Collector<'a, 'py> {
 
     fn container_path_fallback(&self) -> Vec<PathSeg> {
         self.current_array_item_path().unwrap_or_default()
+    }
+
+    fn resolve_header_path(&self, keys: &[String]) -> Vec<PathSeg> {
+        let mut resolved = Vec::new();
+        let mut prefix = Vec::new();
+
+        for key in keys {
+            prefix.push(PathSeg::Key(key.clone()));
+
+            if let Some(MetaNode::Array { items, .. }) = self.get_node_at(&prefix)
+                && !items.is_empty()
+            {
+                resolved.append(&mut prefix);
+                resolved.push(PathSeg::Index(items.len() - 1));
+            }
+        }
+
+        resolved.append(&mut prefix);
+        resolved
     }
 
     fn start_array_ctx(&mut self, span: Span) -> ArrayCtx {
@@ -615,8 +657,11 @@ impl EventReceiver for Collector<'_, '_> {
                 self.parsing_table_header = false;
 
                 let hdr = Self::header_key_string(&self.header_keys);
-                let mut p: Vec<PathSeg> =
-                    self.header_keys.iter().cloned().map(PathSeg::Key).collect();
+                let mut p = if self.header_is_array {
+                    self.header_keys.iter().cloned().map(PathSeg::Key).collect()
+                } else {
+                    self.resolve_header_path(&self.header_keys)
+                };
 
                 if self.header_is_array {
                     let idx = *self.aot_counters.get(&hdr).unwrap_or(&0);

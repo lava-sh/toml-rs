@@ -1,0 +1,4 @@
+x = [{ name = "foo", value = 1 }, { name = "bar", value = 2 }]
+
+[example]
+array = ["item 1", "item 2", "item 3"]

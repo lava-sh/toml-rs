@@ -744,6 +744,19 @@ def test_metadata() -> None:
     assert doc["nodes"]["product"]["value"][0]["value_raw"] == "[[ product ]]"
     assert doc["nodes"]["product"]["value"][1]["value_raw"] == "[[ product ]]"
 
+    nested_aot_table = _dedent("""
+    [[arr]]
+    [arr.subtab]
+    val = 1
+
+    [[arr]]
+    [arr.subtab]
+    val = "4"
+    """)
+    doc = toml_rs.load_with_metadata(nested_aot_table, toml_version="1.1.0").meta
+    assert doc["nodes"]["arr"]["value"][0]["value"]["subtab"]["val"]["value"] == 1
+    assert doc["nodes"]["arr"]["value"][1]["value"]["subtab"]["val"]["value"] == "4"
+
 
 def test_document_item_accessors() -> None:
     toml = _dedent("""
