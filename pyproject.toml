@@ -38,11 +38,11 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.44.0"]
 zizmor = ["zizmor == 1.23.1"]
-rumdl = ["rumdl == 0.1.54"]
+rumdl = ["rumdl == 0.1.56"]
 maturin = ["maturin == 1.12.6"]
 ci = [
-    "ty == 0.0.23",
-    "ruff == 0.15.6",
+    "ty == 0.0.24",
+    "ruff == 0.15.7",
     "pytest == 9.0.2",
     # last `tomli` version which support TOML 1.0
     # need to check compatibility
