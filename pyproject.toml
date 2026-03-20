@@ -65,7 +65,7 @@ bench = [
     "tomli ; python_version<'3.11'",
     "tomli-w",
     "polars == 1.39.2",
-    "altair == 6.0.0",b
+    "altair == 6.0.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",
 ]
