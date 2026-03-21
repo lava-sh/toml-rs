@@ -6,7 +6,7 @@ import toml_rs
 from .helpers import _dedent
 
 
-def test_metadata() -> None:
+def test_metadata(toml_version: toml_rs._lib.TomlVersion) -> None:
     nums = _dedent("""
     int = 999_999_999_999_9_9_9_999_999_999
     float = 999_999_999_999_999.9_9_9
@@ -16,7 +16,7 @@ def test_metadata() -> None:
     float_4 = 1e0_6
     float_5 = -2E-2
     """)
-    assert toml_rs.load_with_metadata(nums, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(nums, toml_version=toml_version).meta == {
         "nodes": {
             "float": {
                 "key": "float",
@@ -110,7 +110,7 @@ def test_metadata() -> None:
     text 3
     \"\"\"
     """)
-    assert toml_rs.load_with_metadata(strings, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(strings, toml_version=toml_version).meta == {
         "nodes": {
             "t1": {
                 "key": "t1",
@@ -187,7 +187,7 @@ def test_metadata() -> None:
     ]
     """)
 
-    assert toml_rs.load_with_metadata(example, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(example, toml_version=toml_version).meta == {
         "nodes": {
             "clients": {
                 "data": {
@@ -482,7 +482,7 @@ def test_metadata() -> None:
         { x = 2, y = 4, z = 8 },
     ]
     """)
-    doc = toml_rs.load_with_metadata(points, toml_version="1.1.0")
+    doc = toml_rs.load_with_metadata(points, toml_version=toml_version)
     assert doc.meta["nodes"]["points"]["value"][0]["value"]["x"]["value"] == 1
     assert doc.meta["nodes"]["points"]["value"][1]["value"]["z"]["value"] == 9
     assert doc.meta["nodes"]["points"]["value"][2]["value"]["z"]["value"] == 8
@@ -636,7 +636,7 @@ def test_metadata() -> None:
     color = "gray"
     """)
 
-    assert toml_rs.load_with_metadata(product, toml_version="1.1.0").meta == {
+    assert toml_rs.load_with_metadata(product, toml_version=toml_version).meta == {
         "nodes": {
             "product": {
                 "key": "product",
@@ -738,7 +738,7 @@ def test_metadata() -> None:
     [[ product ]]
     name = "Nail"
     """)
-    doc = toml_rs.load_with_metadata(product_, toml_version="1.0.0").meta
+    doc = toml_rs.load_with_metadata(product_, toml_version=toml_version).meta
     assert doc["nodes"]["product"]["value"][0]["value"]["name"]["value"] == "Hammer"
     assert doc["nodes"]["product"]["value"][1]["value"]["name"]["value"] == "Nail"
     assert doc["nodes"]["product"]["value"][0]["value_raw"] == "[[ product ]]"
@@ -753,12 +753,12 @@ def test_metadata() -> None:
     [arr.subtab]
     val = "4"
     """)
-    doc = toml_rs.load_with_metadata(nested_aot_table, toml_version="1.1.0").meta
+    doc = toml_rs.load_with_metadata(nested_aot_table, toml_version=toml_version).meta
     assert doc["nodes"]["arr"]["value"][0]["value"]["subtab"]["val"]["value"] == 1
     assert doc["nodes"]["arr"]["value"][1]["value"]["subtab"]["val"]["value"] == "4"
 
 
-def test_document_item_accessors() -> None:
+def test_document_item_accessors(toml_version: toml_rs._lib.TomlVersion) -> None:
     toml = _dedent("""
     ".x" = "text"
     "k.l" = 7
@@ -774,7 +774,7 @@ def test_document_item_accessors() -> None:
     [".m.".p.".e"]
     l = 99
     """)
-    doc = toml_rs.load_with_metadata(toml, toml_version="1.1.0")
+    doc = toml_rs.load_with_metadata(toml, toml_version=toml_version)
 
     assert doc.value["a"]["b"] == 1
     assert doc.value["a"]["c"]["d"] == 2
@@ -816,7 +816,7 @@ def test_document_item_accessors() -> None:
 
     quoted = toml_rs.load_with_metadata(
         "\"'foo'\" = 1\n'\"bar\"' = 2",
-        toml_version="1.1.0",
+        toml_version=toml_version,
     )
 
     assert quoted.value == {"'foo'": 1, '"bar"': 2}
@@ -830,7 +830,7 @@ def test_document_item_accessors() -> None:
         "a\\u0041b" = 1
         "a\\"b" = 2
         """),
-        toml_version="1.1.0",
+        toml_version=toml_version,
     )
 
     assert escaped_quoted.value == {"aAb": 1, 'a"b': 2}
