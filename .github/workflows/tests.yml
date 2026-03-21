@@ -53,9 +53,13 @@ jobs:
           rustc --version --verbose
           maturin build --release --features mimalloc
       - name: "Install built wheel"
+        shell: bash
         run: |
-          WHEEL=$(ls dist/*.whl)
-          uv pip install "$WHEEL"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            pwsh -Command "uv pip install (Get-ChildItem target/wheels/*.whl | Select-Object -First 1).FullName"
+          else
+            uv pip install target/wheels/*.whl
+          fi
       - name: "Run Ruff"
         run: |
           ruff check
