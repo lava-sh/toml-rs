@@ -38,16 +38,15 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.44.0"]
 zizmor = ["zizmor == 1.23.1"]
-rumdl = ["rumdl == 0.1.56"]
+rumdl = ["rumdl == 0.1.57"]
 maturin = ["maturin == 1.12.6"]
+pytest = ["pytest == 9.0.2"]
 ci = [
     "ty == 0.0.24",
     "ruff == 0.15.7",
-    "pytest == 9.0.2",
-    # last `tomli` version which support TOML 1.0
-    # need to check compatibility
-    "tomli == 2.3.0 ; python_version<'3.11'",
+    "nox == 2026.02.09",
     "tomli-w == 1.2.0",
+    { include-group = "pytest" },
     { include-group = "maturin" },
 ]
 dev = [
@@ -64,7 +63,7 @@ bench = [
     "rtoml",
     "tomli ; python_version<'3.11'",
     "tomli-w",
-    "polars == 1.39.2",
+    "polars == 1.39.3",
     "altair == 6.0.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",

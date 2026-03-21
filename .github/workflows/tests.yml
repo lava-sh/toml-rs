@@ -51,7 +51,10 @@ jobs:
       - name: "Run maturin"
         run: |
           rustc --version --verbose
-          maturin develop --features mimalloc
+          maturin build --release --features mimalloc
+      - name: "Install built wheel"
+        run: |
+          uv pip install dist/*.whl
       - name: "Run Ruff"
         run: |
           ruff check

@@ -43,19 +43,6 @@ impl<'a> DocIndex<'a> {
         }
     }
 
-    pub(crate) fn find_close_forward_to_line(&self, ch: u8, pos: usize) -> usize {
-        let bytes = self.doc.as_bytes();
-        let pos = pos.min(bytes.len());
-        let line_end = match memchr(b'\n', &bytes[pos..]) {
-            Some(i) => pos + i,
-            None => bytes.len(),
-        };
-        match memchr(ch, &bytes[pos..line_end]) {
-            Some(i) => pos + i + 1,
-            None => line_end,
-        }
-    }
-
     pub(crate) fn find_table_header_end(&self, start: usize, is_array: bool) -> usize {
         let bytes = self.doc.as_bytes();
         if bytes.is_empty() {
