@@ -32,10 +32,10 @@ use crate::{
 };
 
 fn make_key_loc(idx: &DocIndex<'_>, doc: &str, key: &Spanned<DeString<'_>>) -> KeyLoc {
-    let span = key.span();
-    let key_raw = raw_slice(doc, &span);
-    let (key_line, _) = idx.line_col(span.start);
-    let key_col = idx.col_range_same_line(span.start, span.end);
+    let span = get_key_span(key);
+    let key_raw = raw_slice(doc, &(span.start()..span.end()));
+    let (key_line, _) = idx.line_col(span.start());
+    let key_col = idx.col_range_same_line(span.start(), span.end());
     KeyLoc {
         key: key.get_ref().clone().into_owned(),
         key_raw: key_raw.to_owned(),
