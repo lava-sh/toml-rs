@@ -1,11 +1,11 @@
-use std::{borrow::Cow, ops::Range};
+use std::ops::Range;
 
 use lexical_core::ParseIntegerOptions;
 use num_bigint::BigInt;
 use pyo3::{
     Bound, IntoPyObjectExt, PyAny,
     prelude::*,
-    types::{PyDate, PyDict, PyList, PyTime, PyTuple},
+    types::{PyDate, PyDict, PyList, PyTime},
 };
 use toml::{
     Spanned,
@@ -16,54 +16,20 @@ use toml::{
 };
 
 use crate::{
-    core::{loads::create_timezone_from_offset, metadata::DocIndex},
+    core::{
+        loads::create_timezone_from_offset,
+        metadata::{
+            DocIndex, KeyLoc, NodeKind, ValueLoc, array_has_value_metadata, build_dict,
+            classify_array_item_table_kind, classify_keyed_array_kind, classify_keyed_table_kind,
+            empty_value_loc, raw_slice, set_key_fields, set_value_metadata_fields,
+            table_needs_wrapper,
+        },
+    },
     create_py_datetime,
     error::TomlError,
     parse_int,
     toml_rs::TOMLDecodeError,
 };
-
-#[derive(Clone)]
-struct KeyLoc {
-    key: String,
-    key_raw: String,
-    key_line: usize,
-    key_col: (usize, usize),
-}
-
-#[derive(Clone)]
-struct ValueLoc {
-    raw_span: Option<Range<usize>>,
-    line: (usize, usize),
-    col: (usize, usize),
-}
-
-#[derive(Clone, Copy)]
-enum NodeKind {
-    RootTable,
-    HeaderTable,
-    InlineTable,
-    Array,
-    ArrayOfTables,
-    ArrayOfTablesTable,
-    ArrayItem,
-}
-
-fn raw_slice<'a>(doc: &'a str, span: &Range<usize>) -> &'a str {
-    doc.get(span.start..span.end).unwrap_or("")
-}
-
-fn span_contains(outer: &Range<usize>, inner: &Range<usize>) -> bool {
-    outer.start <= inner.start && inner.end <= outer.end
-}
-
-fn empty_value_loc() -> ValueLoc {
-    ValueLoc {
-        raw_span: None,
-        line: (0, 0),
-        col: (0, 0),
-    }
-}
 
 fn make_key_loc(idx: &DocIndex<'_>, doc: &str, key: &Spanned<DeString<'_>>) -> KeyLoc {
     let span = key.span();
@@ -89,56 +55,6 @@ fn make_value_loc(idx: &DocIndex<'_>, span: &Range<usize>) -> ValueLoc {
         raw_span: Some(span.clone()),
         line,
         col,
-    }
-}
-
-fn table_needs_wrapper(kind: NodeKind) -> bool {
-    matches!(
-        kind,
-        NodeKind::InlineTable | NodeKind::ArrayOfTablesTable | NodeKind::ArrayItem
-    )
-}
-
-fn array_has_value_metadata(kind: NodeKind) -> bool {
-    !matches!(kind, NodeKind::ArrayOfTables)
-}
-
-fn classify_keyed_table_kind(
-    value_span: &Range<usize>,
-    key_span: &Range<usize>,
-    parent_kind: NodeKind,
-) -> NodeKind {
-    if span_contains(value_span, key_span) {
-        match parent_kind {
-            NodeKind::RootTable
-            | NodeKind::HeaderTable
-            | NodeKind::InlineTable
-            | NodeKind::ArrayOfTablesTable
-            | NodeKind::ArrayItem => NodeKind::HeaderTable,
-            NodeKind::Array | NodeKind::ArrayOfTables => NodeKind::ArrayOfTablesTable,
-        }
-    } else {
-        NodeKind::InlineTable
-    }
-}
-
-fn classify_array_item_table_kind(parent_kind: NodeKind) -> NodeKind {
-    match parent_kind {
-        NodeKind::Array => NodeKind::ArrayItem,
-        NodeKind::ArrayOfTables => NodeKind::ArrayOfTablesTable,
-        NodeKind::RootTable
-        | NodeKind::HeaderTable
-        | NodeKind::InlineTable
-        | NodeKind::ArrayOfTablesTable
-        | NodeKind::ArrayItem => NodeKind::HeaderTable,
-    }
-}
-
-fn classify_keyed_array_kind(value_span: &Range<usize>, key_span: &Range<usize>) -> NodeKind {
-    if span_contains(value_span, key_span) {
-        NodeKind::ArrayOfTables
-    } else {
-        NodeKind::Array
     }
 }
 
@@ -214,80 +130,6 @@ fn scalar_to_py_obj<'py>(
         }
         DeValue::Array(_) | DeValue::Table(_) => unreachable!(),
     }
-}
-
-fn build_value_line(py: Python, (l1, l2): (usize, usize)) -> PyResult<Bound<PyAny>> {
-    if l1 == l2 {
-        Ok(l1.into_bound_py_any(py)?)
-    } else {
-        Ok(PyTuple::new(py, [l1, l2])?.into_any())
-    }
-}
-
-fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
-    if c1 == c2 {
-        Ok(c1.into_bound_py_any(py)?)
-    } else {
-        Ok(PyTuple::new(py, [c1, c2])?.into_any())
-    }
-}
-
-fn build_value_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
-    if c1 == c2 {
-        Ok(c1.into_bound_py_any(py)?)
-    } else {
-        Ok(PyTuple::new(py, [c1, c2])?.into_any())
-    }
-}
-
-fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
-    match &value.raw_span {
-        Some(span) if span.start < span.end && span.end <= doc.len() => {
-            Cow::Borrowed(&doc[span.start..span.end])
-        }
-        _ => Cow::Borrowed(""),
-    }
-}
-
-fn set_key_fields(py: Python<'_>, py_dict: &Bound<'_, PyDict>, key: &KeyLoc) -> PyResult<()> {
-    py_dict.set_item("key", key.key.as_str())?;
-    py_dict.set_item("key_raw", key.key_raw.as_str())?;
-    py_dict.set_item("key_line", key.key_line)?;
-    py_dict.set_item("key_col", build_key_col(py, key.key_col)?)?;
-    Ok(())
-}
-
-fn set_value_metadata_fields(
-    py: Python<'_>,
-    doc: &str,
-    py_dict: &Bound<'_, PyDict>,
-    value: &ValueLoc,
-) -> PyResult<()> {
-    let value_raw = value_raw(doc, value);
-    py_dict.set_item("value_raw", value_raw.as_ref())?;
-    py_dict.set_item("value_line", build_value_line(py, value.line)?)?;
-    py_dict.set_item("value_col", build_value_col(py, value.col)?)?;
-    Ok(())
-}
-
-fn build_dict<'py>(
-    py: Python<'py>,
-    doc: &str,
-    key: Option<&KeyLoc>,
-    value: &ValueLoc,
-    py_value: Bound<'py, PyAny>,
-) -> PyResult<Bound<'py, PyAny>> {
-    let py_dict = PyDict::new(py);
-
-    if let Some(k) = key {
-        set_key_fields(py, &py_dict, k)?;
-    }
-
-    py_dict.set_item("value", py_value)?;
-    if value.raw_span.is_some() {
-        set_value_metadata_fields(py, doc, &py_dict, value)?;
-    }
-    Ok(py_dict.into_any())
 }
 
 fn build_table_nodes<'py>(
