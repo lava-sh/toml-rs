@@ -54,7 +54,8 @@ jobs:
           maturin build --release --features mimalloc
       - name: "Install built wheel"
         run: |
-          uv pip install dist/*.whl
+          WHEEL=$(ls dist/*.whl)
+          uv pip install "$WHEEL"
       - name: "Run Ruff"
         run: |
           ruff check
