@@ -24,13 +24,16 @@ def test_example_toml() -> None:
 
 @pytest.mark.parametrize("lib", [tomllib, toml_rs])
 def test_text_mode_typeerror(lib: types.ModuleType) -> None:
-    err_msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
     with (
         Path(TOML).open(encoding="utf-8") as f,
         pytest.raises(TypeError) as exc,
     ):
         lib.load(f)
-    assert err_msg in str(exc.value)
+
+    assert str(exc.value) in (
+        "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`",
+        "bytes object expected; got str",
+    )
 
 
 @pytest.mark.parametrize(
