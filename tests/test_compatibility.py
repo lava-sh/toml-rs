@@ -11,6 +11,8 @@ from .burntsushi import convert, normalize
 from .helpers import TOML, TOML_VERSION
 from .test_data import VALID_PAIRS_1_0_0, VALID_PAIRS_1_1_0
 
+VALID_PAIRS = VALID_PAIRS_1_1_0 if TOML_VERSION == "1.1.0" else VALID_PAIRS_1_0_0
+
 
 def test_example_toml() -> None:
     toml_str = TOML.read_text(encoding="utf-8")
@@ -33,10 +35,10 @@ def test_text_mode_typeerror(lib: types.ModuleType) -> None:
 
 @pytest.mark.parametrize(
     ("valid", "expected"),
-    VALID_PAIRS_1_1_0 if TOML_VERSION == "1.1.0" else VALID_PAIRS_1_0_0,
-    ids=lambda p: p[0].stem,
+    VALID_PAIRS,
+    ids=[p[0].stem for p in VALID_PAIRS],
 )
-def test_tomllib_vs_tomlrs(valid: Path, expected: Path) -> None:
+def test_tomllib_tomlrs(valid: Path, expected: Path) -> None:
     toml_str = valid.read_bytes().decode("utf-8")
     try:
         toml_str.encode("ascii")
