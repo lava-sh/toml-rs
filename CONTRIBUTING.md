@@ -74,10 +74,10 @@ ty check
 
 ## Running tests
 
-We use [pytest](https://github.com/pytest-dev/pytest) for tests. To run it do:
+We use [nox](https://github.com/wntrblm/nox) for tests. To run it do:
 
 ```bash
-pytest tests/
+nox
 ```
 
 ## Running security audit for GitHub Actions
