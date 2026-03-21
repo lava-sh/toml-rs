@@ -1,0 +1,13 @@
+title = "TOML Example"
+float = -inf
+float_2 = nan
+
+[owner]
+dob = 1979-05-27T07:32:00-08:00
+name = "Tom Preston-Werner"
+
+[database]
+connection_max = 5000
+enabled = true
+ports = [8001, 8001, 8002]
+server = "192.168.1.1"

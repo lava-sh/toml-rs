@@ -51,13 +51,22 @@ jobs:
       - name: "Run maturin"
         run: |
           rustc --version --verbose
-          maturin develop --features mimalloc
+          maturin build --release --features mimalloc
+      - name: "Install built wheel"
+        run: |
+          python -c "
+          from pathlib import Path
+          import subprocess
+          
+          wheel = next(Path('target/wheels').glob('*.whl'))
+          subprocess.check_call(['uv', 'pip', 'install', str(wheel)])
+          "
       - name: "Run Ruff"
         run: |
           ruff check
       - name: "Run ty"
         run: |
           ty check
-      - name: "Run pytest"
+      - name: "Run nox"
         run: |
-          pytest tests/
+          nox

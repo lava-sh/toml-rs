@@ -69,7 +69,7 @@ VALID_PAIRS_1_1_0 = list(zip(VALID_TOML_V_1_1_0, VALID_V_1_1_0_EXPECTED, strict=
         *[(pytest.param(p, "1.1.0", id=p.stem)) for p in INVALID_TOML_V_1_1_0],
     ],
 )
-def test_invalid_tomls(invalid: Path, toml_version: str) -> None:
+def test_invalid_tomls(invalid: Path, toml_version: toml_rs._lib.TomlVersion) -> None:
     toml_bytes = invalid.read_bytes()
     try:
         toml_str = toml_bytes.decode()

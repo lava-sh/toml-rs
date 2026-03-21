@@ -1,0 +1,13 @@
+array = [
+    "item 1",
+    "item 2",
+    "item 3",
+]
+x = [
+    { name = "foo", value = 1 },
+    { name = "bar", value = 2 },
+]
+
+[database]
+connection = { host = "localhost", port = 5432 }
+credentials = { user = "admin", password = "secret" }

@@ -38,20 +38,24 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.44.0"]
 zizmor = ["zizmor == 1.23.1"]
-rumdl = ["rumdl == 0.1.56"]
+rumdl = ["rumdl == 0.1.57"]
 maturin = ["maturin == 1.12.6"]
+pytest = ["pytest == 9.0.2"]
+tomli-w = ["tomli-w == 1.2.0"]
+nox = [
+    { include-group = "pytest" },
+    { include-group = "tomli-w" },
+]
 ci = [
     "ty == 0.0.24",
     "ruff == 0.15.7",
-    "pytest == 9.0.2",
-    # last `tomli` version which support TOML 1.0
-    # need to check compatibility
-    "tomli == 2.3.0 ; python_version<'3.11'",
-    "tomli-w == 1.2.0",
+    "nox == 2026.02.09",
+    { include-group = "nox" },
     { include-group = "maturin" },
 ]
 dev = [
     { include-group = "ci" },
+    { include-group = "nox" },
     { include-group = "typos" },
     { include-group = "rumdl" },
     { include-group = "zizmor" },
@@ -64,7 +68,7 @@ bench = [
     "rtoml",
     "tomli ; python_version<'3.11'",
     "tomli-w",
-    "polars == 1.39.2",
+    "polars == 1.39.3",
     "altair == 6.0.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",

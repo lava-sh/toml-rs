@@ -1,0 +1,10 @@
+[database]
+connection = { host = "localhost", port = 5432 }
+
+[database.credentials]
+user = "admin"
+password = "secret"
+
+[service]
+endpoint = "https://api.example.com"
+parameters = { timeout = 30, retries = 3 }

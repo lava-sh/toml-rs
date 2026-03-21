@@ -6,6 +6,8 @@ import pytest
 import toml_rs
 import tomli_w
 
+from .helpers import read_toml
+
 
 @pytest.mark.parametrize(
     ("value", "pattern", "kwargs"),
@@ -80,24 +82,7 @@ def test_dumps() -> None:
             "server": "192.168.1.1",
         },
     }
-    assert (
-        toml_rs.dumps(obj)
-        == """\
-title = "TOML Example"
-float = -inf
-float_2 = nan
-
-[owner]
-dob = 1979-05-27T07:32:00-08:00
-name = "Tom Preston-Werner"
-
-[database]
-connection_max = 5000
-enabled = true
-ports = [8001, 8001, 8002]
-server = "192.168.1.1"
-"""
-    )
+    assert toml_rs.dumps(obj) == read_toml("test_dumps.toml")
 
 
 def test_dumps_inline_tables() -> None:
@@ -111,8 +96,9 @@ def test_dumps_inline_tables() -> None:
             "parameters": {"timeout": 30, "retries": 3},
         },
     }
-    dumps = toml_rs.dumps(obj)
-    dumps_with_inline_tables = toml_rs.dumps(
+    assert toml_rs.dumps(obj) == read_toml("test_dumps_inline_tables.toml")
+
+    with_inline_tables = toml_rs.dumps(
         obj,
         inline_tables={
             "database.connection",
@@ -120,61 +106,16 @@ def test_dumps_inline_tables() -> None:
             "service.parameters",
         },
     )
-    dumps_with_inline_tables_2 = toml_rs.dumps(
+    assert with_inline_tables == read_toml("test_dumps_inline_tables[1].toml")
+
+    with_inline_tables_2 = toml_rs.dumps(
         obj,
         inline_tables={
             "database.connection",
             "service.parameters",
         },
     )
-    assert (
-        dumps
-        == """\
-[database]
-
-[database.connection]
-host = "localhost"
-port = 5432
-
-[database.credentials]
-user = "admin"
-password = "secret"
-
-[service]
-endpoint = "https://api.example.com"
-
-[service.parameters]
-timeout = 30
-retries = 3
-"""
-    )
-    assert (
-        dumps_with_inline_tables
-        == """\
-[database]
-connection = { host = "localhost", port = 5432 }
-credentials = { user = "admin", password = "secret" }
-
-[service]
-endpoint = "https://api.example.com"
-parameters = { timeout = 30, retries = 3 }
-"""
-    )
-    assert (
-        dumps_with_inline_tables_2
-        == """\
-[database]
-connection = { host = "localhost", port = 5432 }
-
-[database.credentials]
-user = "admin"
-password = "secret"
-
-[service]
-endpoint = "https://api.example.com"
-parameters = { timeout = 30, retries = 3 }
-"""
-    )
+    assert with_inline_tables_2 == read_toml("test_dumps_inline_tables[2].toml")
 
 
 def test_dumps_pretty() -> None:
@@ -189,31 +130,14 @@ def test_dumps_pretty() -> None:
     }
     assert (
         toml_rs.dumps(obj, pretty=False)
-        == """\
-x = [{ name = "foo", value = 1 }, { name = "bar", value = 2 }]
-
-[example]
-array = ["item 1", "item 2", "item 3"]
-"""
+        ==
+        read_toml("test_dumps_pretty[pretty=False].toml")
     )
+
     assert (
         toml_rs.dumps(obj, pretty=True)
-        == """\
-[example]
-array = [
-    "item 1",
-    "item 2",
-    "item 3",
-]
-
-[[x]]
-name = "foo"
-value = 1
-
-[[x]]
-name = "bar"
-value = 2
-"""
+        ==
+        read_toml("test_dumps_pretty[pretty=True].toml")
     )
 
 
@@ -229,27 +153,15 @@ def test_dumps_pretty_with_inline_tables() -> None:
             {"name": "bar", "value": 2},
         ],
     }
+
     assert (
         toml_rs.dumps(
             obj,
             inline_tables={"database.connection", "database.credentials"},
             pretty=True,
         )
-        == """\
-array = [
-    "item 1",
-    "item 2",
-    "item 3",
-]
-x = [
-    { name = "foo", value = 1 },
-    { name = "bar", value = 2 },
-]
-
-[database]
-connection = { host = "localhost", port = 5432 }
-credentials = { user = "admin", password = "secret" }
-"""
+        ==
+        read_toml("test_dumps_pretty_with_inline_tables.toml")
     )
 
 

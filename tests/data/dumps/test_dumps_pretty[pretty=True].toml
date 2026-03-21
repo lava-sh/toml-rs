@@ -1,0 +1,14 @@
+[example]
+array = [
+    "item 1",
+    "item 2",
+    "item 3",
+]
+
+[[x]]
+name = "foo"
+value = 1
+
+[[x]]
+name = "bar"
+value = 2
