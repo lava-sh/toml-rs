@@ -1,3 +1,6 @@
+import glob
+from pathlib import Path
+
 import nox
 
 nox.options.default_venv_backend = "uv"
@@ -14,4 +17,8 @@ nox.options.reuse_existing_virtualenvs = True
 def test_compatibility(session: nox.Session, tomli_version: str) -> None:
     session.install(f"tomli=={tomli_version}")
     session.install("--group", "pytest")
+
+    wheel = next(Path("target/wheels").glob("*.whl"))
+    session.install(str(wheel))
+
     session.run("pytest")
