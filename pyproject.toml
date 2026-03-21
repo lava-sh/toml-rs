@@ -50,11 +50,11 @@ ci = [
     "ty == 0.0.24",
     "ruff == 0.15.7",
     "nox == 2026.02.09",
-    { include-group = "nox" },
     { include-group = "maturin" },
 ]
 dev = [
     { include-group = "ci" },
+    { include-group = "nox" },
     { include-group = "typos" },
     { include-group = "rumdl" },
     { include-group = "zizmor" },
