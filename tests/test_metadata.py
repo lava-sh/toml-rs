@@ -757,6 +757,57 @@ def test_metadata(toml_version: toml_rs._lib.TomlVersion) -> None:
     assert doc["nodes"]["arr"]["value"][0]["value"]["subtab"]["val"]["value"] == 1
     assert doc["nodes"]["arr"]["value"][1]["value"]["subtab"]["val"]["value"] == "4"
 
+    assert doc == {
+        "nodes": {
+            "arr": {
+                "key": "arr",
+                "key_col": (3, 5),
+                "key_line": 1,
+                "key_raw": "arr",
+                "value": [
+                    {
+                        "value": {
+                            "subtab": {
+                                "val": {
+                                    "key": "val",
+                                    "key_col": (1, 3),
+                                    "key_line": 3,
+                                    "key_raw": "val",
+                                    "value": 1,
+                                    "value_col": 7,
+                                    "value_line": 3,
+                                    "value_raw": "1",
+                                },
+                            },
+                        },
+                        "value_col": (1, 7),
+                        "value_line": 1,
+                        "value_raw": "[[arr]]",
+                    },
+                    {
+                        "value": {
+                            "subtab": {
+                                "val": {
+                                    "key": "val",
+                                    "key_col": (1, 3),
+                                    "key_line": 7,
+                                    "key_raw": "val",
+                                    "value": "4",
+                                    "value_col": (7, 9),
+                                    "value_line": 7,
+                                    "value_raw": '"4"',
+                                },
+                            },
+                        },
+                        "value_col": (1, 7),
+                        "value_line": 5,
+                        "value_raw": "[[arr]]",
+                    },
+                ],
+            },
+        },
+    }
+
 
 def test_document_item_accessors(toml_version: toml_rs._lib.TomlVersion) -> None:
     toml = _dedent("""
