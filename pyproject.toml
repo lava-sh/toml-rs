@@ -41,12 +41,16 @@ zizmor = ["zizmor == 1.23.1"]
 rumdl = ["rumdl == 0.1.57"]
 maturin = ["maturin == 1.12.6"]
 pytest = ["pytest == 9.0.2"]
+tomli-w = ["tomli-w == 1.2.0"]
+nox = [
+    { include-group = "pytest" },
+    { include-group = "tomli-w" },
+]
 ci = [
     "ty == 0.0.24",
     "ruff == 0.15.7",
     "nox == 2026.02.09",
-    "tomli-w == 1.2.0",
-    { include-group = "pytest" },
+    { include-group = "nox" },
     { include-group = "maturin" },
 ]
 dev = [

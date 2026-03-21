@@ -16,7 +16,7 @@ nox.options.reuse_existing_virtualenvs = True
 @nox.parametrize("tomli_version", ["2.3.0", "2.4.0"])
 def test_compatibility(session: nox.Session, tomli_version: str) -> None:
     session.install(f"tomli=={tomli_version}")
-    session.install("--group", "pytest")
+    session.install("--group", "nox")
 
     wheel = next(Path("target/wheels").glob("*.whl"))
     session.install(str(wheel))
