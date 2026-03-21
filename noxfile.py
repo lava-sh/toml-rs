@@ -20,4 +20,4 @@ def test_compatibility(session: nox.Session, tomli_version: str) -> None:
     wheel = next(Path("target/wheels").glob("*.whl"))
     session.install(str(wheel))
 
-    session.run("pytest")
+    session.run("pytest", "tests/")
