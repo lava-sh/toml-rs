@@ -108,13 +108,13 @@ def test_invalid_char_quotes() -> None:
 
 def test_type_error() -> None:
     with pytest.raises(TypeError) as exc:
-        tomllib.loads(b"v = 1")  # type: ignore[arg-type]
+        tomllib.loads(b"v = 1")  # ty: ignore[invalid-argument-type]]
     assert str(exc.value) in (
         "Expected str object, not 'bytes'", "str object expected; got bytes",
     )
 
     with pytest.raises(TypeError) as exc:
-        tomllib.loads(False)  # type: ignore[arg-type]  # noqa: FBT003
+        tomllib.loads(False)  # ty: ignore[invalid-argument-type]  # noqa: FBT003
     assert str(exc.value) in (
         "Expected str object, not 'bool'", "str object expected; got bool",
     )

@@ -30,7 +30,7 @@ def test_incorrect_load() -> None:
             Path(file_path).open(encoding="utf-8") as txt_f,
             pytest.raises(TypeError) as exc,
         ):
-            tomllib.load(txt_f)  # type: ignore[arg-type]
+            tomllib.load(txt_f)  # ty: ignore[invalid-argument-type]
         assert str(exc.value) in (
             "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`",
             "bytes object expected; got str",
