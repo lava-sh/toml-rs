@@ -68,7 +68,7 @@ features = [
 ##############################################################
 [dependencies.toml]
 git = "https://github.com/lava-sh/toml"
-rev = "036daae1b2cfa8ac39de40da059be73b8d1d7d2e"
+rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit
@@ -77,7 +77,7 @@ features = [
 
 [dependencies.toml_parser]
 git = "https://github.com/lava-sh/toml"
-rev = "036daae1b2cfa8ac39de40da059be73b8d1d7d2e"
+rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
 features = [
     "std",
     "simd",
@@ -86,7 +86,7 @@ features = [
 
 [dependencies.toml_edit]
 git = "https://github.com/lava-sh/toml"
-rev = "036daae1b2cfa8ac39de40da059be73b8d1d7d2e"
+rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
 features = [
     "serde",
     "unbounded",
@@ -94,7 +94,10 @@ features = [
 
 [dependencies.mimalloc]
 optional = true
-version = "=0.1.48"
+# version = "=0.1.48"
+git = "https://github.com/bluecatengineering/mimalloc_rust"
+rev = "8b86a87995e0c2d2fd11e2a15c7f26bc74005d74"
+package = "bc-mimalloc"
 features = [
     # mimalloc v3
     # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
