@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.7"
+version = "0.3.8"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -11,13 +11,13 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "=0.28.2", features = [
+pyo3 = { version = "=0.28.3", features = [
     "extension-module",
     "generate-import-lib",
     "num-bigint",
 ] }
 memchr = "=2.8.0"
-rustc-hash = "=2.1.1"
+rustc-hash = "=2.1.2"
 num-bigint = "=0.4.6"
 smallvec = "=2.0.0-alpha.12"
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
@@ -68,7 +68,7 @@ features = [
 ##############################################################
 [dependencies.toml]
 git = "https://github.com/lava-sh/toml"
-rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
+rev = "e6fb38068158e684ba04263fb83a5c9d104781b8"
 features = [
     "fast_hash", # uses `foldhash`
     "unbounded", # disables default recursion limit
@@ -77,7 +77,7 @@ features = [
 
 [dependencies.toml_parser]
 git = "https://github.com/lava-sh/toml"
-rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
+rev = "e6fb38068158e684ba04263fb83a5c9d104781b8"
 features = [
     "std",
     "simd",
@@ -86,7 +86,7 @@ features = [
 
 [dependencies.toml_edit]
 git = "https://github.com/lava-sh/toml"
-rev = "2fbe635084af20bd6f5b2b55632d3f892f0d3c10"
+rev = "e6fb38068158e684ba04263fb83a5c9d104781b8"
 features = [
     "serde",
     "unbounded",

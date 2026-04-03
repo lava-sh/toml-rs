@@ -6,5 +6,5 @@ include = [
     "py-src/*.py",
     "py-src/*.pyi",
     "tests/*.py",
-    "noxfile.py"
+    "noxfile.py",
 ]
