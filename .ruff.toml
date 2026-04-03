@@ -7,7 +7,9 @@ include = [
     "py-src/**.pyi",
     "tests/**.py",
     "benchmark/run.py",
-    "noxfile.py"
+    "noxfile.py",
+    "pyproject.toml",
+    "README.md",
 ]
 
 [lint.isort]
@@ -21,25 +23,31 @@ preview = true
 
 select = ["ALL"]
 ignore = [
-    "D",
-    "DOC",
-    "CPY001",
-    #______#
-    "PLR2004",
-    "PLR6201",
-    #______#
-    "ANN401",
-    #______#
-    "ARG001",
-    "ARG002",
+    "ARG",     # Unused method argument
+    "D",       # Docstring's
+    ########
+    "CPY001",  # Check copyright notices within Python files
+    "S311",    # Forces `random` -> `secrets`
+    "ANN401",  # Check `typing.Any`
+    "SIM105",  # Forces `try-except-pass` -> `contextlib.suppress`
+    #######
+    "PLR6201", # Checks for membership tests on list and tuple literals.
+    ########
+    "TC001",   # \
+    "TC002",   #  ==> `typing.TYPE_CHECKING` block's
+    "TC003",   # /
+    "TC006",   # Add quotes to type expression in `typing.cast()`
 ]
 
 [lint.per-file-ignores]
 "benchmark/run.py" = [
-    "INP001",
+    "INP001", # Checks for packages that are missing an __init__.py file.
 ]
 "tests/**.py" = [
-    "S101",
+    "DOC",     # Docstring's
+    ########
+    "S101",    # Checks for uses of the assert keyword.
+    "PLR2004", # Checks for the use of unnamed numerical constants ("magic") values in comparisons.
 ]
 
 [lint.mccabe]
@@ -49,3 +57,7 @@ max-complexity = 15
 [lint.pycodestyle]
 # E501 reports lines that exceed the length of 100.
 max-line-length = 320
+
+[lint.flake8-tidy-imports.banned-api]
+"contextlib.suppress" = { msg = "Use `try-except-pass` instead" }
+"__future__.annotations" = { msg = "Directly quote annotations instead" }
