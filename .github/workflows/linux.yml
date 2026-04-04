@@ -41,13 +41,13 @@ jobs:
             maturin_build_args: ""
           }
           - {
-            target: riscv64gc,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
+            target: riscv64,
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc"
           }
           - {
             target: loongarch64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc"
           }
 
