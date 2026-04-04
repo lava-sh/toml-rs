@@ -12,31 +12,38 @@ jobs:
         platform:
           - {
             target: x86_64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: x86,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: aarch64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: armv7,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: ppc64le,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: riscv64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: "--features mimalloc"
           }
           - {
             target: loongarch64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
+            maturin_build_args: ""
           }
 
     steps:
@@ -58,7 +65,7 @@ jobs:
             --release 
             --out dist
             --interpreter ${{ matrix.platform.interpreter }} 
-            --features mimalloc
+            ${{ matrix.platform.maturin_build_args }} 
             --compatibility pypi
 
       - name: "Upload wheels"
