@@ -68,29 +68,37 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.platform.python-version }}
+
       - name: "Install Rust toolchain"
         run: |
           rustup toolchain install ${{ matrix.platform.rust-toolchain }}
           rustup target add wasm32-unknown-emscripten --toolchain ${{ matrix.platform.rust-toolchain }}
+
       - name: "Install Emscripten SDK"
         uses: mymindstorm/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
           version: ${{ matrix.platform.emsdk-version }}
+
       - name: "Install uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
         with:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
+
       - name: "Install maturin"
         run: uv pip install --group maturin --system
+
       - name: "Fetch cargo dependencies"
         run: cargo fetch
+
       - name: "Patch toml_datetime for old Rust"
         run: |
           find ~/.cargo/git/checkouts -path "*toml_datetime/src/datetime.rs" -exec sed -E -i \
           's/([A-Za-z0-9_\.]+)\.is_multiple_of\(([0-9]+)\)/(\1 % \2 == 0)/g' {} +
+
       - name: "Build wasm wheel"
         env:
           RUSTUP_TOOLCHAIN: ${{ matrix.platform.rust-toolchain }}
@@ -100,6 +108,7 @@ jobs:
             --target wasm32-unknown-emscripten \
             --interpreter python${{ matrix.platform.python-version }} \
             --out dist
+
       - name: "Test wasm wheel"
         env:
           PYODIDE_VERSIONS: ${{ matrix.platform.pyodide-version }}
@@ -130,6 +139,7 @@ jobs:
             WHEEL_PATH="${wheel_path}" \
             node ./test_wasm_wheel.mjs
           done
+
       - name: "Upload wasm wheel"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:

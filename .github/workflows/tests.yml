@@ -23,17 +23,21 @@ jobs:
           ubuntu-latest,
           windows-latest,
         ]
+
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: "Install uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
         with:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
+
       - name: "Create and activate .venv"
         shell: bash
         run: |
@@ -45,13 +49,15 @@ jobs:
             echo ".venv/bin" >> "$GITHUB_PATH"
             echo "PYO3_PYTHON=.venv/bin/python3" >> "$GITHUB_ENV"
           fi
+
       - name: "Install dependencies"
-        run: |
-          uv pip install --group ci
+        run: uv pip install --group ci
+
       - name: "Run maturin"
         run: |
           rustc --version --verbose
           maturin build --release --features mimalloc
+
       - name: "Install built wheel"
         run: |
           python -c "
@@ -61,12 +67,12 @@ jobs:
           wheel = next(Path('target/wheels').glob('*.whl'))
           subprocess.check_call(['uv', 'pip', 'install', str(wheel)])
           "
+
       - name: "Run Ruff"
-        run: |
-          ruff check
+        run: ruff check
+
       - name: "Run ty"
-        run: |
-          ty check
+        run: ty check
+
       - name: "Run nox"
-        run: |
-          nox
+        run: nox
