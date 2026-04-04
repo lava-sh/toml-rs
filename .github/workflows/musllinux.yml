@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # PyPI does not support Rust target loongarch64-unknown-linux-gnu
         platform:
           - {
             target: x86_64,
@@ -39,11 +40,6 @@ jobs:
             target: riscv64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc"
-          }
-          - {
-            target: loongarch64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: ""
           }
 
     steps:
