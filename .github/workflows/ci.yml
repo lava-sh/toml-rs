@@ -225,9 +225,7 @@ jobs:
         uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
         with:
           command: sdist
-          args: >
-            --out dist  
-            --compatibility pypi
+          args: --out dist
 
       - name: "Upload sdist"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
