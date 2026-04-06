@@ -10,10 +10,6 @@ __all__ = (
     "loads",
 )
 
-from _toml_rs import (  # noqa: PLC2701
-    _VERSION as __version__,  # noqa: N811
-)
-
 from ._lib import (
     TOMLDecodeError,
     TOMLDocument,
@@ -23,4 +19,7 @@ from ._lib import (
     load,
     load_with_metadata,
     loads,
+)
+from ._toml_rs import (
+    _VERSION as __version__,  # noqa: N811
 )
