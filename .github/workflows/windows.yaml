@@ -1,26 +1,35 @@
-name: "macos"
+name: "windows"
 
 on:
   workflow_call:
 
 jobs:
-  macos:
-    name: "macos-latest / ${{ matrix.platform.target }}"
-    runs-on: macos-latest
+  windows:
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
+    runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
         platform:
           - {
-            target: x86_64,
+            # AMD64
+            runner: windows-latest,
+            target: x64,
+            python_arch: x64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
           }
           - {
+            # x86
+            runner: windows-latest,
+            target: x86,
+            python_arch: x86,
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t"
+          }
+          - {
+            # ARM64
+            runner: windows-11-arm,
             target: aarch64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
-          }
-          - {
-            target: universal2,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11"
+            python_arch: arm64,
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t"
           }
 
     steps:
@@ -31,6 +40,7 @@ jobs:
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: 3.x
+          architecture: ${{ matrix.platform.python_arch }}
 
       - name: "Build wheels"
         uses: PyO3/maturin-action@04ac600d27cdf7a9a280dadf7147097c42b757ad # v1.50.1
@@ -38,14 +48,14 @@ jobs:
           target: ${{ matrix.platform.target }}
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
           args: >
-            --release 
+            --release
             --out dist
-            --interpreter ${{ matrix.platform.interpreter }} 
+            --interpreter ${{ matrix.platform.interpreter }}
             --features mimalloc
             --compatibility pypi
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
-          name: wheels-macos-${{ matrix.platform.target }}
+          name: wheels-windows-${{ matrix.platform.target }}
           path: dist

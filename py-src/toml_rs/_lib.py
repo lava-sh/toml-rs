@@ -3,14 +3,11 @@ from pathlib import Path
 from typing import Any, BinaryIO, Literal, TextIO, TypeAlias
 
 from ._toml_rs import (
-    _VERSION,
     TOMLDocument,
     _dumps,
     _loads,
     _parse_metadata_from_string,
 )
-
-__version__: str = _VERSION
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]
@@ -127,7 +124,7 @@ class TOMLDecodeError(ValueError):
             .msg
             .replace("\r", "\\r")
             .replace("\b", "\\b")
-        )
+        )  # fmt: off
 
 
 class TOMLEncodeError(TypeError):

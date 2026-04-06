@@ -61,7 +61,7 @@ ruff check
 We use [rumdl](https://github.com/rvben/rumdl) to lint Markdown files. To run it do:
 
 ```bash
-rumdl check .
+rumdl check
 ```
 
 ## Running type checker
