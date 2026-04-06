@@ -5,7 +5,7 @@ on:
 
 jobs:
   windows:
-    name: "windows-latest / ${{ matrix.platform.target }}"
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
