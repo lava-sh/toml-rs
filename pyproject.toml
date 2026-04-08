@@ -40,7 +40,7 @@ typos = ["typos == 1.45.0"]
 zizmor = ["zizmor == 1.23.1"]
 rumdl = ["rumdl == 0.1.67"]
 maturin = ["maturin == 1.12.6"]
-pytest = ["pytest == 9.0.2"]
+pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
 nox = [
     { include-group = "pytest" },
