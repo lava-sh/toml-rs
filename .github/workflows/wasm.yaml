@@ -14,7 +14,7 @@ jobs:
         platform:
           - python-version: "3.10"
             # pyodide: 0.22.0 - ???
-            pyodide-version: "0.22.0"
+            pyodide-version: "0.23.0"
             emsdk-version: "3.1.27"
             rust-toolchain: "nightly-2025-02-17"
             rustflags: >-
