@@ -73,6 +73,26 @@ class MyMap(Mapping[str, Any]):
             re.escape("Path 'database.port' does not point to a table"),
             {"inline_tables": {"database.port"}},
         ),
+        (
+            {"decimal": Decimal("NaN123")},
+            re.escape("Cannot serialize invalid decimal.Decimal('NaN123') to TOML"),
+            {},
+        ),
+        (
+            {"decimal": Decimal("-NaN123")},
+            re.escape("Cannot serialize invalid decimal.Decimal('-NaN123') to TOML"),
+            {},
+        ),
+        (
+            {"decimal": Decimal("sNaN789")},
+            re.escape("Cannot serialize invalid decimal.Decimal('sNaN789') to TOML"),
+            {},
+        ),
+        (
+            {"decimal": Decimal("-sNaN789")},
+            re.escape("Cannot serialize invalid decimal.Decimal('-sNaN789') to TOML"),
+            {},
+        ),
     ],
 )
 def test_incorrect_dumps(

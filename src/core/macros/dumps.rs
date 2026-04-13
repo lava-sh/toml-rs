@@ -86,7 +86,7 @@ macro_rules! impl_dumps {
                     .map(|func| func.bind(py))
             }
 
-            fn normalize_decimal_str(value: &str) -> std::borrow::Cow<'_, str> {
+            fn normalize_decimal_str(value: &str) -> pyo3::PyResult<std::borrow::Cow<'_, str>> {
                 let bytes = value.as_bytes();
                 let mut start = 0;
                 let mut end = bytes.len();
@@ -121,14 +121,14 @@ macro_rules! impl_dumps {
                     };
 
                     if (a, b, c) == (b'n', b'a', b'n') {
-                        return std::borrow::Cow::Borrowed("nan");
+                        return Ok(std::borrow::Cow::Borrowed("nan"));
                     }
                     if (a, b, c) == (b'i', b'n', b'f') {
-                        return if neg {
+                        return Ok(if neg {
                             std::borrow::Cow::Borrowed("-inf")
                         } else {
                             std::borrow::Cow::Borrowed("inf")
-                        };
+                        });
                     }
                 }
 
@@ -144,8 +144,31 @@ macro_rules! impl_dumps {
                     };
 
                     if (a, b, c, d) == (b's', b'n', b'a', b'n') {
-                        return std::borrow::Cow::Borrowed("nan");
+                        return Ok(std::borrow::Cow::Borrowed("nan"));
                     }
+                }
+
+                if rest.len() > 3
+                    && (rest[0] | 0x20, rest[1] | 0x20, rest[2] | 0x20) == (b'n', b'a', b'n')
+                    && rest[3..].iter().all(u8::is_ascii_digit)
+                {
+                    return Err($crate::toml_rs::TOMLEncodeError::new_err(format!(
+                        "Cannot serialize invalid decimal.Decimal({trimmed:?}) to TOML"
+                    )));
+                }
+
+                if rest.len() > 4
+                    && (
+                        rest[0] | 0x20,
+                        rest[1] | 0x20,
+                        rest[2] | 0x20,
+                        rest[3] | 0x20,
+                    ) == (b's', b'n', b'a', b'n')
+                    && rest[4..].iter().all(u8::is_ascii_digit)
+                {
+                    return Err($crate::toml_rs::TOMLEncodeError::new_err(format!(
+                        "Cannot serialize invalid decimal.Decimal({trimmed:?}) to TOML"
+                    )));
                 }
 
                 if rest.len() == 8 {
@@ -161,11 +184,11 @@ macro_rules! impl_dumps {
                     }
 
                     if matches {
-                        return if neg {
+                        return Ok(if neg {
                             std::borrow::Cow::Borrowed("-inf")
                         } else {
                             std::borrow::Cow::Borrowed("inf")
-                        };
+                        });
                     }
                 }
 
@@ -190,7 +213,7 @@ macro_rules! impl_dumps {
                     let mut normalized = String::with_capacity(trimmed.len() + 2);
                     normalized.push_str(trimmed);
                     normalized.push_str(".0");
-                    return std::borrow::Cow::Owned(normalized);
+                    return Ok(std::borrow::Cow::Owned(normalized));
                 }
 
                 if has_upper_exp {
@@ -202,12 +225,12 @@ macro_rules! impl_dumps {
                     }
 
                     // SAFETY: the source is valid UTF-8 ASCII and we only replace `E` with `e`.
-                    return std::borrow::Cow::Owned(unsafe {
+                    return Ok(std::borrow::Cow::Owned(unsafe {
                         String::from_utf8_unchecked(normalized)
-                    });
+                    }));
                 }
 
-                std::borrow::Cow::Borrowed(trimmed)
+                Ok(std::borrow::Cow::Borrowed(trimmed))
             }
 
             fn mapping_to_toml_impl<'py>(
@@ -299,7 +322,7 @@ macro_rules! impl_dumps {
                 .is_truthy()?
             {
                 let py_str = obj.str()?;
-                let normalized = normalize_decimal_str(py_str.to_str()?);
+                let normalized = normalize_decimal_str(py_str.to_str()?)?;
                 return $to_toml_macro!(BigNum, normalized.as_ref());
             }
 
