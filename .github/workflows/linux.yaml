@@ -71,6 +71,7 @@ jobs:
           manylinux: auto
           args: >
             --release
+            --pgo
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin_build_args }}

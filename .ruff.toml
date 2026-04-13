@@ -7,6 +7,7 @@ include = [
     "py-src/**.pyi",
     "tests/**.py",
     "benchmark/run.py",
+    "benchmark/pgo.py",
     "noxfile.py",
     "pyproject.toml",
     "README.md",
@@ -40,7 +41,7 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"benchmark/run.py" = [
+"benchmark/**.py" = [
     "INP001", # Checks for packages that are missing an __init__.py file.
 ]
 "tests/**.py" = [

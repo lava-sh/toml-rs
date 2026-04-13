@@ -67,6 +67,7 @@ jobs:
           manylinux: musllinux_1_2
           args: >
             --release
+            --pgo
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin_build_args }}
