@@ -71,6 +71,123 @@ macro_rules! impl_dumps {
                 MAPPING_TYPE.import(py, "collections.abc", "Mapping")
             }
 
+            fn get_isinstance_func(
+                py: pyo3::Python<'_>,
+            ) -> pyo3::PyResult<&pyo3::Bound<'_, pyo3::PyAny>> {
+                static ISINSTANCE_FUNC: pyo3::sync::PyOnceLock<pyo3::Py<pyo3::PyAny>> =
+                    pyo3::sync::PyOnceLock::new();
+
+                ISINSTANCE_FUNC
+                    .get_or_try_init(py, || {
+                        py.import("builtins")?
+                            .getattr("isinstance")
+                            .map(|func| func.unbind())
+                    })
+                    .map(|func| func.bind(py))
+            }
+
+            fn normalize_decimal_str(value: &str) -> std::borrow::Cow<'_, str> {
+                let bytes = value.as_bytes();
+                let mut start = 0;
+                let mut end = bytes.len();
+
+                // SAFETY: `start < end <= bytes.len()`, so `start` is in bounds.
+                while start < end && unsafe { bytes.get_unchecked(start) }.is_ascii_whitespace() {
+                    start += 1;
+                }
+                // SAFETY: `start < end <= bytes.len()`, so `end - 1` is in bounds.
+                while start < end && unsafe { bytes.get_unchecked(end - 1) }.is_ascii_whitespace()
+                {
+                    end -= 1;
+                }
+
+                // SAFETY: `start` and `end` are advanced only while staying within `bytes.len()`.
+                let trimmed = unsafe { value.get_unchecked(start..end) };
+                let bytes = trimmed.as_bytes();
+
+                let (neg, rest, sign_len) = match bytes {
+                    [b'-', rest @ ..] => (true, rest, 1),
+                    [b'+', rest @ ..] => (false, rest, 1),
+                    _ => (false, bytes, 0),
+                };
+
+                if rest.len() == 3 {
+                    // SAFETY: `rest.len() == 3`, so indices `0..3` are in bounds.
+                    let (a, b, c) = unsafe {
+                        (
+                            *rest.get_unchecked(0) | 0x20,
+                            *rest.get_unchecked(1) | 0x20,
+                            *rest.get_unchecked(2) | 0x20,
+                        )
+                    };
+
+                    if (a, b, c) == (b'n', b'a', b'n') {
+                        return std::borrow::Cow::Borrowed("nan");
+                    }
+                }
+
+                if rest.len() == 8 {
+                    let inf = b"infinity";
+                    let mut matches = true;
+
+                    for i in 0..8 {
+                        // SAFETY: `rest.len() == 8`, so `i` in `0..8` is in bounds.
+                        if unsafe { *rest.get_unchecked(i) | 0x20 } != inf[i] {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if matches {
+                        return if neg {
+                            std::borrow::Cow::Borrowed("-inf")
+                        } else {
+                            std::borrow::Cow::Borrowed("inf")
+                        };
+                    }
+                }
+
+                let mut has_dot = false;
+                let mut has_exp = false;
+                let mut has_upper_exp = false;
+
+                for i in sign_len..bytes.len() {
+                    // SAFETY: loop bounds guarantee `i < bytes.len()`.
+                    match unsafe { *bytes.get_unchecked(i) } {
+                        b'.' => has_dot = true,
+                        b'e' => has_exp = true,
+                        b'E' => {
+                            has_exp = true;
+                            has_upper_exp = true;
+                        }
+                        _ => {}
+                    }
+                }
+
+                if !has_dot && !has_exp {
+                    let mut normalized = String::with_capacity(trimmed.len() + 2);
+                    normalized.push_str(trimmed);
+                    normalized.push_str(".0");
+                    return std::borrow::Cow::Owned(normalized);
+                }
+
+                if has_upper_exp {
+                    let mut normalized = trimmed.as_bytes().to_vec();
+                    for byte in &mut normalized {
+                        if *byte == b'E' {
+                            *byte = b'e';
+                        }
+                    }
+
+                    // SAFETY: the source is valid UTF-8 ASCII and we only replace `E` with `e`.
+                    return std::borrow::Cow::Owned(unsafe {
+                        String::from_utf8_unchecked(normalized)
+                    });
+                }
+
+                std::borrow::Cow::Borrowed(trimmed)
+            }
+
             fn mapping_to_toml_impl<'py>(
                 py: pyo3::Python<'py>,
                 obj: &pyo3::Bound<'py, pyo3::PyAny>,
@@ -155,8 +272,13 @@ macro_rules! impl_dumps {
                 return $to_toml_macro!(BigNum, float.str()?.to_str()?);
             }
 
-            if obj.is_instance(get_decimal_type(py)?.as_any())? {
-                return $to_toml_macro!(BigNum, obj.str()?.to_str()?);
+            if get_isinstance_func(py)?
+                .call1((obj, get_decimal_type(py)?))?
+                .is_truthy()?
+            {
+                let py_str = obj.str()?;
+                let normalized = normalize_decimal_str(py_str.to_str()?);
+                return $to_toml_macro!(BigNum, normalized.as_ref());
             }
 
             if let Ok(py_datetime) = obj.cast::<pyo3::types::PyDateTime>() {
@@ -193,7 +315,10 @@ macro_rules! impl_dumps {
                 return mapping_to_toml_impl(py, dict.as_any(), inline_tables, toml_path);
             }
 
-            if obj.is_instance(get_mapping_type(py)?.as_any())? {
+            if get_isinstance_func(py)?
+                .call1((obj, get_mapping_type(py)?))?
+                .is_truthy()?
+            {
                 return mapping_to_toml_impl(py, obj, inline_tables, toml_path);
             }
 
