@@ -1,5 +1,9 @@
 import re
+from collections import OrderedDict
+from collections.abc import Mapping
 from datetime import date, datetime, time, timedelta, timezone
+from decimal import Decimal
+from types import MappingProxyType
 from typing import Any
 
 import pytest
@@ -7,6 +11,20 @@ import toml_rs
 import tomli_w
 
 from .helpers import read_toml
+
+
+class MyMap(Mapping[str, Any]):
+    def __init__(self, data: dict[str, Any]) -> None:
+        self._data = data
+
+    def __getitem__(self, key: str) -> Any:
+        return self._data[key]
+
+    def __iter__(self) -> Any:
+        return iter(self._data)
+
+    def __len__(self) -> int:
+        return len(self._data)
 
 
 @pytest.mark.parametrize(
@@ -192,6 +210,34 @@ def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
             {
                 "1.0.0": "date = 1979-05-27\n",
                 "1.1.0": "date = 1979-05-27\n",
+            },
+        ),
+        (
+            {"ordered_dict": OrderedDict([("x", 1), ("y", 2)])},
+            {
+                "1.0.0": "[ordered_dict]\nx = 1\ny = 2\n",
+                "1.1.0": "[ordered_dict]\nx = 1\ny = 2\n",
+            },
+        ),
+        (
+            {"mapping_proxy": MappingProxyType({"x": 1, "y": 2})},
+            {
+                "1.0.0": "[mapping_proxy]\nx = 1\ny = 2\n",
+                "1.1.0": "[mapping_proxy]\nx = 1\ny = 2\n",
+            },
+        ),
+        (
+            {"custom_mapping": MyMap({"x": 1, "y": 2})},
+            {
+                "1.0.0": "[custom_mapping]\nx = 1\ny = 2\n",
+                "1.1.0": "[custom_mapping]\nx = 1\ny = 2\n",
+            },
+        ),
+        (
+            {"decimal": Decimal("1.50")},
+            {
+                "1.0.0": "decimal = 1.50\n",
+                "1.1.0": "decimal = 1.50\n",
             },
         ),
         (
