@@ -96,8 +96,7 @@ macro_rules! impl_dumps {
                     start += 1;
                 }
                 // SAFETY: `start < end <= bytes.len()`, so `end - 1` is in bounds.
-                while start < end && unsafe { bytes.get_unchecked(end - 1) }.is_ascii_whitespace()
-                {
+                while start < end && unsafe { bytes.get_unchecked(end - 1) }.is_ascii_whitespace() {
                     end -= 1;
                 }
 
