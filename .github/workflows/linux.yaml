@@ -25,7 +25,7 @@ jobs:
             maturin_build_args: "--pgo --features mimalloc"
           }
           - {
-            # ARM64
+            # ARM64 (cross-compile with zig)
             target: aarch64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc --zig"
