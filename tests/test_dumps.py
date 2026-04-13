@@ -241,7 +241,7 @@ def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
             },
         ),
         (
-            {"decimal": Decimal("1")},
+            {"decimal": Decimal(1)},
             {
                 "1.0.0": "decimal = 1.0\n",
                 "1.1.0": "decimal = 1.0\n",
