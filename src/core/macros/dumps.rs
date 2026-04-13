@@ -53,6 +53,95 @@ macro_rules! impl_dumps {
             inline_tables: Option<&rustc_hash::FxHashSet<String>>,
             toml_path: &mut smallvec::SmallVec<String, 32>,
         ) -> pyo3::PyResult<Item> {
+            fn get_decimal_type(
+                py: pyo3::Python<'_>,
+            ) -> pyo3::PyResult<&pyo3::Bound<'_, pyo3::types::PyType>> {
+                static DECIMAL_TYPE: pyo3::sync::PyOnceLock<pyo3::Py<pyo3::types::PyType>> =
+                    pyo3::sync::PyOnceLock::new();
+
+                DECIMAL_TYPE.import(py, "decimal", "Decimal")
+            }
+
+            fn get_mapping_type(
+                py: pyo3::Python<'_>,
+            ) -> pyo3::PyResult<&pyo3::Bound<'_, pyo3::types::PyType>> {
+                static MAPPING_TYPE: pyo3::sync::PyOnceLock<pyo3::Py<pyo3::types::PyType>> =
+                    pyo3::sync::PyOnceLock::new();
+
+                MAPPING_TYPE.import(py, "collections.abc", "Mapping")
+            }
+
+            fn mapping_to_toml_impl<'py>(
+                py: pyo3::Python<'py>,
+                obj: &pyo3::Bound<'py, pyo3::PyAny>,
+                inline_tables: Option<&rustc_hash::FxHashSet<String>>,
+                toml_path: &mut smallvec::SmallVec<String, 32>,
+            ) -> pyo3::PyResult<Item> {
+                let items = obj.call_method0(pyo3::intern!(py, "items"))?;
+                if items.len()? == 0 {
+                    return $to_toml_macro!(TomlTable, Table::new());
+                }
+
+                let inline = inline_tables.is_some_and(|set| set.contains(&toml_path.join(".")));
+
+                if inline {
+                    let mut inline_table = InlineTable::new();
+                    for item in items.try_iter()? {
+                        let py_tuple = item?.cast_into::<pyo3::types::PyTuple>()?;
+                        let py_key = py_tuple.get_item(0)?;
+                        let key = py_key
+                            .clone()
+                            .cast_into::<pyo3::types::PyString>()
+                            .map_err(|_| {
+                                $crate::toml_rs::TOMLEncodeError::new_err(format!(
+                                    "TOML table keys must be strings, got {py_type}",
+                                    py_type = $crate::get_type!(py_key)
+                                ))
+                            })?;
+                        let value = py_tuple.get_item(1)?;
+                        let key_str = key.to_str()?;
+
+                        toml_path.push(key_str.to_owned());
+                        let item = to_toml_impl(py, &value, inline_tables, toml_path)?;
+                        toml_path.pop();
+
+                        if let Item::Value(val) = item {
+                            inline_table.insert(key_str, val);
+                        } else {
+                            return Err($crate::toml_rs::TOMLEncodeError::new_err(
+                                "Inline tables can only contain values, not nested tables",
+                            ));
+                        }
+                    }
+
+                    return $to_toml_macro!(TomlInlineTable, inline_table);
+                }
+
+                let mut table = Table::new();
+                for item in items.try_iter()? {
+                    let py_tuple = item?.cast_into::<pyo3::types::PyTuple>()?;
+                    let py_key = py_tuple.get_item(0)?;
+                    let key = py_key
+                        .clone()
+                        .cast_into::<pyo3::types::PyString>()
+                        .map_err(|_| {
+                            $crate::toml_rs::TOMLEncodeError::new_err(format!(
+                                "TOML table keys must be strings, got {py_type}",
+                                py_type = $crate::get_type!(py_key)
+                            ))
+                        })?;
+                    let value = py_tuple.get_item(1)?;
+                    let key_str = key.to_str()?;
+
+                    toml_path.push(key_str.to_owned());
+                    let item = to_toml_impl(py, &value, inline_tables, toml_path)?;
+                    toml_path.pop();
+
+                    table.insert(key_str, item);
+                }
+                $to_toml_macro!(TomlTable, table)
+            }
+
             if let Ok(s) = obj.cast::<pyo3::types::PyString>() {
                 return $to_toml_macro!(String, s.to_str()?.to_owned());
             }
@@ -64,6 +153,10 @@ macro_rules! impl_dumps {
             }
             if let Ok(float) = obj.cast::<pyo3::types::PyFloat>() {
                 return $to_toml_macro!(BigNum, float.str()?.to_str()?);
+            }
+
+            if obj.is_instance(get_decimal_type(py)?.as_any())? {
+                return $to_toml_macro!(BigNum, obj.str()?.to_str()?);
             }
 
             if let Ok(py_datetime) = obj.cast::<pyo3::types::PyDateTime>() {
@@ -97,60 +190,11 @@ macro_rules! impl_dumps {
             }
 
             if let Ok(dict) = obj.cast::<pyo3::types::PyDict>() {
-                if dict.is_empty() {
-                    return $to_toml_macro!(TomlTable, Table::new());
-                }
+                return mapping_to_toml_impl(py, dict.as_any(), inline_tables, toml_path);
+            }
 
-                let inline = inline_tables.is_some_and(|set| set.contains(&toml_path.join(".")));
-
-                return if inline {
-                    let mut inline_table = InlineTable::new();
-                    for (k, v) in dict.iter() {
-                        let key = k
-                            .cast::<pyo3::types::PyString>()
-                            .map_err(|_| {
-                                $crate::toml_rs::TOMLEncodeError::new_err(format!(
-                                    "TOML table keys must be strings, got {py_type}",
-                                    py_type = $crate::get_type!(k)
-                                ))
-                            })?
-                            .to_str()?;
-
-                        toml_path.push(key.to_owned());
-                        let item = to_toml_impl(py, &v, inline_tables, toml_path)?;
-                        toml_path.pop();
-
-                        if let Item::Value(val) = item {
-                            inline_table.insert(key, val);
-                        } else {
-                            return Err($crate::toml_rs::TOMLEncodeError::new_err(
-                                "Inline tables can only contain values, not nested tables",
-                            ));
-                        }
-                    }
-
-                    $to_toml_macro!(TomlInlineTable, inline_table)
-                } else {
-                    let mut table = Table::new();
-                    for (k, v) in dict.iter() {
-                        let key = k
-                            .cast::<pyo3::types::PyString>()
-                            .map_err(|_| {
-                                $crate::toml_rs::TOMLEncodeError::new_err(format!(
-                                    "TOML table keys must be strings, got {py_type}",
-                                    py_type = $crate::get_type!(k)
-                                ))
-                            })?
-                            .to_str()?;
-
-                        toml_path.push(key.to_owned());
-                        let item = to_toml_impl(py, &v, inline_tables, toml_path)?;
-                        toml_path.pop();
-
-                        table.insert(key, item);
-                    }
-                    $to_toml_macro!(TomlTable, table)
-                };
+            if obj.is_instance(get_mapping_type(py)?.as_any())? {
+                return mapping_to_toml_impl(py, obj, inline_tables, toml_path);
             }
 
             if let Ok(list) = obj.cast::<pyo3::types::PyList>() {
