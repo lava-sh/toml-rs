@@ -5,7 +5,6 @@ build-backend = "maturin"
 [tool.maturin]
 python-source = "py-src"
 module-name = "toml_rs._toml_rs"
-pgo-command = "python benchmark/pgo.py"
 
 [project]
 name = "toml-rs"
