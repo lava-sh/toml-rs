@@ -269,6 +269,20 @@ def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
             },
         ),
         (
+            {"decimal": Decimal("sNaN")},
+            {
+                "1.0.0": "decimal = nan\n",
+                "1.1.0": "decimal = nan\n",
+            },
+        ),
+        (
+            {"decimal": Decimal("-sNaN")},
+            {
+                "1.0.0": "decimal = nan\n",
+                "1.1.0": "decimal = nan\n",
+            },
+        ),
+        (
             {"decimal": Decimal("Infinity")},
             {
                 "1.0.0": "decimal = inf\n",
@@ -277,6 +291,20 @@ def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
         ),
         (
             {"decimal": Decimal("-Infinity")},
+            {
+                "1.0.0": "decimal = -inf\n",
+                "1.1.0": "decimal = -inf\n",
+            },
+        ),
+        (
+            {"decimal": Decimal("Inf")},
+            {
+                "1.0.0": "decimal = inf\n",
+                "1.1.0": "decimal = inf\n",
+            },
+        ),
+        (
+            {"decimal": Decimal("-Inf")},
             {
                 "1.0.0": "decimal = -inf\n",
                 "1.1.0": "decimal = -inf\n",

@@ -123,6 +123,29 @@ macro_rules! impl_dumps {
                     if (a, b, c) == (b'n', b'a', b'n') {
                         return std::borrow::Cow::Borrowed("nan");
                     }
+                    if (a, b, c) == (b'i', b'n', b'f') {
+                        return if neg {
+                            std::borrow::Cow::Borrowed("-inf")
+                        } else {
+                            std::borrow::Cow::Borrowed("inf")
+                        };
+                    }
+                }
+
+                if rest.len() == 4 {
+                    // SAFETY: `rest.len() == 4`, so indices `0..4` are in bounds.
+                    let (a, b, c, d) = unsafe {
+                        (
+                            *rest.get_unchecked(0) | 0x20,
+                            *rest.get_unchecked(1) | 0x20,
+                            *rest.get_unchecked(2) | 0x20,
+                            *rest.get_unchecked(3) | 0x20,
+                        )
+                    };
+
+                    if (a, b, c, d) == (b's', b'n', b'a', b'n') {
+                        return std::borrow::Cow::Borrowed("nan");
+                    }
                 }
 
                 if rest.len() == 8 {
