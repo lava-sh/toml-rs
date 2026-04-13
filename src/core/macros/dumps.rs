@@ -153,7 +153,7 @@ macro_rules! impl_dumps {
                     && rest[3..].iter().all(u8::is_ascii_digit)
                 {
                     return Err($crate::toml_rs::TOMLEncodeError::new_err(format!(
-                        "Cannot serialize invalid decimal.Decimal({trimmed:?}) to TOML"
+                        "Cannot serialize invalid decimal.Decimal('{trimmed}') to TOML"
                     )));
                 }
 
@@ -167,7 +167,7 @@ macro_rules! impl_dumps {
                     && rest[4..].iter().all(u8::is_ascii_digit)
                 {
                     return Err($crate::toml_rs::TOMLEncodeError::new_err(format!(
-                        "Cannot serialize invalid decimal.Decimal({trimmed:?}) to TOML"
+                        "Cannot serialize invalid decimal.Decimal('{trimmed}') to TOML"
                     )));
                 }
 
