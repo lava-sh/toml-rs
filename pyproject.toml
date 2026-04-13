@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.12.6"]
+requires = ["maturin == 1.13.1"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -12,7 +12,7 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 description = "A High-Performance TOML Parser for Python written in Rust"
 readme = "README.md"
-license = "UNLICENSE"
+license = "Unlicense"
 license-files = ["UNLICENSE"]
 authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
@@ -37,9 +37,9 @@ classifiers = [
 
 [dependency-groups]
 typos = ["typos == 1.45.0"]
-zizmor = ["zizmor == 1.23.1"]
-rumdl = ["rumdl == 0.1.67"]
-maturin = ["maturin == 1.12.6"]
+zizmor = ["zizmor == 1.24.0"]
+rumdl = ["rumdl == 0.1.71"]
+maturin = ["maturin == 1.13.1"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
 nox = [
@@ -48,8 +48,8 @@ nox = [
 ]
 ci = [
     "ty == 0.0.29",
-    "ruff == 0.15.9",
-    "nox == 2026.02.09",
+    "ruff == 0.15.10",
+    "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
 ]
