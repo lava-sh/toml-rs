@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from typing import Any
 
 import pytest
@@ -175,3 +175,74 @@ def test_big_nums(toml_version: toml_rs._lib.TomlVersion) -> None:
     # https://github.com/lava-sh/toml-rs/issues/118
     big_float = {"float": float(f"{num}.{num}")}
     assert tomli_w.dumps(big_float) == toml_rs.dumps(big_float, toml_version=toml_version)
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (
+            {"empty_tuple": ()},
+            {
+                "1.0.0": "empty_tuple = []\n",
+                "1.1.0": "empty_tuple = []\n",
+            },
+        ),
+        (
+            {"date": date(1979, 5, 27)},
+            {
+                "1.0.0": "date = 1979-05-27\n",
+                "1.1.0": "date = 1979-05-27\n",
+            },
+        ),
+        (
+            {"tuple": (2, 3)},
+            {
+                "1.0.0": "tuple = [2, 3]\n",
+                "1.1.0": "tuple = [2, 3]\n",
+            },
+        ),
+        (
+            {"nested_tuple": ((1, 2), (3, 4))},
+            {
+                "1.0.0": "nested_tuple = [[1, 2], [3, 4]]\n",
+                "1.1.0": "nested_tuple = [[1, 2], [3, 4]]\n",
+            },
+        ),
+        (
+            {"mixed_sequence": [1, (2, 3), [4, 5]]},
+            {
+                "1.0.0": "mixed_sequence = [1, [2, 3], [4, 5]]\n",
+                "1.1.0": "mixed_sequence = [1, [2, 3], [4, 5]]\n",
+            },
+        ),
+        (
+            {"time": time(7, 32)},
+            {
+                "1.0.0": "time = 07:32:00\n",
+                "1.1.0": "time = 07:32:00.0\n",
+            },
+        ),
+        (
+            {
+                "datetime": datetime(
+                    1979,
+                    5,
+                    27,
+                    7,
+                    32,
+                    tzinfo=timezone(timedelta(hours=-8)),
+                ),
+            },
+            {
+                "1.0.0": "datetime = 1979-05-27T07:32:00-08:00\n",
+                "1.1.0": "datetime = 1979-05-27T07:32:00.0-08:00\n",
+            },
+        ),
+    ],
+)
+def test_dumps_direct(
+        value: dict[str, Any],
+        expected: dict[toml_rs._lib.TomlVersion, str],
+        toml_version: toml_rs._lib.TomlVersion,
+) -> None:
+    assert toml_rs.dumps(value, toml_version=toml_version) == expected[toml_version]

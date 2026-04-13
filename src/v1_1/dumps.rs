@@ -1,6 +1,6 @@
 use pyo3::types::{
     PyAnyMethods, PyBoolMethods, PyDateAccess, PyDeltaAccess, PyDictMethods, PyListMethods,
-    PyStringMethods, PyTimeAccess, PyTzInfoAccess,
+    PyStringMethods, PyTimeAccess, PyTupleMethods, PyTzInfoAccess,
 };
 use toml_edit::{Array, InlineTable, Item, Offset, Table, Value};
 

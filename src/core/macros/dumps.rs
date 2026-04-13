@@ -180,6 +180,33 @@ macro_rules! impl_dumps {
                 return $to_toml_macro!(TomlArray, array);
             }
 
+            if let Ok(py_tuple) = obj.cast::<pyo3::types::PyTuple>() {
+                if py_tuple.is_empty() {
+                    return $to_toml_macro!(TomlArray, Array::new());
+                }
+
+                let mut array = Array::new();
+                for item in py_tuple.iter() {
+                    let items = to_toml_impl(py, &item, inline_tables, toml_path)?;
+                    match items {
+                        Item::Value(value) => {
+                            array.push(value);
+                        }
+                        Item::Table(table) => {
+                            let inline_table = table.into_inline_table();
+                            array.push(Value::InlineTable(inline_table));
+                        }
+                        _ => {
+                            return Err($crate::toml_rs::TOMLEncodeError::new_err(
+                                "Arrays can only contain values or inline tables",
+                            ));
+                        }
+                    }
+                }
+
+                return $to_toml_macro!(TomlArray, array);
+            }
+
             Err($crate::toml_rs::TOMLEncodeError::new_err(format!(
                 "Cannot serialize {py_type} to TOML",
                 py_type = $crate::get_type!(obj)
