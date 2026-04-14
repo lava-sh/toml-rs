@@ -36,19 +36,19 @@ jobs:
             # ARMv7 (32-bit)
             target: armv7,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo"
+            maturin_build_args: ""
           }
           - {
             # IBM System z (s390x)
             target: s390x,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo"
+            maturin_build_args: ""
           }
           - {
             # PowerPC64 Little Endian
             target: ppc64le,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo"
+            maturin_build_args: ""
           }
           - {
             # RISC-V 64-bit
