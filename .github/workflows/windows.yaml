@@ -5,6 +5,7 @@ on:
 
 env:
   UV_LINK_MODE: copy
+  UV_PYTHON_DOWNLOADS: 0
 
 jobs:
   windows:
@@ -28,7 +29,7 @@ jobs:
             target: x86,
             python_arch: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # ARM64
@@ -36,7 +37,7 @@ jobs:
             target: aarch64,
             python_arch: arm64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
 
     steps:

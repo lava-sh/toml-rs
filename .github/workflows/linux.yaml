@@ -3,12 +3,14 @@ name: "linux"
 on:
   workflow_call:
 
+env:
+  UV_PYTHON_DOWNLOADS: 0
+
 jobs:
   linux:
     name: "ubuntu-latest / ${{ matrix.platform.target }}"
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         # PyPI does not support Rust target `loongarch64-unknown-linux-gnu`
         platform:
@@ -16,13 +18,13 @@ jobs:
             # AMD64
             target: x86_64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # x86 (32-bit)
             target: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # ARM64 (cross-compile with zig)
@@ -52,7 +54,7 @@ jobs:
             # RISC-V 64-bit
             target: riscv64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
 
     steps:
@@ -75,7 +77,6 @@ jobs:
           target: ${{ matrix.platform.target }}
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
           manylinux: auto
-          rustup-components: llvm-tools rust-src
           args: >
             --release
             --out dist
