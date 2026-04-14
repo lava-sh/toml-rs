@@ -19,16 +19,7 @@ jobs:
             runner: windows-latest,
             target: x64,
             python_arch: x64,
-            interpreter: [
-              "3.10",
-              "3.11",
-              "3.12",
-              "3.13",
-              "3.13t",
-              "3.14",
-              "3.14t",
-              "pypy3.11",
-            ],
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--pgo --features mimalloc"
           }
           - {
@@ -36,15 +27,7 @@ jobs:
             runner: windows-latest,
             target: x86,
             python_arch: x86,
-            interpreter: [
-              "3.10",
-              "3.11",
-              "3.12",
-              "3.13",
-              "3.13t",
-              "3.14",
-              "3.14t",
-            ],
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc"
           }
           - {
@@ -52,15 +35,7 @@ jobs:
             runner: windows-11-arm,
             target: aarch64,
             python_arch: arm64,
-            interpreter: [
-              "3.10",
-              "3.11",
-              "3.12",
-              "3.13",
-              "3.13t",
-              "3.14",
-              "3.14t",
-            ],
+            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
             maturin_build_args: "--features mimalloc"
           }
 
@@ -86,7 +61,7 @@ jobs:
           args: >
             --release
             --out dist
-            --interpreter ${{ join(matrix.platform.interpreter, ' ') }}
+            --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin_build_args }}
             --compatibility pypi
 
