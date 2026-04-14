@@ -37,8 +37,8 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.45.0"]
-zizmor = ["zizmor == 1.24.0"]
+typos = ["typos == 1.45.1"]
+zizmor = ["zizmor == 1.24.1"]
 rumdl = ["rumdl == 0.1.71"]
 maturin = ["maturin == 1.13.1"]
 pytest = ["pytest == 9.0.3"]
