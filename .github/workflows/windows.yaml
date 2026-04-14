@@ -50,6 +50,14 @@ jobs:
           python-version: |
             3.13t
             3.14t
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        if: matrix.platform.python_arch == "x64"
+        with:
+          architecture: ${{ matrix.platform.python_arch }}
+          python-version: |
+            3.13t
+            3.14t
             pypy3.11
 
       - name: "Install uv"
