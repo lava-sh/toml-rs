@@ -12,7 +12,6 @@ jobs:
     name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
-      fail-fast: false
       matrix:
         platform:
           - {
