@@ -36,7 +36,7 @@ jobs:
             target: aarch64,
             python_arch: arm64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
 
     steps:
