@@ -13,6 +13,29 @@ def capture(*args: str) -> str:
     return subprocess.check_output(args, text=True).strip()
 
 
+def uv_request(version: str, python_arch: str) -> str:
+    arch = {"x64": "x86_64", "x86": "x86", "arm64": "aarch64"}[python_arch]
+
+    if version.startswith("pypy"):
+        return f"pypy-{version.removeprefix('pypy')}-windows-{arch}-none"
+
+    if version.endswith("t"):
+        return f"cpython-{version.removesuffix('t')}+freethreaded-windows-{arch}-none"
+
+    return f"cpython-{version}-windows-{arch}-none"
+
+
+def try_capture(*args: str) -> str | None:
+    try:
+        return capture(*args)
+    except subprocess.CalledProcessError:
+        return None
+
+
+def log(message: str) -> None:
+    print(message, flush=True)
+
+
 def find_python_in_toolcache(version: str, python_arch: str) -> str | None:
     is_pypy = version.startswith("pypy")
     is_freethreaded = version.endswith("t") and not is_pypy
@@ -25,7 +48,7 @@ def find_python_in_toolcache(version: str, python_arch: str) -> str | None:
     if runner_tool_cache:
         roots.append(Path(runner_tool_cache) / family)
 
-    python_location = os.environ.get("PYTHONLOCATION")
+    python_location = os.environ.get("pythonLocation")
     if python_location:
         location_path = Path(python_location)
         if location_path.parent.name == family:
@@ -44,17 +67,29 @@ def find_python_in_toolcache(version: str, python_arch: str) -> str | None:
 
 
 def find_python(version: str, python_arch: str) -> str:
+    request = uv_request(version, python_arch)
+    log(f"Resolving Python {version} for {python_arch} via uv request: {request}")
+
+    managed_python = try_capture("uv", "python", "find", "--no-project", request)
+    if managed_python is not None:
+        log(f"Found Python {version} via uv: {managed_python}")
+        return managed_python
+
     toolcache_python = find_python_in_toolcache(version, python_arch)
     if toolcache_python is not None:
+        log(f"Found Python {version} in toolcache: {toolcache_python}")
         return toolcache_python
 
     launcher_version = f"{version}-32" if python_arch == "x86" else version
-    return capture(
+    log(f"Falling back to py launcher for Python {version}: -{launcher_version}")
+    python = capture(
         "py",
         f"-{launcher_version}",
         "-c",
         "import sys; print(sys.executable)",
     )
+    log(f"Found Python {version} via py launcher: {python}")
+    return python
 
 
 def main() -> None:
@@ -71,14 +106,23 @@ def main() -> None:
     instrumented_root.mkdir(parents=True, exist_ok=True)
 
     base_env = os.environ.copy()
+    log(f"Starting manual PGO build for interpreters: {args.interpreters}")
+    log(f"Python architecture: {args.python_arch}")
+    log(f"llvm-profdata: {args.llvm_profdata}")
 
     for version in args.interpreters.split():
         safe_version = version.replace(".", "_")
+        log("")
+        log(f"=== Python {version} / {args.python_arch} ===")
         python = find_python(version, args.python_arch)
         pgo_dir = workspace / "pgo-data" / safe_version
         instrumented_dir = instrumented_root / safe_version
         venv_dir = workspace / ".pgo-venv" / safe_version
         merged_profdata = pgo_dir / "merged.profdata"
+        log(f"Resolved interpreter: {python}")
+        log(f"PGO directory: {pgo_dir}")
+        log(f"Instrumented wheel directory: {instrumented_dir}")
+        log(f"Temporary venv: {venv_dir}")
 
         pgo_dir.mkdir(parents=True, exist_ok=True)
         instrumented_dir.mkdir(parents=True, exist_ok=True)
@@ -87,6 +131,8 @@ def main() -> None:
 
         env = base_env.copy()
         env["RUSTFLAGS"] = f"-Cprofile-generate={pgo_dir}"
+        log(f"[{version}] Phase 1/4: building instrumented wheel")
+        log(f"[{version}] RUSTFLAGS={env['RUSTFLAGS']}")
         run(
             "maturin",
             "build",
@@ -102,9 +148,12 @@ def main() -> None:
             env=env,
         )
 
+        log(f"[{version}] Phase 2/4: creating venv and installing instrumented wheel")
         run("uv", "venv", str(venv_dir), "--python", python)
         venv_python = venv_dir / "Scripts" / "python.exe"
         wheel = next(instrumented_dir.glob("*.whl"))
+        log(f"[{version}] Venv Python: {venv_python}")
+        log(f"[{version}] Instrumented wheel: {wheel}")
 
         run(
             "uv",
@@ -119,13 +168,19 @@ def main() -> None:
 
         env = base_env.copy()
         env["LLVM_PROFILE_FILE"] = str(pgo_dir / "%m_%p.profraw")
+        log(f"[{version}] Phase 3/4: running benchmark/pgo.py")
+        log(f"[{version}] LLVM_PROFILE_FILE={env['LLVM_PROFILE_FILE']}")
         run(str(venv_python), "benchmark/pgo.py", env=env)
 
         profraw = [str(path) for path in pgo_dir.glob("*.profraw")]
+        log(f"[{version}] Collected {len(profraw)} raw profile(s)")
+        log(f"[{version}] Merging profiles into: {merged_profdata}")
         run(args.llvm_profdata, "merge", "-o", str(merged_profdata), *profraw)
 
         env = base_env.copy()
         env["RUSTFLAGS"] = f"-Cprofile-use={merged_profdata}"
+        log(f"[{version}] Phase 4/4: building optimized wheel")
+        log(f"[{version}] RUSTFLAGS={env['RUSTFLAGS']}")
         run(
             "maturin",
             "build",
@@ -140,6 +195,10 @@ def main() -> None:
             "pypi",
             env=env,
         )
+        log(f"[{version}] Finished successfully")
+
+    log("")
+    log(f"Manual PGO build completed. Wheels are in: {dist_dir}")
 
 
 if __name__ == "__main__":
