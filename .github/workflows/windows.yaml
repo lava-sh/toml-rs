@@ -12,7 +12,6 @@ jobs:
     name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
-      fail-fast: false
       matrix:
         platform:
           - {
@@ -21,7 +20,7 @@ jobs:
             target: x64,
             python_arch: x64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            pgo: true
+            maturin_build_args: "--pgo --features mimalloc"
           }
           - {
             # x86
@@ -29,7 +28,7 @@ jobs:
             target: x86,
             python_arch: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            pgo: true
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # ARM64
@@ -37,7 +36,7 @@ jobs:
             target: aarch64,
             python_arch: arm64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            pgo: false
+            maturin_build_args: "--features mimalloc"
           }
 
     steps:
@@ -45,81 +44,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Prepare Python versions"
-        id: python-versions
-        shell: pwsh
-        env:
-          INTERPRETERS: ${{ matrix.platform.interpreter }}
-          PGO: ${{ matrix.platform.pgo }}
-        run: |
-          if ($env:PGO -eq 'true') {
-            $versions = $env:INTERPRETERS.Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries) -join "`n"
-          } else {
-            $versions = "3.13t`n3.14t"
-          }
-
-          "versions<<EOF" >> $env:GITHUB_OUTPUT
-          $versions >> $env:GITHUB_OUTPUT
-          "EOF" >> $env:GITHUB_OUTPUT
-
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           architecture: ${{ matrix.platform.python_arch }}
           python-version: |
-            ${{ steps.python-versions.outputs.versions }}
+            3.13t
+            3.14t
+            ${{ matrix.platform.python_arch == 'x64' && 'pypy3.11' || '' }}
 
       - name: "Install uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
         with:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
 
-      - name: "Install llvm-tools"
-        if: ${{ matrix.platform.pgo }}
-        shell: pwsh
-        run: rustup component add llvm-tools
-
-      - name: "Install maturin"
-        if: ${{ matrix.platform.pgo }}
-        shell: pwsh
-        run: uv pip install --group maturin --system
-
-      - name: "Resolve llvm-profdata"
-        if: ${{ matrix.platform.pgo }}
-        id: llvm
-        shell: pwsh
-        run: |
-          $sysroot = rustc --print sysroot
-          $rustc_verbose = rustc -vV
-          $host_line = $rustc_verbose | Select-String '^host: '
-          $rust_host = $host_line.ToString().Substring(6)
-          $llvm_profdata = Join-Path $sysroot "lib\rustlib\$rust_host\bin\llvm-profdata.exe"
-
-          "path=$llvm_profdata" >> $env:GITHUB_OUTPUT
-
-      - name: "Build wheels with manual PGO"
-        if: ${{ matrix.platform.pgo }}
-        shell: pwsh
-        env:
-          INTERPRETERS: ${{ matrix.platform.interpreter }}
-          PYTHON_ARCH: ${{ matrix.platform.python_arch }}
-          LLVM_PROFDATA: ${{ steps.llvm.outputs.path }}
-        run: |
-          $args = @(
-            ".github/scripts/build_with_pgo.py"
-            "--interpreters"
-            "${env:INTERPRETERS}"
-            "--python-arch"
-            "${env:PYTHON_ARCH}"
-            "--target"
-            "${{ matrix.platform.target }}"
-            "--llvm-profdata"
-            "${env:LLVM_PROFDATA}"
-          )
-
-          python @args
-
       - name: "Build wheels"
-        if: ${{ !matrix.platform.pgo }}
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
@@ -128,7 +66,7 @@ jobs:
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
-            --features mimalloc
+            ${{ matrix.platform.maturin_build_args }}
             --compatibility pypi
 
       - name: "Upload wheels"

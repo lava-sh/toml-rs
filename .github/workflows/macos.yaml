@@ -11,45 +11,31 @@ jobs:
     name: "macos-latest / ${{ matrix.platform.target }}"
     runs-on: macos-latest
     strategy:
-      fail-fast: false
       matrix:
         platform:
           - {
             # Intel Mac
             target: x86_64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # Apple Silicon M1-M4
             target: aarch64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
           - {
             # Universal binary (Intel + Apple Silicon)
             target: universal2,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin_build_args: "--features mimalloc"
           }
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          architecture: ${{ matrix.platform.python_arch }}
-          python-version: |
-            3.10
-            3.11
-            3.12
-            3.13
-            3.14
-            3.13t
-            3.14t
-            pypy3.11
 
       - name: "Install uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
@@ -61,7 +47,6 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
-          rustup-components: llvm-tools
           args: >
             --release
             --out dist
