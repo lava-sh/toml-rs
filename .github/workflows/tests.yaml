@@ -54,7 +54,7 @@ jobs:
 
       - name: "Install built wheel"
         shell: bash
-        run: uv pip install --system wheel/*.whl
+        run: uv pip install wheel/*.whl
 
       - name: "Run ruff"
         run: ruff check
