@@ -17,6 +17,6 @@ def test_compatibility(session: nox.Session, tomli_version: str) -> None:
     session.install(f"tomli=={tomli_version}")
     session.install("--group", "nox")
 
-    session.install(glob.glob("*.whl")[0])
+    session.install(glob.glob("wheel/*.whl")[0])
 
     session.run("pytest", "tests/")
