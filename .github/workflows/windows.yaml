@@ -8,7 +8,7 @@ env:
 
 jobs:
   windows:
-    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }} / ${{ matrix.platform.interpreter }}"
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }} / ${{ matrix.interpreter }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -65,7 +65,7 @@ jobs:
           args: >
             --release
             --out dist
-            --interpreter ${{ matrix.platform.interpreter }}
+            --interpreter ${{ matrix.interpreter }}
             ${{ matrix.platform.maturin-build-args }}
             --compatibility pypi
 
