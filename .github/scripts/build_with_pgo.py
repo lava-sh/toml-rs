@@ -22,7 +22,11 @@ def try_capture(*args: str) -> str | None:
 
 
 def log(message: str) -> None:
-    print(message, flush=True)
+    try:
+        print(message, flush=True)
+    except UnicodeEncodeError:
+        fallback = message.encode("ascii", errors="replace").decode("ascii")
+        print(fallback, flush=True)
 
 
 def run_logged(*args: str, env: dict[str, str] | None = None) -> None:
