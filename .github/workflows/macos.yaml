@@ -3,9 +3,6 @@ name: "macOS"
 on:
   workflow_call:
 
-env:
-  UV_PYTHON_DOWNLOADS: 0
-
 jobs:
   macos:
     name: "macos-latest / ${{ matrix.platform.target }}"

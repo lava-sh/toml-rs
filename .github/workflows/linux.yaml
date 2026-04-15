@@ -3,9 +3,6 @@ name: "linux"
 on:
   workflow_call:
 
-env:
-  UV_PYTHON_DOWNLOADS: 0
-
 jobs:
   linux:
     name: "ubuntu-latest / ${{ matrix.platform.target }}"
@@ -18,7 +15,7 @@ jobs:
             # AMD64
             target: x86_64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc"
+            maturin-build-args: "--pgo --features mimalloc"
           }
           - {
             # x86 (32-bit)

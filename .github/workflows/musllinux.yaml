@@ -3,9 +3,6 @@ name: "musllinux"
 on:
   workflow_call:
 
-env:
-  UV_PYTHON_DOWNLOADS: 0
-
 jobs:
   musllinux:
     name: "ubuntu-latest / ${{ matrix.platform.target }}"
