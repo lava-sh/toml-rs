@@ -56,6 +56,7 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         export RUST_HOST=$(rustc --print host-tuple)
+        uv venv
         uv pip install --no-deps initial-wheel/*.whl
         uv run --directory "${{ github.workspace }}" --no-sync python benchmark/pgo.py
         rustup run ${INPUTS_RUST_TOOLCHAIN} bash -c 'echo LLVM_PROFDATA=$RUSTUP_HOME/toolchains/$RUSTUP_TOOLCHAIN/lib/rustlib/$RUST_HOST/bin/llvm-profdata >> "$GITHUB_ENV"'
