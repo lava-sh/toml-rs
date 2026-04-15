@@ -40,6 +40,7 @@ runs:
           --release
           --out initial-wheel
           --interpreter ${{ inputs.interpreter }}
+          --compatibility pypi
         rust-toolchain: ${{ inputs.rust-toolchain }}
         docker-options: -e CI
       env:
@@ -69,6 +70,7 @@ runs:
           --release
           --out dist
           --interpreter ${{ inputs.interpreter }}
+          --compatibility pypi
         rust-toolchain: ${{inputs.rust-toolchain}}
         docker-options: -e CI
       env:
