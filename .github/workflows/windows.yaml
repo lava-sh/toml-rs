@@ -55,7 +55,7 @@ jobs:
           if ($env:PGO -eq 'true') {
             $versions = $env:INTERPRETERS.Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries) -join "`n"
           } else {
-            $versions = "3.13t`n3.14t`npypy3.11"
+            $versions = "3.13t`n3.14t"
           }
 
           "versions<<EOF" >> $env:GITHUB_OUTPUT
