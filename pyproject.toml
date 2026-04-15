@@ -48,7 +48,7 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.30",
+    "ty == 0.0.31",
     "ruff == 0.15.10",
     "nox == 2026.4.10",
     { include-group = "nox" },

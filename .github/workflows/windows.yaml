@@ -18,25 +18,25 @@ jobs:
             # AMD64
             runner: windows-latest,
             target: x64,
-            python_arch: x64,
+            python-arch: x64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
-            maturin_build_args: "--pgo --features mimalloc"
+            maturin-build-args: "--pgo --features mimalloc"
           }
           - {
             # x86
             runner: windows-latest,
             target: x86,
-            python_arch: x86,
+            python-arch: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            maturin_build_args: "--features mimalloc"
+            maturin-build-args: "--features mimalloc"
           }
           - {
             # ARM64
             runner: windows-11-arm,
             target: aarch64,
-            python_arch: arm64,
+            python-arch: arm64,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            maturin_build_args: "--features mimalloc"
+            maturin-build-args: "--features mimalloc"
           }
 
     steps:
@@ -46,11 +46,11 @@ jobs:
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
-          architecture: ${{ matrix.platform.python_arch }}
+          architecture: ${{ matrix.platform.python-arch }}
           python-version: |
             3.13t
             3.14t
-            ${{ matrix.platform.python_arch == 'x64' && 'pypy3.11' || '' }}
+            ${{ matrix.platform.python-arch == 'x64' && 'pypy3.11' || '' }}
 
       - name: "Install uv"
         uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57 # v8.0.0
@@ -66,7 +66,7 @@ jobs:
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
-            ${{ matrix.platform.maturin_build_args }}
+            ${{ matrix.platform.maturin-build-args }}
             --compatibility pypi
 
       - name: "Upload wheels"
