@@ -29,7 +29,7 @@ jobs:
             target: x86,
             python-arch: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
-            maturin-build-args: "--pgo --features mimalloc",
+            maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
