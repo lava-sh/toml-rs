@@ -50,21 +50,13 @@ jobs:
         run: uv pip install --group ci
 
       - name: "Run maturin"
-        run: |
-          rustc --version --verbose
-          maturin build --release --features mimalloc
+        run: maturin build --out wheel --release --features mimalloc
 
       - name: "Install built wheel"
-        run: |
-          python -c "
-          from pathlib import Path
-          import subprocess
-          
-          wheel = next(Path('target/wheels').glob('*.whl'))
-          subprocess.check_call(['uv', 'pip', 'install', str(wheel)])
-          "
+        shell: bash
+        run: uv pip install --system wheel/*.whl
 
-      - name: "Run Ruff"
+      - name: "Run ruff"
         run: ruff check
 
       - name: "Run ty"
