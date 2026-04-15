@@ -76,8 +76,8 @@ jobs:
           $sysroot = rustc --print sysroot
           $rustc_verbose = rustc -vV
           $host_line = $rustc_verbose | Select-String '^host: '
-          $host = $host_line.ToString().Substring(6)
-          $llvm_profdata = Join-Path $sysroot "lib\rustlib\$host\bin\llvm-profdata.exe"
+          $rust_host = $host_line.ToString().Substring(6)
+          $llvm_profdata = Join-Path $sysroot "lib\rustlib\$rust_host\bin\llvm-profdata.exe"
 
           "path=$llvm_profdata" >> $env:GITHUB_OUTPUT
 
