@@ -12,6 +12,11 @@ inputs:
     description: "Rust toolchain to use"
     required: true
 
+  maturin-build-args:
+    description: "Additional arguments to pass to maturin build"
+    required: false
+    default: ""
+
   working-directory:
     description: "Working directory to run the action in"
     required: false
@@ -41,6 +46,7 @@ runs:
           --out initial-wheel
           --interpreter ${{ inputs.interpreter }}
           --compatibility pypi
+          ${{ inputs.maturin-build-args }}
         rust-toolchain: ${{ inputs.rust-toolchain }}
         docker-options: -e CI
       env:
@@ -71,6 +77,7 @@ runs:
           --out dist
           --interpreter ${{ inputs.interpreter }}
           --compatibility pypi
+          ${{ inputs.maturin-build-args }}
         rust-toolchain: ${{inputs.rust-toolchain}}
         docker-options: -e CI
       env:
