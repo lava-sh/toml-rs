@@ -246,14 +246,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     needs: [
-      cargo-clippy,
-      cargo-fmt,
-      zizmor,
-      typos,
-      rumdl,
       build-sdist,
-      tests,
-      tests-alpine,
       linux,
       musllinux,
       windows,
