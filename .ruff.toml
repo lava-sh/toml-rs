@@ -27,11 +27,12 @@ ignore = [
     "D",       # Docstring's
     ########
     "CPY001",  # Check copyright notices within Python files
-    "S311",    # Forces `random` -> `secrets`
+    "S311",    # Force `random` -> `secrets`
     "ANN401",  # Check `typing.Any`
-    "SIM105",  # Forces `try-except-pass` -> `contextlib.suppress`
+    "SIM105",  # Force `try-except-pass` -> `contextlib.suppress`
     #######
     "PLR6201", # Checks for membership tests on list and tuple literals.
+    "PTH207",  # Force `glob` -> `Path.glob` or `Path.rglob`
     ########
     "TC001",   # \
     "TC002",   #  ==> `typing.TYPE_CHECKING` block's
@@ -41,13 +42,13 @@ ignore = [
 
 [lint.per-file-ignores]
 "benchmark/**.py" = [
-    "INP001", # Checks for packages that are missing an __init__.py file.
+    "INP001", # Check for packages that are missing an __init__.py file.
 ]
 "tests/**.py" = [
     "DOC",     # Docstring's
     ########
-    "S101",    # Checks for uses of the assert keyword.
-    "PLR2004", # Checks for the use of unnamed numerical constants ("magic") values in comparisons.
+    "S101",    # Check for uses of the assert keyword.
+    "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
 ]
 
 [lint.mccabe]
