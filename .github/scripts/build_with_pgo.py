@@ -13,7 +13,41 @@ def capture(*args: str) -> str:
     return subprocess.check_output(args, text=True).strip()
 
 
+def find_python_in_toolcache(version: str, python_arch: str) -> str | None:
+    is_pypy = version.startswith("pypy")
+    is_freethreaded = version.endswith("t") and not is_pypy
+    version_prefix = version.removeprefix("pypy").removesuffix("t")
+    arch_dir = f"{python_arch}-freethreaded" if is_freethreaded else python_arch
+    family = "PyPy" if is_pypy else "Python"
+    roots = []
+
+    runner_tool_cache = os.environ.get("RUNNER_TOOL_CACHE")
+    if runner_tool_cache:
+        roots.append(Path(runner_tool_cache) / family)
+
+    python_location = os.environ.get("PYTHONLOCATION")
+    if python_location:
+        location_path = Path(python_location)
+        if location_path.parent.name == family:
+            roots.append(location_path.parent)
+
+    for root in roots:
+        if not root.exists():
+            continue
+
+        for version_dir in sorted(root.glob(f"{version_prefix}*"), reverse=True):
+            candidate = version_dir / arch_dir / "python.exe"
+            if candidate.exists():
+                return str(candidate)
+
+    return None
+
+
 def find_python(version: str, python_arch: str) -> str:
+    toolcache_python = find_python_in_toolcache(version, python_arch)
+    if toolcache_python is not None:
+        return toolcache_python
+
     launcher_version = f"{version}-32" if python_arch == "x86" else version
     return capture(
         "py",
