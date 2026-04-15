@@ -110,6 +110,8 @@ jobs:
             "${env:INTERPRETERS}"
             "--python-arch"
             "${env:PYTHON_ARCH}"
+            "--target"
+            "${{ matrix.platform.target }}"
             "--llvm-profdata"
             "${env:LLVM_PROFDATA}"
           )
