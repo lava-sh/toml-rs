@@ -1,32 +1,37 @@
 # https://github.com/pydantic/pydantic/blob/main/.github/actions/core-build-pgo-wheel/action.yml
 
-name: Build PGO wheel
-description: Builds a PGO-optimized wheel
+name: "Build PGO wheel"
+description: "Builds a PGO-optimized wheel"
+
 inputs:
   interpreter:
-    description: 'Interpreter to build the wheel for'
+    description: "Interpreter to build the wheel for"
     required: true
+
   rust-toolchain:
-    description: 'Rust toolchain to use'
+    description: "Rust toolchain to use"
     required: true
+
   working-directory:
-    description: 'Working directory to run the action in'
+    description: "Working directory to run the action in"
     required: false
     default: ${{ github.workspace }}
+
 outputs:
   wheel:
-    description: 'Path to the built wheel'
+    description: "Path to the built wheel"
     value: ${{ steps.find_wheel.outputs.path }}
+
 runs:
   using: composite
   steps:
-    - name: Prepare profiling directory
+    - name: "Prepare profiling directory"
       shell: bash
       # making this ahead of the compile ensures that the local user can write to this
       # directory; the maturin action (on linux) runs in docker so would create as root
       run: mkdir -p ${{ github.workspace }}/profdata
 
-    - name: Build initial wheel
+    - name: "Build initial wheel"
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}
@@ -38,9 +43,9 @@ runs:
         rust-toolchain: ${{ inputs.rust-toolchain }}
         docker-options: -e CI
       env:
-        RUSTFLAGS: '-Cprofile-generate=${{ github.workspace }}/profdata'
+        RUSTFLAGS: "-Cprofile-generate=${{ github.workspace }}/profdata"
 
-    - name: Generate pgo data
+    - name: "Generate pgo data"
       working-directory: ${{ inputs.working-directory }}
       run: |
         export RUST_HOST=$(rustc --print host-tuple)
@@ -51,11 +56,11 @@ runs:
       env:
         INPUTS_RUST_TOOLCHAIN: ${{ inputs.rust-toolchain }}
 
-    - name: Merge pgo data
+    - name: "Merge pgo data"
       run: ${{ env.LLVM_PROFDATA }} merge -o ${{ github.workspace }}/merged.profdata ${{ github.workspace }}/profdata # zizmor: ignore[template-injection]
       shell: pwsh # because it handles paths on windows better, and works well enough on unix for this step
 
-    - name: Build pgo-optimized wheel
+    - name: "Build pgo-optimized wheel"
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}
@@ -67,9 +72,9 @@ runs:
         rust-toolchain: ${{inputs.rust-toolchain}}
         docker-options: -e CI
       env:
-        RUSTFLAGS: '-Cprofile-use=${{ github.workspace }}/merged.profdata'
+        RUSTFLAGS: "-Cprofile-use=${{ github.workspace }}/merged.profdata"
 
-    - name: Find built wheel
+    - name: "Find built wheel"
       id: find_wheel
       working-directory: ${{ inputs.working-directory }}
       run: echo "path=$(ls dist/*.whl)" | tee -a "$GITHUB_OUTPUT"
