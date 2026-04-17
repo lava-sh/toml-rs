@@ -36,9 +36,9 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.45.0"]
-zizmor = ["zizmor == 1.24.0"]
-rumdl = ["rumdl == 0.1.71"]
+typos = ["typos == 1.45.1"]
+zizmor = ["zizmor == 1.24.1"]
+rumdl = ["rumdl == 0.1.73"]
 maturin = ["maturin == 1.13.1"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
@@ -47,8 +47,8 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.29",
-    "ruff == 0.15.10",
+    "ty == 0.0.31",
+    "ruff == 0.15.11",
     "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
