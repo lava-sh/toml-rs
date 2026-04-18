@@ -41,6 +41,19 @@ uv_request() {
           ;;
       esac
       ;;
+    macOS)
+      os="macos"
+      libc="none"
+      case "$INPUTS_TARGET" in
+        x86_64) arch="x86_64" ;;
+        aarch64) arch="aarch64" ;;
+        universal2) arch="x86_64" ;;
+        *)
+          echo "Unsupported macOS target: $INPUTS_TARGET" >&2
+          exit 1
+          ;;
+      esac
+      ;;
     *)
       echo "Unsupported runner OS: $RUNNER_OS" >&2
       exit 1

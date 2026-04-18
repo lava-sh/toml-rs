@@ -197,7 +197,7 @@ jobs:
 #    ]
     uses: ./.github/workflows/windows.yaml
 
-#  macos:
+  macos:
 #    needs: [
 #      tests,
 #      tests-alpine,
@@ -207,7 +207,7 @@ jobs:
 #      typos,
 #      rumdl,
 #    ]
-#    uses: ./.github/workflows/macos.yaml
+    uses: ./.github/workflows/macos.yaml
 
 #  wasm:
 #    needs: [
@@ -250,7 +250,7 @@ jobs:
       linux,
 #      musllinux,
       windows,
-#      macos,
+      macos,
 #      wasm,
     ]
     permissions:

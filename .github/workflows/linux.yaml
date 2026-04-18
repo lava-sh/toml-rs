@@ -16,43 +16,50 @@ jobs:
             # AMD64
             target: x86_64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc"
+            maturin-build-args: "--features mimalloc",
+            use-pgo: true,
           }
           - {
             # x86 (32-bit)
             target: x86,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc"
+            maturin-build-args: "--features mimalloc",
+            use-pgo: false,
           }
           - {
-            # ARM64 (cross-compile with zig)
+            # ARM64
             target: aarch64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc --zig"
+            maturin-build-args: "--features mimalloc --zig",
+            use-pgo: true,
           }
           - {
             # ARMv7 (32-bit)
             target: armv7,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: ""
+            maturin-build-args: "",
+            use-pgo: false,
           }
           - {
             # IBM System z (s390x)
             target: s390x,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: ""
+            maturin-build-args: "",
+            use-pgo: false,
           }
           - {
             # PowerPC64 Little Endian
             target: ppc64le,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: ""
+            maturin-build-args: "",
+            use-pgo: false,
           }
           - {
             # RISC-V 64-bit
             target: riscv64,
             interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc"
+            maturin-build-args: "--features mimalloc",
+            use-pgo: false,
           }
 
     steps:
@@ -66,6 +73,7 @@ jobs:
           enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
 
       - name: "Build wheels"
+        if: matrix.platform.use-pgo == false
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
@@ -77,6 +85,25 @@ jobs:
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args }}
             --compatibility pypi
+
+      - name: "Install rust stable + llvm-tools"
+        if: matrix.platform.use-pgo == true
+        id: rust-toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          components: llvm-tools
+          toolchain: stable
+
+      - name: "Build PGO wheel"
+        if: matrix.platform.use-pgo == true
+        uses: ./.github/actions/build-pgo-wheel
+        with:
+          working-directory: .
+          python-arch: x64
+          target: ${{ matrix.platform.target }}
+          interpreter: ${{ matrix.platform.interpreter }}
+          rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
+          maturin-build-args: ${{ matrix.platform.maturin-build-args }}
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
