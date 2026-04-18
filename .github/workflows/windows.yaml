@@ -8,7 +8,7 @@ env:
 
 jobs:
   windows:
-    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }} / ${{ matrix.interpreter }}"
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -18,37 +18,28 @@ jobs:
             runner: windows-latest,
             target: x64,
             python-arch: x64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t pypy3.11",
-            maturin-build-args: "--features mimalloc"
+            interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t pypy3.11",
+            maturin-build-args: "--features mimalloc",
+            use-pgo: true,
           }
           - {
             # x86
             runner: windows-latest,
             target: x86,
             python-arch: x86,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
-            maturin-build-args: "--features mimalloc"
+            interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
+            maturin-build-args: "--pgo --features mimalloc",
+            use-pgo: true,
           }
           - {
             # ARM64
             runner: windows-11-arm,
             target: aarch64,
             python-arch: arm64,
-            interpreter: "3.10 3.11 3.12 3.13 3.13t 3.14 3.14t",
-            maturin-build-args: "--features mimalloc"
+            interpreter: "3.10 3.11 3.12 3.13 3.14 3.13t 3.14t",
+            maturin-build-args: "--features mimalloc",
+            use-pgo: false,
           }
-        interpreter: [
-          "3.10",
-          "3.11",
-          "3.12",
-          "3.13",
-          "3.14",
-          "3.13t",
-          "3.14t",
-        ]
-        include:
-          - platform: { runner: windows-latest, target: x64 }
-            interpreter: "pypy3.11"
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -56,6 +47,7 @@ jobs:
           persist-credentials: false
 
       - name: "Build wheels"
+        if: matrix.platform.use-pgo == false
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
@@ -66,6 +58,23 @@ jobs:
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args }}
             --compatibility pypi
+
+      - name: "Install rust stable"
+        if: matrix.platform.use-pgo == true
+        id: rust-toolchain
+        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          components: llvm-tools
+          toolchain: stable
+
+      - name: "Build PGO wheels"
+        if: matrix.platform.use-pgo == true
+        uses: ./.github/actions/build-pgo-wheel
+        with:
+          working-directory: .
+          interpreter: ${{ matrix.platform.interpreter }}
+          rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
+          maturin-build-args: ${{ matrix.platform.maturin-build-args }}
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
