@@ -69,7 +69,6 @@ jobs:
         uses: ./.github/actions/build-pgo-wheel
         with:
           working-directory: .
-          python-arch: x64
           target: ${{ matrix.platform.target }}
           interpreter: ${{ matrix.platform.interpreter }}
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}

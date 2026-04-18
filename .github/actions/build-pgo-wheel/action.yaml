@@ -5,8 +5,9 @@ description: "Builds a PGO-optimized wheel"
 
 inputs:
   python-arch:
-    description: "Python architecture for interpreter resolution"
-    required: true
+    description: "Python architecture for interpreter resolution on Windows"
+    required: false
+    default: ""
 
   target:
     description: "Rust target to build the wheel for"
@@ -68,7 +69,7 @@ runs:
 
     - name: "Generate pgo data"
       working-directory: ${{ inputs.working-directory }}
-      run: '"$GITHUB_ACTION_PATH/generate-pgo-data.sh"'
+      run: bash "$GITHUB_ACTION_PATH/generate-pgo-data.sh"
       shell: bash
       env:
         INPUTS_INTERPRETER: ${{ inputs.interpreter }}

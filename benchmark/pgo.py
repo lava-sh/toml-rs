@@ -37,33 +37,76 @@ def build_obj() -> dict[str, Any]:
     }
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901, PLR0912
     example = (ROOT / "tests" / "data" / "example.toml").read_text(encoding="utf-8")
     obj = build_obj()
+
+    for _ in range(4000):
+        toml_rs.loads(example, toml_version="1.1.0")
+
+    for _ in range(4000):
+        toml_rs.loads(example, toml_version="1.0.0")
+
+    for _ in range(3000):
+        toml_rs.dumps(obj, toml_version="1.1.0")
+
+    for _ in range(3000):
+        toml_rs.dumps(obj, toml_version="1.0.0")
+
+    for _ in range(2000):
+        dumped = toml_rs.dumps(obj, toml_version="1.1.0")
+        toml_rs.loads(dumped, toml_version="1.1.0")
+
+    for _ in range(2000):
+        dumped = toml_rs.dumps(obj, toml_version="1.0.0")
+        toml_rs.loads(dumped, toml_version="1.0.0")
+
+    for _ in range(2000):
+        toml_rs.loads(example, toml_version="1.1.0")
+        toml_rs.loads(example, toml_version="1.0.0")
+
+    for _ in range(1500):
+        doc = toml_rs.load_with_metadata(example, toml_version="1.1.0")
+        _ = doc.meta
+        _ = doc.value
+
+    for _ in range(1500):
+        doc = toml_rs.load_with_metadata(example, toml_version="1.0.0")
+        _ = doc.meta
+        _ = doc.value
+
+    for _ in range(1500):
+        buffer = StringIO()
+        toml_rs.dump(obj, buffer, pretty=True, toml_version="1.1.0")
+        toml_rs.loads(buffer.getvalue(), toml_version="1.1.0")
+
+    for _ in range(1500):
+        buffer = StringIO()
+        toml_rs.dump(obj, buffer, pretty=True, toml_version="1.0.0")
+        toml_rs.loads(buffer.getvalue(), toml_version="1.0.0")
 
     with TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir) / "profile.toml"
 
-        for toml_version in ("1.0.0", "1.1.0"):
-            for _ in range(400):
-                dumped = toml_rs.dumps(obj, toml_version=toml_version)
-                toml_rs.loads(dumped, toml_version=toml_version)
-                doc = toml_rs.load_with_metadata(example, toml_version=toml_version)
+        for _ in range(1500):
+            toml_rs.dump(obj, tmp_path, toml_version="1.1.0")
+            with tmp_path.open("rb") as fp:
+                toml_rs.load(fp, toml_version="1.1.0")
+
+        for _ in range(1500):
+            toml_rs.dump(obj, tmp_path, toml_version="1.0.0")
+            with tmp_path.open("rb") as fp:
+                toml_rs.load(fp, toml_version="1.0.0")
+
+        for _ in range(1000):
+            with tmp_path.open("rb") as fp:
+                doc = toml_rs.load_with_metadata(fp, toml_version="1.1.0")
                 _ = doc.meta
-                _ = doc.value
 
-            for _ in range(200):
-                buffer = StringIO()
-                toml_rs.dump(obj, buffer, pretty=True, toml_version=toml_version)
-                toml_rs.loads(buffer.getvalue(), toml_version=toml_version)
-
-            for _ in range(200):
-                toml_rs.dump(obj, tmp_path, toml_version=toml_version)
-                with tmp_path.open("rb") as fp:
-                    toml_rs.load(fp, toml_version=toml_version)
-                with tmp_path.open("rb") as fp:
-                    doc = toml_rs.load_with_metadata(fp, toml_version=toml_version)
-                    _ = doc.meta
+        for _ in range(1000):
+            with tmp_path.open("rb") as fp:
+                doc = toml_rs.load_with_metadata(fp, toml_version="1.0.0")
+                _ = doc.meta
 
 
 if __name__ == "__main__":
