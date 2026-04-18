@@ -4,6 +4,10 @@ name: "Build PGO wheel"
 description: "Builds a PGO-optimized wheel"
 
 inputs:
+  target:
+    description: "Rust target to build the wheel for"
+    required: true
+
   interpreter:
     description: "Interpreter to build the wheel for"
     required: true
@@ -45,6 +49,7 @@ runs:
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}
+        target: ${{ inputs.target }}
         manylinux: auto
         args: >
           --release
@@ -61,8 +66,18 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         export RUST_HOST=$(rustc --print host-tuple)
-        uv pip install --no-deps initial-wheel/*.whl
-        uv run --directory "${{ github.workspace }}" --no-sync python benchmark/pgo.py
+
+        rm -rf .pgo-venv
+        uv venv .pgo-venv --python python
+
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          python_=".pgo-venv/Scripts/python.exe"
+        else
+          python_=".pgo-venv/bin/python"
+        fi
+
+        "$python_" -m uv pip install --no-deps initial-wheel/*.whl
+        "$python_" benchmark/pgo.py
         rustup run ${INPUTS_RUST_TOOLCHAIN} bash -c 'echo LLVM_PROFDATA=$RUSTUP_HOME/toolchains/$RUSTUP_TOOLCHAIN/lib/rustlib/$RUST_HOST/bin/llvm-profdata >> "$GITHUB_ENV"'
       shell: bash
       env:
@@ -76,6 +91,7 @@ runs:
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}
+        target: ${{ inputs.target }}
         manylinux: auto
         args: >
           --release
