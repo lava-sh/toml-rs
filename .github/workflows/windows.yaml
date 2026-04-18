@@ -79,6 +79,7 @@ jobs:
         with:
           working-directory: .
           target: ${{ matrix.platform.target }}
+          python-arch: ${{ matrix.platform.python-arch }}
           interpreter: ${{ matrix.platform.interpreter }}
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
           maturin-build-args: ${{ matrix.platform.maturin-build-args }}

@@ -8,6 +8,7 @@ jobs:
     name: "macos-latest / ${{ matrix.platform.target }}"
     runs-on: macos-latest
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - {

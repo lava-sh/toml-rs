@@ -6,6 +6,59 @@ RUST_HOST="$(rustc --print host-tuple)"
 shopt -s nullglob
 read -r -a interpreters <<<"$INPUTS_INTERPRETER"
 
+uv_request() {
+  local version="$1"
+  local os arch libc
+
+  case "$RUNNER_OS" in
+    Windows)
+      os="windows"
+      libc="none"
+      case "$INPUTS_PYTHON_ARCH" in
+        x64) arch="x86_64" ;;
+        x86) arch="x86" ;;
+        arm64) arch="aarch64" ;;
+        *)
+          echo "Unsupported Windows python arch: $INPUTS_PYTHON_ARCH" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+    Linux)
+      os="linux"
+      libc="gnu"
+      case "$INPUTS_TARGET" in
+        x86_64) arch="x86_64" ;;
+        x86) arch="x86" ;;
+        aarch64) arch="aarch64" ;;
+        armv7) arch="armv7" ;;
+        s390x) arch="s390x" ;;
+        ppc64le) arch="powerpc64le" ;;
+        riscv64) arch="riscv64" ;;
+        *)
+          echo "Unsupported Linux target: $INPUTS_TARGET" >&2
+          exit 1
+          ;;
+      esac
+      ;;
+    *)
+      echo "Unsupported runner OS: $RUNNER_OS" >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ "$version" == pypy* ]]; then
+    echo "pypy-${version#pypy}-${os}-${arch}-${libc}"
+    return
+  fi
+
+  if [[ "$version" == *t ]]; then
+    echo "cpython-${version%t}+freethreaded-${os}-${arch}-${libc}"
+  else
+    echo "cpython-${version}-${os}-${arch}-${libc}"
+  fi
+}
+
 wheel_pattern() {
   local version="$1"
   if [[ "$version" == pypy* ]]; then
@@ -27,8 +80,15 @@ wheel_pattern() {
 for version in "${interpreters[@]}"; do
   safe_version="${version//./_}"
   venv_dir=".pgo-venv/${safe_version}"
+  request="$(uv_request "$version")"
   rm -rf "$venv_dir"
-  uv venv "$venv_dir" --python "$version"
+  python_path="$(uv python find --no-project "$request" 2> /dev/null || true)"
+  if [[ -z "$python_path" ]]; then
+    uv python install "$request"
+    python_path="$(uv python find --no-project "$request")"
+  fi
+
+  uv venv "$venv_dir" --python "$python_path"
 
   if [[ "$RUNNER_OS" == "Windows" ]]; then
     pgo_python="$venv_dir/Scripts/python.exe"

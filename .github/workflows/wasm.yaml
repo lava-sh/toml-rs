@@ -10,6 +10,7 @@ jobs:
     timeout-minutes: 15
     # See: https://github.com/pyodide/pyodide/blob/main/pyodide-cross-build-environments.json
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - python-version: "3.10"
