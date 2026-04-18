@@ -110,7 +110,10 @@ for version in "${interpreters[@]}"; do
   fi
 
   pattern="$(wheel_pattern "$version")"
-  mapfile -t wheels < <(compgen -G "$pattern")
+  wheels=()
+  while IFS= read -r wheel; do
+    wheels+=("$wheel")
+  done < <(compgen -G "$pattern")
   if [[ "${#wheels[@]}" -ne 1 ]]; then
     echo "Expected exactly one wheel for ${version}, found ${#wheels[@]} using pattern: ${pattern}" >&2
     ls -lh initial-wheel
