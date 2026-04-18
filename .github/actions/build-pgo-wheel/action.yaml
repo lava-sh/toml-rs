@@ -64,7 +64,7 @@ runs:
 
     - name: "Generate pgo data"
       working-directory: ${{ inputs.working-directory }}
-      run: ../.github/actions/build-pgo-wheel/generate-pgo-data.sh
+      run: '"$GITHUB_ACTION_PATH/generate-pgo-data.sh"'
       shell: bash
       env:
         INPUTS_INTERPRETER: ${{ inputs.interpreter }}
