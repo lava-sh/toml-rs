@@ -75,7 +75,6 @@ runs:
         INPUTS_INTERPRETER: ${{ inputs.interpreter }}
         INPUTS_PYTHON_ARCH: ${{ inputs.python-arch }}
         INPUTS_TARGET: ${{ inputs.target }}
-        INPUTS_RUST_TOOLCHAIN: ${{ inputs.rust-toolchain }}
 
     - name: "Merge pgo data"
       run: ${{ env.LLVM_PROFDATA }} merge -o ${{ github.workspace }}/merged.profdata ${{ github.workspace }}/profdata # zizmor: ignore[template-injection]
