@@ -77,7 +77,6 @@ jobs:
         if: matrix.platform.use-pgo == true
         uses: ./.github/actions/build-pgo-wheel
         with:
-          working-directory: .
           target: ${{ matrix.platform.target }}
           python-arch: ${{ matrix.platform.python-arch }}
           interpreter: ${{ matrix.platform.interpreter }}

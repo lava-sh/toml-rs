@@ -29,7 +29,7 @@ inputs:
   working-directory:
     description: "Working directory to run the action in"
     required: false
-    default: ${{ github.workspace }}
+    default: "."
 
 outputs:
   wheel:
