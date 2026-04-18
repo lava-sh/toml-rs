@@ -1,4 +1,4 @@
-from pathlib import Path
+import glob
 
 import nox
 
@@ -17,7 +17,6 @@ def test_compatibility(session: nox.Session, tomli_version: str) -> None:
     session.install(f"tomli=={tomli_version}")
     session.install("--group", "nox")
 
-    wheel = next(Path("target/wheels").glob("*.whl"))
-    session.install(str(wheel))
+    session.install(glob.glob("wheel/*.whl")[0])
 
     session.run("pytest", "tests/")
