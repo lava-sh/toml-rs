@@ -25,7 +25,9 @@
 ```bash
 # Using pip
 pip install toml-rs
+```
 
+```bash
 # Using uv
 uv pip install toml-rs
 ```
