@@ -69,7 +69,7 @@ runs:
 
     - name: "Generate pgo data"
       working-directory: ${{ inputs.working-directory }}
-      run: bash "$GITHUB_ACTION_PATH/generate-pgo-data.sh"
+      run: bash "$GITHUB_ACTION_PATH/pgo.sh"
       shell: bash
       env:
         INPUTS_INTERPRETER: ${{ inputs.interpreter }}
