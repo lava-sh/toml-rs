@@ -66,21 +66,54 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         export RUST_HOST=$(rustc --print host-tuple)
+        shopt -s nullglob
 
-        rm -rf .pgo-venv
-        uv venv .pgo-venv --python python
+        wheel_pattern() {
+          local version="$1"
+          if [[ "$version" == pypy* ]]; then
+            local pypy_minor="${version#pypy}"
+            local compact="${pypy_minor/./}"
+            echo "initial-wheel/*-pp${compact}-*.whl"
+            return
+          fi
 
-        if [[ "${{ runner.os }}" == "Windows" ]]; then
-          python_=".pgo-venv/Scripts/python.exe"
-        else
-          python_=".pgo-venv/bin/python"
-        fi
+          local compact="${version//./}"
+          if [[ "$version" == *t ]]; then
+            compact="${compact%t}"
+            echo "initial-wheel/*-cp${compact}-cp${compact}t-*.whl"
+          else
+            echo "initial-wheel/*-cp${compact}-cp${compact}-*.whl"
+          fi
+        }
 
-        "$python_" -m uv pip install --no-deps initial-wheel/*.whl
-        "$python_" benchmark/pgo.py
+        for version in $INPUTS_INTERPRETER; do
+          safe_version="${version//./_}"
+          venv_dir=".pgo-venv/${safe_version}"
+          rm -rf "$venv_dir"
+          uv venv "$venv_dir" --python "$version"
+
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            pgo_python="$venv_dir/Scripts/python.exe"
+          else
+            pgo_python="$venv_dir/bin/python"
+          fi
+
+          pattern="$(wheel_pattern "$version")"
+          wheels=( $pattern )
+          if [[ "${#wheels[@]}" -ne 1 ]]; then
+            echo "Expected exactly one wheel for ${version}, found ${#wheels[@]} using pattern: ${pattern}" >&2
+            ls -lh initial-wheel
+            exit 1
+          fi
+
+          uv pip install --python "$pgo_python" --force-reinstall --no-deps "${wheels[0]}"
+          "$pgo_python" benchmark/pgo.py
+        done
+
         rustup run ${INPUTS_RUST_TOOLCHAIN} bash -c 'echo LLVM_PROFDATA=$RUSTUP_HOME/toolchains/$RUSTUP_TOOLCHAIN/lib/rustlib/$RUST_HOST/bin/llvm-profdata >> "$GITHUB_ENV"'
       shell: bash
       env:
+        INPUTS_INTERPRETER: ${{ inputs.interpreter }}
         INPUTS_RUST_TOOLCHAIN: ${{ inputs.rust-toolchain }}
 
     - name: "Merge pgo data"
