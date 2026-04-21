@@ -38,7 +38,7 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.45.1"]
 zizmor = ["zizmor == 1.24.1"]
-rumdl = ["rumdl == 0.1.76"]
+rumdl = ["rumdl == 0.1.78"]
 maturin = ["maturin == 1.13.1"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
@@ -69,7 +69,7 @@ bench = [
     "tomli ; python_version<'3.11'",
     "tomli-w",
     "polars == 1.40.0",
-    "altair == 6.0.0",
+    "altair == 6.1.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",
 ]

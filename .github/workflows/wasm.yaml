@@ -7,9 +7,10 @@ jobs:
   wasm:
     name: "wasm32-unknown-emscripten / python ${{ matrix.platform.python-version }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     # See: https://github.com/pyodide/pyodide/blob/main/pyodide-cross-build-environments.json
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - python-version: "3.11"

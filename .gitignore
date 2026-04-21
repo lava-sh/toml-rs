@@ -1,4 +1,21 @@
+# Python
 .venv/
 venv/
+build/
+dist/
+wheel/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Rust
 target/
 Cargo.lock
+
+# Tools
+.rumdl_cache/
+.ruff_cache/
+uv.lock
+
+# IDE
+.idea/
