@@ -50,7 +50,7 @@ runs:
       with:
         enable-cache: ${{ !startsWith(github.ref, 'refs/tags/') }} # zizmor: ignore[cache-poisoning]
 
-    - name: "Build initial wheel"
+    - name: "🔧 Phase 1/3: Build instrumented wheel"
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}
@@ -67,7 +67,7 @@ runs:
       env:
         RUSTFLAGS: "-Cprofile-generate=${{ github.workspace }}/profdata"
 
-    - name: "Generate pgo data"
+    - name: "📊 Phase 2/3: Generate PGO data"
       working-directory: ${{ inputs.working-directory }}
       run: bash "$GITHUB_ACTION_PATH/pgo.sh"
       shell: bash
@@ -76,11 +76,11 @@ runs:
         INPUTS_PYTHON_ARCH: ${{ inputs.python-arch }}
         INPUTS_TARGET: ${{ inputs.target }}
 
-    - name: "Merge pgo data"
+    - name: "🧬 Merge PGO profiles"
       run: ${{ env.LLVM_PROFDATA }} merge -o ${{ github.workspace }}/merged.profdata ${{ github.workspace }}/profdata # zizmor: ignore[template-injection]
       shell: pwsh # because it handles paths on windows better, and works well enough on unix for this step
 
-    - name: "Build pgo-optimized wheel"
+    - name: "⚡ Phase 3/3: Build PGO-optimized wheel"
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         working-directory: ${{ inputs.working-directory }}

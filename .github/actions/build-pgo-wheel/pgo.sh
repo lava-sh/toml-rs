@@ -2,8 +2,20 @@
 set -euo pipefail
 
 die() {
-  echo "Error: $*" >&2
+  echo "❌ Error: $*" >&2
   exit 1
+}
+
+log_info() {
+  echo "ℹ️  $*"
+}
+
+log_success() {
+  echo "✅ $*"
+}
+
+log_step() {
+  echo "🔧 $*"
 }
 
 export RUST_HOST
@@ -139,35 +151,68 @@ install_and_run_wheel() {
   local pgo_python="$2"
   local wheel_path
 
+  log_step "Finding matching wheel for Python $version"
   wheel_path="$(find_matching_wheel "$version")"
+  log_info "Found wheel: $wheel_path"
+  log_step "Installing wheel: $wheel_path"
   uv pip install --python "$pgo_python" --force-reinstall --no-deps "$wheel_path" || die "Failed to install wheel: $wheel_path"
+  log_step "Running PGO benchmark with: $pgo_python"
   "$pgo_python" benchmark/pgo.py
+  log_success "PGO benchmark completed for Python $version"
 }
 
 setup_python_env() {
   local version="$1"
+  local start_time end_time duration
   local safe_version="${version//./_}"
   local venv_dir=".pgo-venv/${safe_version}"
   local request
   local python_path
   local pgo_python
 
+  start_time="$(date +%s)"
+  log_step "Setting up Python environment for version: $version"
+  log_info "Resolving Python request for version: $version"
   request="$(python_download_request "$version")"
+  log_step "Creating virtual environment in: $venv_dir"
   rm -rf "$venv_dir"
   python_path="$(resolve_python_path "$request")"
   uv venv "$venv_dir" --python "$python_path" || die "Failed to create venv: $venv_dir"
 
   pgo_python="$(venv_python_path "$venv_dir")"
   [[ -f "$pgo_python" ]] || die "Python executable not found: $pgo_python"
+  log_info "Using Python executable: $pgo_python"
 
   install_and_run_wheel "$version" "$pgo_python"
+  end_time="$(date +%s)"
+  duration="$((end_time - start_time))"
+  log_info "Python $version setup completed in ${duration}s"
+  log_success "Completed PGO data generation for Python $version"
 }
+
+log_step "Starting PGO build..."
+log_info "Build environment:"
+log_info "  - Runner OS: $RUNNER_OS"
+log_info "  - Target: $INPUTS_TARGET"
+log_info "  - Python arch: ${INPUTS_PYTHON_ARCH:-<default>}"
+log_info "  - Rust host: $RUST_HOST"
+log_info "Starting PGO data generation for interpreters: ${interpreters[*]}"
+log_step "Phase 2/3: Running PGO instrumentation..."
 
 for version in "${interpreters[@]}"; do
   setup_python_env "$version"
 done
 
+log_step "Merging PGO profiles"
+if [[ -d "$GITHUB_WORKSPACE/profdata" ]]; then
+  profraw_count="$(find "$GITHUB_WORKSPACE/profdata" -name "*.profraw" | wc -l)"
+  log_info "Found $profraw_count profile files to merge"
+fi
+
+log_step "Resolving llvm-profdata path"
 sysroot="$(rustc --print sysroot)" || die "Failed to get rustc sysroot"
 llvm_profdata="$sysroot/lib/rustlib/$RUST_HOST/bin/llvm-profdata"
 [[ -f "$llvm_profdata" ]] || die "llvm-profdata not found: $llvm_profdata"
+log_info "Setting LLVM_PROFDATA=$llvm_profdata"
 printf 'LLVM_PROFDATA=%s\n' "$llvm_profdata" >> "$GITHUB_ENV"
+log_success "PGO data generation completed successfully"
