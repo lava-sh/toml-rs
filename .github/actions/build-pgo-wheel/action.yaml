@@ -41,7 +41,7 @@ runs:
   steps:
     - name: "Prepare profiling directory"
       shell: bash
-      # making this ahead of the compile ensures that the local user can write to this
+      # making this ahead of to compile ensures that the local user can write to this
       # directory; the maturin action (on linux) runs in docker so would create as root
       run: mkdir -p ${{ github.workspace }}/profdata
 
