@@ -67,10 +67,11 @@ jobs:
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel-action@2e9d6ddc357953f08fca2f4bafae91d7669da9d5 # main
+        uses: lava-sh/build-pgo-wheel-action@62f35cb729a784bf95db4f398cfa779037b32018 # main
         with:
           target: ${{ matrix.platform.target }}
           interpreter: ${{ matrix.platform.interpreter }}
+          pgo-command: python benchmark/pgo.py
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
           maturin-build-args: ${{ matrix.platform.maturin-build-args }}
 
