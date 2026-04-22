@@ -67,7 +67,7 @@ jobs:
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel-action@62f35cb729a784bf95db4f398cfa779037b32018 # main
+        uses: lava-sh/build-pgo-wheel-action@ce96585148cd4ba7dd0612976cae3da4d2748666 # main
         with:
           target: ${{ matrix.platform.target }}
           interpreter: ${{ matrix.platform.interpreter }}
