@@ -96,7 +96,7 @@ jobs:
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel-action@71acfb6ac79b1ff477a2f7414d292c02a19b4642 # main
+        uses: lava-sh/build-pgo-wheel-action@b146ae743c8d66df60d61b021f29b29b1a759e13 # main
         with:
           rust-toolchain: stable
           pgo-command: python benchmark/pgo.py
