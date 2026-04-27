@@ -18,17 +18,20 @@
 
 * The fastest TOML parser in Python (see [benchmarks](https://github.com/lava-sh/toml-rs/tree/main/benchmark))
 
-* Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases (see [below](#differences-with-tomllib))
+* Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases (
+  see [below](#differences-with-tomllib))
 
 ## Installation
 
+Using pip:
+
 ```bash
-# Using pip
 pip install toml-rs
 ```
 
+Using uv:
+
 ```bash
-# Using uv
 uv pip install toml-rs
 ```
 
@@ -120,6 +123,6 @@ data = {
 
 print(toml_rs.dumps(data))
 
-toml_rs.dump(data, Path("example.toml"))  
+toml_rs.dump(data, Path("example.toml"))
 # or `toml_rs.dump(data, "example.toml")`
 ```
