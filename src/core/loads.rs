@@ -3,7 +3,7 @@ use pyo3::{
     types::{PyDelta, PyTzInfo},
 };
 
-pub(crate) trait TomlOffset {
+pub trait TomlOffset {
     fn into_minutes(self) -> Option<i16>;
 }
 
@@ -26,7 +26,7 @@ impl TomlOffset for toml_v1::value::Offset {
 }
 
 #[inline]
-pub(crate) fn create_timezone_from_offset<T: TomlOffset>(
+pub fn create_timezone_from_offset<T: TomlOffset>(
     py: Python,
     offset: T,
 ) -> PyResult<Bound<PyTzInfo>> {

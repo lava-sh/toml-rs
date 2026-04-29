@@ -22,7 +22,7 @@ impl TomlError {
         self.span.clone()
     }
 
-    pub(crate) fn set_input(&mut self, input: Option<&str>) {
+    pub fn set_input(&mut self, input: Option<&str>) {
         self.input = input.map(Into::into);
     }
 }
@@ -106,10 +106,7 @@ fn translate_position(input: &[u8], index: usize) -> (usize, usize) {
         .find(|(_, b)| **b == b'\n')
         .map(|(nl, _)| index - nl - 1);
 
-    let line_start = match nl {
-        Some(nl) => nl + 1,
-        None => 0,
-    };
+    let line_start = nl.map_or(0, |nl| nl + 1);
 
     let line = bytecount::count(&input[0..line_start], b'\n');
 

@@ -232,7 +232,7 @@ fn build_node<'py>(
     }
 }
 
-pub(crate) fn extract_metadata_v1<'py>(
+pub fn extract_metadata_v1<'py>(
     py: Python<'py>,
     table: &Spanned<DeTable<'_>>,
     doc: &str,
@@ -247,7 +247,7 @@ pub(crate) fn extract_metadata_v1<'py>(
     Ok(py_dict.into_any())
 }
 
-pub(crate) fn to_python_v1<'py>(
+pub fn to_python_v1<'py>(
     py: Python<'py>,
     value: &DeValue<'_>,
     span: Range<usize>,

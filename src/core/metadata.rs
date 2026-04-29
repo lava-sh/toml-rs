@@ -8,21 +8,21 @@ use pyo3::{
 };
 
 #[derive(Clone)]
-pub(crate) struct KeyLoc {
-    pub(crate) key: String,
-    pub(crate) key_raw: String,
-    pub(crate) key_line: usize,
-    pub(crate) key_col: (usize, usize),
+pub struct KeyLoc {
+    pub key: String,
+    pub key_raw: String,
+    pub key_line: usize,
+    pub key_col: (usize, usize),
 }
 
 #[derive(Clone)]
-pub(crate) struct ValueLoc {
-    pub(crate) raw_span: Option<Range<usize>>,
-    pub(crate) line: (usize, usize),
-    pub(crate) col: (usize, usize),
+pub struct ValueLoc {
+    pub raw_span: Option<Range<usize>>,
+    pub line: (usize, usize),
+    pub col: (usize, usize),
 }
 
-pub(crate) fn empty_value_loc() -> ValueLoc {
+pub fn empty_value_loc() -> ValueLoc {
     ValueLoc {
         raw_span: None,
         line: (0, 0),
@@ -30,7 +30,7 @@ pub(crate) fn empty_value_loc() -> ValueLoc {
     }
 }
 
-pub(crate) fn build_value_line(py: Python, (l1, l2): (usize, usize)) -> PyResult<Bound<PyAny>> {
+pub fn build_value_line(py: Python, (l1, l2): (usize, usize)) -> PyResult<Bound<PyAny>> {
     if l1 == l2 {
         Ok(l1.into_bound_py_any(py)?)
     } else {
@@ -38,7 +38,7 @@ pub(crate) fn build_value_line(py: Python, (l1, l2): (usize, usize)) -> PyResult
     }
 }
 
-pub(crate) fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
+pub fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
     if c1 == c2 {
         Ok(c1.into_bound_py_any(py)?)
     } else {
@@ -46,7 +46,7 @@ pub(crate) fn build_key_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bo
     }
 }
 
-pub(crate) fn build_value_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
+pub fn build_value_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<Bound<PyAny>> {
     if c1 == c2 {
         Ok(c1.into_bound_py_any(py)?)
     } else {
@@ -54,7 +54,7 @@ pub(crate) fn build_value_col(py: Python, (c1, c2): (usize, usize)) -> PyResult<
     }
 }
 
-pub(crate) fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
+pub fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
     match &value.raw_span {
         Some(span) if span.start < span.end && span.end <= doc.len() => {
             Cow::Borrowed(&doc[span.start..span.end])
@@ -63,11 +63,7 @@ pub(crate) fn value_raw<'a>(doc: &'a str, value: &ValueLoc) -> Cow<'a, str> {
     }
 }
 
-pub(crate) fn set_key_fields(
-    py: Python<'_>,
-    py_dict: &Bound<'_, PyDict>,
-    key: &KeyLoc,
-) -> PyResult<()> {
+pub fn set_key_fields(py: Python<'_>, py_dict: &Bound<'_, PyDict>, key: &KeyLoc) -> PyResult<()> {
     py_dict.set_item("key", key.key.as_str())?;
     py_dict.set_item("key_raw", key.key_raw.as_str())?;
     py_dict.set_item("key_line", key.key_line)?;
@@ -75,7 +71,7 @@ pub(crate) fn set_key_fields(
     Ok(())
 }
 
-pub(crate) fn set_value_metadata_fields(
+pub fn set_value_metadata_fields(
     py: Python<'_>,
     doc: &str,
     py_dict: &Bound<'_, PyDict>,
@@ -88,7 +84,7 @@ pub(crate) fn set_value_metadata_fields(
     Ok(())
 }
 
-pub(crate) fn build_dict<'py>(
+pub fn build_dict<'py>(
     py: Python<'py>,
     doc: &str,
     key: Option<&KeyLoc>,
@@ -109,7 +105,7 @@ pub(crate) fn build_dict<'py>(
 }
 
 #[derive(Clone, Copy)]
-pub(crate) enum NodeKind {
+pub enum NodeKind {
     RootTable,
     HeaderTable,
     InlineTable,
@@ -119,26 +115,26 @@ pub(crate) enum NodeKind {
     ArrayItem,
 }
 
-pub(crate) fn raw_slice<'a>(doc: &'a str, span: &Range<usize>) -> &'a str {
+pub fn raw_slice<'a>(doc: &'a str, span: &Range<usize>) -> &'a str {
     doc.get(span.start..span.end).unwrap_or("")
 }
 
-pub(crate) fn span_contains(outer: &Range<usize>, inner: &Range<usize>) -> bool {
+pub fn span_contains(outer: &Range<usize>, inner: &Range<usize>) -> bool {
     outer.start <= inner.start && inner.end <= outer.end
 }
 
-pub(crate) fn table_needs_wrapper(kind: NodeKind) -> bool {
+pub fn table_needs_wrapper(kind: NodeKind) -> bool {
     matches!(
         kind,
         NodeKind::InlineTable | NodeKind::ArrayOfTablesTable | NodeKind::ArrayItem
     )
 }
 
-pub(crate) fn array_has_value_metadata(kind: NodeKind) -> bool {
+pub fn array_has_value_metadata(kind: NodeKind) -> bool {
     !matches!(kind, NodeKind::ArrayOfTables)
 }
 
-pub(crate) fn classify_keyed_table_kind(
+pub fn classify_keyed_table_kind(
     value_span: &Range<usize>,
     key_span: &Range<usize>,
     parent_kind: NodeKind,
@@ -157,7 +153,7 @@ pub(crate) fn classify_keyed_table_kind(
     }
 }
 
-pub(crate) fn classify_array_item_table_kind(parent_kind: NodeKind) -> NodeKind {
+pub fn classify_array_item_table_kind(parent_kind: NodeKind) -> NodeKind {
     match parent_kind {
         NodeKind::Array => NodeKind::ArrayItem,
         NodeKind::ArrayOfTables => NodeKind::ArrayOfTablesTable,
@@ -169,10 +165,7 @@ pub(crate) fn classify_array_item_table_kind(parent_kind: NodeKind) -> NodeKind 
     }
 }
 
-pub(crate) fn classify_keyed_array_kind(
-    value_span: &Range<usize>,
-    key_span: &Range<usize>,
-) -> NodeKind {
+pub fn classify_keyed_array_kind(value_span: &Range<usize>, key_span: &Range<usize>) -> NodeKind {
     if span_contains(value_span, key_span) {
         NodeKind::ArrayOfTables
     } else {
@@ -181,13 +174,13 @@ pub(crate) fn classify_keyed_array_kind(
 }
 
 #[derive(Clone)]
-pub(crate) struct DocIndex<'a> {
-    pub(crate) doc: &'a str,
+pub struct DocIndex<'a> {
+    pub doc: &'a str,
     line_starts: Vec<usize>,
 }
 
 impl<'a> DocIndex<'a> {
-    pub(crate) fn new(doc: &'a str) -> Self {
+    pub fn new(doc: &'a str) -> Self {
         let mut line_starts = Vec::new();
         line_starts.push(0);
         for i in memchr_iter(b'\n', doc.as_bytes()) {
@@ -196,7 +189,7 @@ impl<'a> DocIndex<'a> {
         Self { doc, line_starts }
     }
 
-    pub(crate) fn line_col(&self, pos: usize) -> (usize, usize) {
+    pub fn line_col(&self, pos: usize) -> (usize, usize) {
         let pos = pos.min(self.doc.len());
         let idx = self
             .line_starts
@@ -207,21 +200,21 @@ impl<'a> DocIndex<'a> {
         (line, col)
     }
 
-    pub(crate) fn col_range_same_line(&self, start: usize, end: usize) -> (usize, usize) {
+    pub fn col_range_same_line(&self, start: usize, end: usize) -> (usize, usize) {
         let (_, c1) = self.line_col(start);
         let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
         let (_, c2) = self.line_col(end_pos);
         (c1, c2)
     }
 
-    pub(crate) fn value_line_range(&self, start: usize, end: usize) -> (usize, usize) {
+    pub fn value_line_range(&self, start: usize, end: usize) -> (usize, usize) {
         let (l1, _) = self.line_col(start);
         let end_pos = end.saturating_sub(1).min(self.doc.len().saturating_sub(1));
         let (l2, _) = self.line_col(end_pos);
         (l1, l2)
     }
 
-    pub(crate) fn value_col_range_first_line(&self, start: usize, end: usize) -> (usize, usize) {
+    pub fn value_col_range_first_line(&self, start: usize, end: usize) -> (usize, usize) {
         let (_, c1) = self.line_col(start);
         let bytes = self.doc.as_bytes();
         let end = end.min(bytes.len());

@@ -6,7 +6,7 @@ macro_rules! impl_dumps {
         $to_toml_macro:ident,
         $toml_dt_macro:ident
     ) => {
-        pub(crate) fn $validate_fn(
+        pub fn $validate_fn(
             doc: &Item,
             inline_tables: &rustc_hash::FxHashSet<String>,
         ) -> Result<(), pyo3::PyErr> {
@@ -32,7 +32,7 @@ macro_rules! impl_dumps {
             Ok(())
         }
 
-        pub(crate) fn $python_to_toml_fn<'py>(
+        pub fn $python_to_toml_fn<'py>(
             py: pyo3::Python<'py>,
             obj: &pyo3::Bound<'py, pyo3::PyAny>,
             inline_tables: Option<&rustc_hash::FxHashSet<String>>,

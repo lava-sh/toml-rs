@@ -3,7 +3,7 @@ use toml::{Spanned, de::DeValue};
 
 use crate::{create_py_datetime, impl_loads};
 
-pub(crate) fn toml_to_python<'py>(
+pub fn toml_to_python<'py>(
     py: Python<'py>,
     value: &Spanned<DeValue<'_>>,
     parse_float: &Bound<'py, PyAny>,

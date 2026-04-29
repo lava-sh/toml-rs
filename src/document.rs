@@ -7,7 +7,7 @@ use pyo3::{
 };
 
 #[pyclass]
-pub(crate) struct TOMLDocument {
+pub struct TOMLDocument {
     #[pyo3(get)]
     pub value: Py<PyAny>,
     #[pyo3(get)]
@@ -120,7 +120,7 @@ impl TOMLDocument {
         let val = self.value.bind(py);
 
         if let Ok(s) = key.extract::<&str>() {
-            if let Ok(()) = val.del_item(s) {
+            if matches!(val.del_item(s), Ok(())) {
                 return Ok(());
             }
 
