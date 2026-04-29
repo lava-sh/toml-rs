@@ -77,18 +77,19 @@ fn scalar_to_py_obj<'py>(
             if let Some(big_int) = BigInt::parse_bytes(bytes, radix) {
                 return big_int.into_py_any(py);
             }
+            let error_start = raw_span.start;
             let mut err = TomlError::custom(
                 format!(
                     "invalid integer '{}'",
                     &doc[raw_span.start..raw_span.end.min(doc.len())]
                 ),
-                Some(raw_span.start..raw_span.end),
+                Some(raw_span),
             );
             err.set_input(Some(doc));
             Err(TOMLDecodeError::new_err((
                 err.to_string(),
                 doc.to_string(),
-                raw_span.start,
+                error_start,
             )))
         }
         DeValue::Float(float) => {
@@ -269,19 +270,20 @@ pub fn to_python_v1<'py>(
                 return big_int.into_bound_py_any(py);
             }
 
+            let error_start = span.start;
             let mut err = TomlError::custom(
                 format!(
                     "invalid integer '{}'",
                     &doc[span.start..span.end.min(doc.len())]
                 ),
-                Some(span.start..span.end),
+                Some(span),
             );
             err.set_input(Some(doc));
 
             Err(TOMLDecodeError::new_err((
                 err.to_string(),
                 doc.to_string(),
-                span.start,
+                error_start,
             )))
         }
         DeValue::Float(float) => {
