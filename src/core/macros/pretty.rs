@@ -1,13 +1,13 @@
 #[macro_export]
 macro_rules! impl_pretty {
     ($pretty_name:ident) => {
-        pub(crate) struct $pretty_name {
+        pub struct $pretty_name {
             in_value: bool,
             format_tables: bool,
         }
 
         impl $pretty_name {
-            pub(crate) fn new(format_tables: bool) -> Self {
+            pub fn new(format_tables: bool) -> Self {
                 Self {
                     in_value: false,
                     format_tables,
