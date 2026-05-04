@@ -16,8 +16,8 @@
 
 * The fastest TOML parser in Python (see [benchmarks](https://github.com/lava-sh/toml-rs/tree/main/benchmark))
 
-* Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases (
-  see [below](#differences-with-tomllib))
+* Drop-in compatibility with most [`tomllib`](https://docs.python.org/3/library/tomllib.html) use cases
+  (see [below](#differences-with-tomllib))
 
 ## Installation
 
