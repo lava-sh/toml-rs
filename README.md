@@ -2,7 +2,7 @@
 
 # toml-rs
 
-*A High-Performance TOML v1.0.0 and v1.1.0 parser for Python written in Rust*
+*A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust*
 
 [![PyPI License](https://img.shields.io/pypi/l/toml_rs.svg?style=flat-square)](https://pypi.org/project/toml_rs/)
 [![Monthly downloads](https://img.shields.io/pypi/dm/toml_rs.svg?style=flat-square)](https://pypi.org/project/toml_rs/)
@@ -21,13 +21,13 @@
 
 ## Installation
 
-Using pip:
+Using [pip](https://github.com/pypa/pip):
 
 ```bash
 pip install toml-rs
 ```
 
-Using uv:
+Using [uv](https://github.com/astral-sh/uv):
 
 ```bash
 uv pip install toml-rs
