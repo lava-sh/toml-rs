@@ -17,9 +17,6 @@ license-files = ["UNLICENSE"]
 authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
 ]
-maintainers = [
-    { name = "chirizxc", email = "chirizxc@proton.me" }
-]
 classifiers = [
     "Typing :: Typed",
     "Programming Language :: Rust",
@@ -42,6 +39,10 @@ rumdl = ["rumdl == 0.1.91"]
 maturin = ["maturin == 1.13.3"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
+wasm-test = [
+    "pytest-pyodide == 0.59.2",
+    "pytest-httpserver == 1.1.5",
+]
 nox = [
     { include-group = "pytest" },
     { include-group = "tomli-w" },

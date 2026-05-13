@@ -8,3 +8,6 @@ include = [
     "tests/*.py",
     "noxfile.py",
 ]
+exclude = [
+    "tests/test_wasm.py",
+]
