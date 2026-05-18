@@ -4,7 +4,14 @@ extend-exclude = [
 ]
 
 [default.extend-words]
-# For lines:
-# 1. `"Path 'database.connectio' specified in"`
-# 2. `{"inline_tables": {"database.connectio"}},`
+# error: `connectio` should be `connection`
+#   --> .\tests\test_dumps.py:66:33
+#    |
+# 66 |                 "Path 'database.connectio' specified in"
+#    |                                 ^^^^^^^^^
+# error: `connectio` should be `connection`
+#   --> .\tests\test_dumps.py:69:42
+#    |
+# 69 |             {"inline_tables": {"database.connectio"}},
+#    |                                          ^^^^^^^^^
 connectio = "connectio"
