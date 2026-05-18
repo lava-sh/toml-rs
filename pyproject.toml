@@ -33,13 +33,14 @@ classifiers = [
 ]
 
 [dependency-groups]
-typos = ["typos == 1.46.1"]
-zizmor = ["zizmor == 1.24.1"]
-rumdl = ["rumdl == 0.1.91"]
+typos = ["typos == 1.46.2"]
+zizmor = ["zizmor == 1.25.2"]
+rumdl = ["rumdl == 0.1.94"]
 maturin = ["maturin == 1.13.3"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
+    { include-group = "pytest" },
     "pytest-pyodide == 0.59.2",
     "pytest-httpserver == 1.1.5",
 ]
@@ -48,8 +49,8 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.35",
-    "ruff == 0.15.12",
+    "ty == 0.0.37",
+    "ruff == 0.15.13",
     "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
@@ -74,6 +75,9 @@ bench = [
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",
 ]
+
+[tool.uv.dependency-groups]
+wasm-test = { requires-python = ">=3.11" }
 
 [project.urls]
 Source = "https://github.com/lava-sh/toml-rs"
