@@ -15,7 +15,7 @@ pyo3 = { version = "=0.28.3", features = [
     "generate-import-lib",
     "num-bigint",
 ] }
-memchr = "=2.8.0"
+memchr = "=2.8.1"
 rustc-hash = "=2.1.2"
 num-bigint = "=0.4.6"
 smallvec = "=2.0.0-alpha.12"
