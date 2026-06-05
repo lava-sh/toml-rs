@@ -4,11 +4,11 @@
 
 *A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust*
 
-![CI](https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?size=xs&variant=outline&animate=pulse&font=geist-mono&mode=light)
-![Last Commit](https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?size=xs&variant=outline&font=geist-mono&mode=light)
-[![License](https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?size=xs&variant=outline&font=geist-mono&mode=light)](https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE)
-[![Monthly downloads](https://shieldcn.dev/pypi/dm/toml_rs.svg?size=xs&variant=outline&font=geist-mono&mode=light)](https://pypi.org/project/toml_rs)
-[![Python version](https://shieldcn.dev/pypi/python/toml_rs.svg?size=xs&variant=outline&font=geist-mono&mode=light)](https://pypi.org/project/toml_rs)
+![CI](https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&animate=pulse&font=geist-mono&size=xs)
+![Last Commit](https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs)
+[![License](https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs)](https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE)
+[![Monthly downloads](https://shieldcn.dev/pypi/dm/toml_rs.svg?variant=outline&font=geist-mono&size=xs)](https://pypi.org/project/toml_rs)
+[![Python version](https://shieldcn.dev/pypi/python/toml_rs.svg?variant=outline&font=geist-mono&size=xs)](https://pypi.org/project/toml_rs)
 
 </div>
 
