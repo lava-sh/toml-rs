@@ -7,8 +7,8 @@
 ![CI](https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=secondary&animate=pulse&font=geist-mono&size=xs)
 ![Last Commit](https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=secondary&font=geist-mono&size=xs)
 [![License](https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=secondary&font=geist-mono&size=xs)](https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE)
-[![Monthly downloads](https://shieldcn.dev/pypi/dm/toml_rs.svg?variant=secondary&font=geist-mono&size=xs)](https://pypi.org/project/toml_rs)
-[![Python version](https://shieldcn.dev/pypi/python/toml_rs.svg?variant=secondary&font=geist-mono&size=xs)](https://pypi.org/project/toml_rs)
+[![Monthly downloads](https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=secondary&font=geist-mono&size=xs)](https://pypi.org/project/toml-rs)
+[![Python version](https://shieldcn.dev/pypi/python/toml-rs.svg?variant=secondary&font=geist-mono&size=xs)](https://pypi.org/project/toml-rs)
 
 </div>
 
