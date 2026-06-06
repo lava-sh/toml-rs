@@ -4,11 +4,13 @@
 
 *A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust*
 
+<a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
+<a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
+<a href="https://pypi.org/project/toml-rs"><img alt="Python Version" src="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
+
 <a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&animate=pulse&mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&animate=pulse&mode=light"></picture></a>
 <a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
 <a href="https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="License" src="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
-<a href="https://pypi.org/project/toml-rs"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="Monthly downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
-<a href="https://pypi.org/project/toml-rs"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="Python version" src="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
 
 </div>
 
