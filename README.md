@@ -12,7 +12,6 @@
 <a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
 <a href="https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="License" src="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
 
-
 </div>
 
 ## Features
