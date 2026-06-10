@@ -23,13 +23,19 @@
 
 ## Installation
 
-Using [pip](https://github.com/pypa/pip):
+<p>
+  <img src="https://thesvg.org/icons/python/default.svg" alt="Python" style="height:14px;">
+  Using <a href="https://github.com/pypa/pip">pip</a>:
+</p>
 
 ```bash
 pip install toml-rs
 ```
 
-Using [uv](https://github.com/astral-sh/uv):
+<p>
+  <img src="https://thesvg.org/icons/uv/default.svg" alt="uv" style="height:14px;">
+  Using <a href="https://github.com/astral-sh/uv">uv</a>:
+</p>
 
 ```bash
 uv pip install toml-rs
