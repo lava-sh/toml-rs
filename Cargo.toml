@@ -85,7 +85,7 @@ features = [
 
 [dependencies.toml_edit]
 git = "https://github.com/lava-sh/toml"
-rev = "aa02632d6c75b674f79cd1619769e9c0ace534e6"
+rev = "b249d89fa447802bdde710943de1c4ce062b4181"
 features = [
     "serde",
     "unbounded",
