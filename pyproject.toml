@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.13.3"]
+requires = ["maturin == 1.14.0"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -35,8 +35,8 @@ classifiers = [
 [dependency-groups]
 typos = ["typos == 1.47.2"]
 zizmor = ["zizmor == 1.25.2"]
-rumdl = ["rumdl == 0.2.12"]
-maturin = ["maturin == 1.13.3"]
+rumdl = ["rumdl == 0.2.14"]
+maturin = ["maturin == 1.14.0"]
 pytest = ["pytest == 9.0.3"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
@@ -49,8 +49,8 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.48",
-    "ruff == 0.15.16",
+    "ty == 0.0.49",
+    "ruff == 0.15.17",
     "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
