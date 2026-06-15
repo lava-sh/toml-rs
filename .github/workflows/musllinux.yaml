@@ -6,11 +6,11 @@ on:
 env:
   # A small hack to use anchors as GitHub doesn't allow it to be top level
   ○_○: &interpreters "3.10 3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
-  
+
 jobs:
   musllinux:
-    name: "ubuntu-latest / ${{ matrix.platform.target }}"
-    runs-on: ubuntu-latest
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
+    runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
       matrix:
@@ -20,36 +20,42 @@ jobs:
         platform:
           - {
             # AMD64
+            runner: ubuntu-latest,
             target: x86_64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # x86 (32-bit)
+            runner: ubuntu-latest,
             target: x86,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # ARM64
+            runner: ubuntu-26.04-arm,
             target: aarch64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # ARMv7 (32-bit)
+            runner: ubuntu-latest,
             target: armv7,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # PowerPC64 Little Endian
+            runner: ubuntu-latest,
             target: ppc64le,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # RISC-V 64-bit
+            runner: ubuntu-latest,
             target: riscv64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
@@ -60,11 +66,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          # zizmor: ignore[cache-poisoning]
+          enable-cache: ${{ github.event_name == 'pull_request' }}
+
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
-          sccache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+          sccache: ${{ github.event_name == 'pull_request' }}
           manylinux: musllinux_1_2
           args: >
             --release

@@ -48,9 +48,9 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 [dependency-groups]
 typos = ["typos == 1.47.2"]
 zizmor = ["zizmor == 1.25.2"]
-rumdl = ["rumdl == 0.2.14"]
+rumdl = ["rumdl == 0.2.16"]
 maturin = ["maturin == 1.14.0"]
-pytest = ["pytest == 9.0.3"]
+pytest = ["pytest == 9.1.0"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
     { include-group = "pytest" },
@@ -81,7 +81,7 @@ bench = [
     "tomlkit",
     "qtoml",
     "rtoml",
-    "tomli ; python_version<'3.11'",
+    "tomli ; python_version < '3.11'",
     "tomli-w",
     "polars == 1.41.2",
     "altair == 6.2.1",
@@ -90,4 +90,4 @@ bench = [
 ]
 
 [tool.uv.dependency-groups]
-wasm-test = { requires-python = ">=3.11" }
+wasm-test = { requires-python = ">= 3.13" }
