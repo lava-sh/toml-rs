@@ -34,7 +34,7 @@ jobs:
           }
           - {
             # ARM64
-            runner: ubuntu-24.04-arm,
+            runner: ubuntu-26.04-arm,
             target: aarch64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
@@ -81,14 +81,15 @@ jobs:
       - name: "Install uv"
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          enable-cache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+          # zizmor: ignore[cache-poisoning]
+          enable-cache: ${{ github.event_name == 'pull_request' }}
 
       - name: "Build wheels"
         if: matrix.platform.use-pgo == false
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
-          sccache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+          sccache: ${{ github.event_name == 'pull_request' }}
           manylinux: auto
           args: >
             --release
