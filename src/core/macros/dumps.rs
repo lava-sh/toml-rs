@@ -338,7 +338,16 @@ macro_rules! impl_dumps {
                         return None;
                     }
                     let delta = utc_offset.cast::<pyo3::types::PyDelta>().ok()?;
+
+                    #[cfg(not(Py_LIMITED_API))]
                     let seconds = delta.get_days() * 86400 + delta.get_seconds();
+                    #[cfg(Py_LIMITED_API)]
+                    let seconds = {
+                        let days = delta.getattr("days").ok()?.extract::<i32>()?;
+                        let secs = delta.getattr("seconds").ok()?.extract::<i32>()?;
+                        days * 86400 + secs
+                    };
+
                     Some(Offset::Custom {
                         minutes: i16::try_from(seconds / 60).ok()?,
                     })
