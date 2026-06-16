@@ -54,6 +54,13 @@ jobs:
             maturin-build-args: "--features mimalloc"
           }
           - {
+            # PowerPC64 Big Endian
+            runner: ubuntu-latest,
+            target: ppc64,
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc"
+          }
+          - {
             # RISC-V 64-bit
             runner: ubuntu-latest,
             target: riscv64,
