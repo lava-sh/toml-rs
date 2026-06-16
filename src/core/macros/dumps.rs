@@ -341,10 +341,11 @@ macro_rules! impl_dumps {
 
                     #[cfg(not(Py_LIMITED_API))]
                     let seconds = delta.get_days() * 86400 + delta.get_seconds();
+
                     #[cfg(Py_LIMITED_API)]
                     let seconds = {
-                        let days = delta.getattr("days").ok()?.extract::<i32>()?;
-                        let secs = delta.getattr("seconds").ok()?.extract::<i32>()?;
+                        let days = delta.getattr("days").ok()?.extract::<i32>().ok()?;
+                        let secs = delta.getattr("seconds").ok()?.extract::<i32>().ok()?;
                         days * 86400 + secs
                     };
 
