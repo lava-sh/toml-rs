@@ -14,9 +14,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # PyPI does not support Rust target `loongarch64-unknown-linux-gnu`
+        # Rust target `loongarch64-unknown-linux-musl` is not supported by PyPI
+        #
         # `s390x-unknown-linux-musl` is not available as prebuilt target for cross-compilation
         # `s390x` is only supported for manylinux (gnu), not musllinux
+        # musllinux doesn't support Powerpc64 (ppc64)
+
         platform:
           - {
             # AMD64
@@ -50,13 +53,6 @@ jobs:
             # PowerPC64 Little Endian
             runner: ubuntu-latest,
             target: ppc64le,
-            interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc"
-          }
-          - {
-            # PowerPC64 Big Endian
-            runner: ubuntu-latest,
-            target: ppc64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
