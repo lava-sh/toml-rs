@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 jobs:
-  android:
+  ios:
     name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
@@ -49,5 +49,5 @@ jobs:
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: wheels-android-${{ matrix.platform.target }}
+          name: wheels-ios-${{ matrix.platform.target }}
           path: dist
