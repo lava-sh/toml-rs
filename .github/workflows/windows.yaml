@@ -42,7 +42,6 @@ jobs:
             python-arch: arm64,
             interpreter: *interpreters_without_pypy,
             maturin-build-args: "--features mimalloc",
-            use-pgo: false,
           }
 
     steps:
@@ -57,7 +56,7 @@ jobs:
           enable-cache: ${{ github.event_name == 'pull_request' }}
 
       - name: "Build wheels"
-        if: matrix.platform.use-pgo == false
+        if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
@@ -66,7 +65,7 @@ jobs:
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
-            ${{ matrix.platform.maturin-build-args }}
+            ${{ matrix.platform.maturin-build-args || '' }
             --compatibility pypi
 
       - name: "Install rust stable + llvm-tools"
