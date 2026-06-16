@@ -3,6 +3,10 @@ name: "Android"
 on:
   workflow_call:
 
+env:
+  # A small hack to use anchors as GitHub doesn't allow it to be top level
+  ○_○: &interpreters "3.10 3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
+
 jobs:
   android:
     name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
@@ -15,21 +19,25 @@ jobs:
             # ARM64 (64-bit)
             runner: ubuntu-latest,
             target: aarch64-linux-android,
+            interpreter: *interpreters,
           }
           - {
             # x86_64 (64-bit)
             runner: ubuntu-latest,
             target: x86_64-linux-android,
+            interpreter: *interpreters,
           }
           - {
             # ARMv7 (32-bit)
             runner: ubuntu-latest,
             target: armv7-linux-androideabi,
+            interpreter: *interpreters,
           }
           - {
             # x86 (32-bit)
             runner: ubuntu-latest,
             target: i686-linux-android,
+            interpreter: *interpreters,
           }
 
     steps:
@@ -50,7 +58,7 @@ jobs:
           args: >
             --release 
             --out dist
-            --features android
+            --interpreter ${{ matrix.platform.interpreter }}
             --compatibility pypi
         env:
           ANDROID_API_LEVEL: "21"
