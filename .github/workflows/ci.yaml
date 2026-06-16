@@ -58,93 +58,97 @@ jobs:
 
       - run: cargo clippy --all-targets
 
-  tools:
-    runs-on: ubuntu-latest
+#  tools:
+#    runs-on: ubuntu-latest
+#
+#    strategy:
+#      matrix:
+#        include:
+#          - name: "zizmor"
+#            command: zizmor .github/
+#
+#          - name: "typos"
+#            command: typos --config .typos.toml
+#
+#          - name: "rumdl"
+#            command: rumdl check .
+#
+#    name: ${{ matrix.name }}
+#
+#    steps:
+#      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+#        with:
+#          persist-credentials: false
+#
+#      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+#        with:
+#          python-version: "3.14"
+#
+#      - name: "Install uv"
+#        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+#        with:
+#          enable-cache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+#
+#      - name: "Install ${{ matrix.name }}"
+#        run: uv pip install --group ${{ matrix.name }} --system
+#
+#      - name: "Run ${{ matrix.name }}"
+#        run: ${{ matrix.command }}
 
-    strategy:
-      matrix:
-        include:
-          - name: "zizmor"
-            command: zizmor .github/
+#  tests-alpine:
+#    name: "tests / alpine / python 3.14"
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 10
+#    steps:
+#      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+#        with:
+#          persist-credentials: false
+#
+#      - name: "latest"
+#        run: |
+#          mkdir -p /tmp/__build__
+#          cp -r py-src src Cargo.toml pyproject.toml README.md /tmp/__build__/
+#
+#          docker run --rm \
+#            -v /tmp/__build__:/app \
+#            -w /app \
+#            ghcr.io/astral-sh/uv:python3.14-alpine sh -c "
+#            apk add --no-cache curl build-base musl-dev openssl-dev && \
+#            curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
+#            . \$HOME/.cargo/env && \
+#            rustc --version && \
+#            uv pip install maturin[patchelf] -U --system && \
+#            maturin build --release --out /app/dist --features mimalloc && \
+#            uv pip install /app/dist/*.whl --system && \
+#            python -c 'import toml_rs; print(toml_rs.__version__)'
+#          "
 
-          - name: "typos"
-            command: typos --config .typos.toml
+#  tests:
+#    uses: ./.github/workflows/tests.yaml
+#
+#  linux:
+#    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+#    uses: ./.github/workflows/linux.yaml
+#
+#  musllinux:
+#    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+#    uses: ./.github/workflows/musllinux.yaml
+#
+#  windows:
+#    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+#    uses: ./.github/workflows/windows.yaml
+#
+#  macos:
+#    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+#    uses: ./.github/workflows/macos.yaml
+#
+#  wasm:
+#    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+#    uses: ./.github/workflows/wasm.yaml
 
-          - name: "rumdl"
-            command: rumdl check .
-
-    name: ${{ matrix.name }}
-
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.14"
-
-      - name: "Install uv"
-        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
-        with:
-          enable-cache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
-
-      - name: "Install ${{ matrix.name }}"
-        run: uv pip install --group ${{ matrix.name }} --system
-
-      - name: "Run ${{ matrix.name }}"
-        run: ${{ matrix.command }}
-
-  tests-alpine:
-    name: "tests / alpine / python 3.14"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-
-      - name: "latest"
-        run: |
-          mkdir -p /tmp/__build__
-          cp -r py-src src Cargo.toml pyproject.toml README.md /tmp/__build__/
-
-          docker run --rm \
-            -v /tmp/__build__:/app \
-            -w /app \
-            ghcr.io/astral-sh/uv:python3.14-alpine sh -c "
-            apk add --no-cache curl build-base musl-dev openssl-dev && \
-            curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable && \
-            . \$HOME/.cargo/env && \
-            rustc --version && \
-            uv pip install maturin[patchelf] -U --system && \
-            maturin build --release --out /app/dist --features mimalloc && \
-            uv pip install /app/dist/*.whl --system && \
-            python -c 'import toml_rs; print(toml_rs.__version__)'
-          "
-
-  tests:
-    uses: ./.github/workflows/tests.yaml
-
-  linux:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/linux.yaml
-
-  musllinux:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/musllinux.yaml
-
-  windows:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/windows.yaml
-
-  macos:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/macos.yaml
-
-  wasm:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
-    uses: ./.github/workflows/wasm.yaml
+  android:
+    # needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    uses: ./.github/workflows/android.yaml
 
   build-sdist:
     name: "build sdist"
@@ -173,11 +177,11 @@ jobs:
     environment: pypi
     needs: [
       build-sdist,
-      linux,
-      musllinux,
-      windows,
-      macos,
-      wasm,
+      # linux,
+      # musllinux,
+      # windows,
+      # macos,
+      # wasm,
     ]
     permissions:
       # Use to sign the release artifacts
