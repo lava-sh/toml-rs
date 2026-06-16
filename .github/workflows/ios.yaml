@@ -42,6 +42,7 @@ jobs:
             --out dist
             --features ios
             --compatibility pypi
+            --skip-auditwheel
         env:
           IPHONEOS_DEPLOYMENT_TARGET: "14.0"
 
