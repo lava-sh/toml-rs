@@ -344,8 +344,16 @@ macro_rules! impl_dumps {
 
                     #[cfg(Py_LIMITED_API)]
                     let seconds = {
-                        let days = delta.getattr("days").ok()?.extract::<i32>().ok()?;
-                        let secs = delta.getattr("seconds").ok()?.extract::<i32>().ok()?;
+                        let days = delta
+                            .getattr(pyo3::intern!(delta.py(), "days"))
+                            .ok()?
+                            .extract::<i32>()
+                            .ok()?;
+                        let secs = delta
+                            .getattr(pyo3::intern!(delta.py(), "seconds"))
+                            .ok()?
+                            .extract::<i32>()
+                            .ok()?;
                         days * 86400 + secs
                     };
 

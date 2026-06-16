@@ -22,15 +22,23 @@ macro_rules! toml_dt_v1 {
             #[cfg(not(Py_LIMITED_API))]
             year: u16::try_from($py_date.get_year())?,
             #[cfg(Py_LIMITED_API)]
-            year: u16::try_from($py_date.getattr("year")?.extract::<i32>()?)?,
+            year: u16::try_from(
+                $py_date
+                    .getattr(pyo3::intern!($py_date.py(), "year"))?
+                    .extract::<i32>()?,
+            )?,
             #[cfg(not(Py_LIMITED_API))]
             month: $py_date.get_month(),
             #[cfg(Py_LIMITED_API)]
-            month: $py_date.getattr("month")?.extract::<u8>()?,
+            month: $py_date
+                .getattr(pyo3::intern!($py_date.py(), "month"))?
+                .extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             day: $py_date.get_day(),
             #[cfg(Py_LIMITED_API)]
-            day: $py_date.getattr("day")?.extract::<u8>()?,
+            day: $py_date
+                .getattr(pyo3::intern!($py_date.py(), "day"))?
+                .extract::<u8>()?,
         }
     };
 
@@ -39,19 +47,28 @@ macro_rules! toml_dt_v1 {
             #[cfg(not(Py_LIMITED_API))]
             hour: $py_time.get_hour(),
             #[cfg(Py_LIMITED_API)]
-            hour: $py_time.getattr("hour")?.extract::<u8>()?,
+            hour: $py_time
+                .getattr(pyo3::intern!($py_time.py(), "hour"))?
+                .extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             minute: $py_time.get_minute(),
             #[cfg(Py_LIMITED_API)]
-            minute: $py_time.getattr("minute")?.extract::<u8>()?,
+            minute: $py_time
+                .getattr(pyo3::intern!($py_time.py(), "minute"))?
+                .extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             second: $py_time.get_second(),
             #[cfg(Py_LIMITED_API)]
-            second: $py_time.getattr("second")?.extract::<u8>()?,
+            second: $py_time
+                .getattr(pyo3::intern!($py_time.py(), "second"))?
+                .extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             nanosecond: $py_time.get_microsecond() * 1000,
             #[cfg(Py_LIMITED_API)]
-            nanosecond: $py_time.getattr("microsecond")?.extract::<u32>()? * 1000,
+            nanosecond: $py_time
+                .getattr(pyo3::intern!($py_time.py(), "microsecond"))?
+                .extract::<u32>()?
+                * 1000,
         }
     };
 
