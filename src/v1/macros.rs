@@ -22,15 +22,15 @@ macro_rules! toml_dt_v1 {
             #[cfg(not(Py_LIMITED_API))]
             year: u16::try_from($py_date.get_year())?,
             #[cfg(Py_LIMITED_API)]
-            year: u16::try_from($py_date.getattr("year")?.extract()?)?,
+            year: u16::try_from($py_date.getattr("year")?.extract::<i32>()?)?,
             #[cfg(not(Py_LIMITED_API))]
             month: $py_date.get_month(),
             #[cfg(Py_LIMITED_API)]
-            month: $py_date.getattr("month")?.extract()?,
+            month: $py_date.getattr("month")?.extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             day: $py_date.get_day(),
             #[cfg(Py_LIMITED_API)]
-            day: $py_date.getattr("day")?.extract()?,
+            day: $py_date.getattr("day")?.extract::<u8>()?,
         }
     };
 
@@ -39,15 +39,15 @@ macro_rules! toml_dt_v1 {
             #[cfg(not(Py_LIMITED_API))]
             hour: $py_time.get_hour(),
             #[cfg(Py_LIMITED_API)]
-            hour: $py_time.getattr("hour")?.extract()?,
+            hour: $py_time.getattr("hour")?.extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             minute: $py_time.get_minute(),
             #[cfg(Py_LIMITED_API)]
-            minute: $py_time.getattr("minute")?.extract()?,
+            minute: $py_time.getattr("minute")?.extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             second: $py_time.get_second(),
             #[cfg(Py_LIMITED_API)]
-            second: $py_time.getattr("second")?.extract()?,
+            second: $py_time.getattr("second")?.extract::<u8>()?,
             #[cfg(not(Py_LIMITED_API))]
             nanosecond: $py_time.get_microsecond() * 1000,
             #[cfg(Py_LIMITED_API)]
