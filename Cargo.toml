@@ -112,6 +112,7 @@ default = []
 mimalloc = ["dep:mimalloc"]
 snmalloc = ["dep:snmalloc-rs"]
 android = ["pyo3/abi3-py310"]
+ios = ["pyo3/abi3-py310"]
 
 [profile.release]
 opt-level = 3
