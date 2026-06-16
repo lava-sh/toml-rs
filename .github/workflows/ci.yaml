@@ -127,7 +127,7 @@ jobs:
     uses: ./.github/workflows/tests.yaml
 
   linux:
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    # needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/linux.yaml
 
   musllinux:

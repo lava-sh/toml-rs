@@ -65,12 +65,31 @@ jobs:
             use-pgo: false,
           }
           - {
+            # PowerPC64 Big Endian
+            runner: ubuntu-latest,
+            target: ppc64,
+            interpreter: *interpreters,
+            maturin-build-args: "",
+            use-pgo: false,
+            container: ghcr.io/rust-cross/manylinux2014-cross:ppc64,
+          }
+          - {
             # RISC-V 64-bit
             runner: ubuntu-latest,
             target: riscv64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: false,
+          }
+          - {
+            # LoongArch64
+            runner: ubuntu-latest,
+            target: loongarch64,
+            interpreter: *interpreters,
+            maturin-build-args: "",
+            use-pgo: false,
+            container: ghcr.io/rust-cross/manylinux_2_36-cross:loongarch64,
+            rustflags: "-C target-feature=+crt-static",
           }
 
     steps:
@@ -91,12 +110,15 @@ jobs:
           target: ${{ matrix.platform.target }}
           sccache: ${{ github.event_name == 'pull_request' }}
           manylinux: auto
+          container: ${{ matrix.platform.container }}
           args: >
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args }}
             --compatibility pypi
+        env:
+          RUSTFLAGS: ${{ matrix.platform.rustflags || '' }}
 
       - name: "Install rust stable + llvm-tools"
         if: matrix.platform.use-pgo == true
