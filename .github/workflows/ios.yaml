@@ -43,7 +43,6 @@ jobs:
             --features ios
             --compatibility pypi
         env:
-          PYO3_CONFIG_FILE: "/dev/null"
           IPHONEOS_DEPLOYMENT_TARGET: "14.0"
 
       - name: "Upload wheels"
