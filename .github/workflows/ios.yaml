@@ -15,11 +15,13 @@ jobs:
             # ARM64
             runner: macos-latest,
             target: aarch64-apple-ios,
+            host_platform: "ios-14.0-arm64-iphoneos",
           }
           - {
             # x86_64
             runner: macos-latest,
             target: x86_64-apple-ios,
+            host_platform: "ios-14.0-x86_64-iphonesimulator",
           }
 
     steps:
@@ -45,6 +47,7 @@ jobs:
             --skip-auditwheel
         env:
           IPHONEOS_DEPLOYMENT_TARGET: "14.0"
+          _PYTHON_HOST_PLATFORM: ${{ matrix.platform.host_platform }}
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
