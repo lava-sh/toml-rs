@@ -17,16 +17,12 @@ class Context:
     rust_host: str
 
 
-def output(*args: str) -> str:
-    return subprocess.check_output(args, text=True)
-
-
 ctx = Context(
     target=os.environ["INPUTS_TARGET"],
     interpreters=os.environ["INPUTS_INTERPRETER"].split(),
     workdir=Path(os.environ.get("INPUTS_WORKING_DIRECTORY", ".")),
     runner_os=os.environ["RUNNER_OS"],
-    rust_host=output("rustc", "--print", "host-tuple"),
+    rust_host=subprocess.check_output("rustc", "--print", "host-tuple", text=True),
 )
 
 
@@ -108,7 +104,14 @@ def uv_python(request: str) -> Path:
 
     if not path:
         subprocess.run("uv", "python", "install", request, check=True)
-        path = output("uv", "python", "find", "--no-project", request)
+        path = subprocess.check_output(
+            "uv",
+            "python",
+            "find",
+            "--no-project",
+            request,
+            text=True,
+        )
 
     return Path(path)
 
@@ -147,7 +150,7 @@ for interpreter in ctx.interpreters:
     run_profile(interpreter)
 
 
-sysroot = Path(output("rustc", "--print", "sysroot"))
+sysroot = Path(subprocess.check_output("rustc", "--print", "sysroot", text=True))
 
 llvm = sysroot / "lib" / "rustlib" / ctx.rust_host / "bin" / "llvm-profdata"
 
