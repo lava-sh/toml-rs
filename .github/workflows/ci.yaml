@@ -96,6 +96,7 @@ jobs:
         run: ${{ matrix.command }}
 
   tests-alpine:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
     name: "tests / alpine / python 3.14"
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -124,6 +125,7 @@ jobs:
           "
 
   tests:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
     uses: ./.github/workflows/tests.yaml
 
   linux:
