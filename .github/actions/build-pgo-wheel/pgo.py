@@ -36,10 +36,7 @@ ctx = Context(
 
 def python_request(version: str) -> str:
     arch = ctx.target.split("-", 1)[0]
-    arch = {
-        "i686": "x86",
-        "riscv64gc": "riscv64",
-    }.get(arch, arch)
+    arch = {"i686": "x86", "riscv64gc": "riscv64"}.get(arch, arch)
 
     match ctx.runner_os:
         case "Linux":
@@ -82,14 +79,12 @@ def wheel_pattern(version: str) -> str:
 
     if version.startswith("pypy"):
         tag = version[4:].replace(".", "")
-
         return str(base / f"*-pp{tag}-*.whl")
 
     tag = version.replace(".", "")
 
     if version.endswith("t"):
         tag = tag[:-1]
-
         return str(base / f"*-cp{tag}-cp{tag}t-*.whl")
 
     return str(base / f"*-cp{tag}-cp{tag}-*.whl")
@@ -117,14 +112,7 @@ def uv_python(request: str) -> Path:
 
     if not path:
         run("uv", "python", "install", request)
-
-        path = output(
-            "uv",
-            "python",
-            "find",
-            "--no-project",
-            request,
-        )
+        path = output("uv", "python", "find", "--no-project", request)
 
     return Path(path)
 
@@ -140,11 +128,9 @@ def run_profile(version: str) -> None:
     python = uv_python(python_request(version))
 
     venv = Path(".pgo-venv") / version.replace(".", "_")
-
     shutil.rmtree(venv, ignore_errors=True)
 
     run("uv", "venv", str(venv), "--python", str(python))
-
     executable = venv_python(venv)
 
     run(
@@ -157,7 +143,6 @@ def run_profile(version: str) -> None:
         "--no-deps",
         str(find_wheel(version)),
     )
-
     run(str(executable), str(ctx.workdir / "benchmark" / "pgo.py"))
 
 
