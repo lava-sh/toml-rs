@@ -20,16 +20,16 @@ jobs:
           - {
             # AMD64
             runner: windows-latest,
-            target: x64,
+            target: x86_64-pc-windows-msvc,
             python-arch: x64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
-            # x86
+            # x86 (32-bit)
             runner: windows-latest,
-            target: x86,
+            target: i686-pc-windows-msvc,
             python-arch: x86,
             interpreter: *interpreters_without_pypy,
             maturin-build-args: "--features mimalloc",
@@ -38,7 +38,7 @@ jobs:
           - {
             # ARM64
             runner: windows-11-vs2026-arm,
-            target: aarch64,
+            target: aarch64-pc-windows-msvc,
             python-arch: arm64,
             interpreter: *interpreters_without_pypy,
             maturin-build-args: "--features mimalloc",
