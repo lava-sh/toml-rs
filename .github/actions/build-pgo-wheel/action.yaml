@@ -4,11 +4,6 @@ name: "Build PGO wheel"
 description: "Builds a PGO-optimized wheel"
 
 inputs:
-  python-arch:
-    description: "Python architecture for interpreter resolution on Windows"
-    required: false
-    default: ""
-
   target:
     description: "Rust target to build the wheel for"
     required: true
@@ -48,7 +43,7 @@ runs:
     - name: "Install uv"
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
       with:
-        enable-cache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+        enable-cache: ${{ github.event_name == 'pull_request' }}
 
     - name: "Build initial wheel"
       uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -63,18 +58,20 @@ runs:
           --compatibility pypi
           ${{ inputs.maturin-build-args }}
         rust-toolchain: ${{ inputs.rust-toolchain }}
-        docker-options: -e CI
+        docker-options: >-
+          -e CI
+          -e RUSTFLAGS
       env:
         RUSTFLAGS: "-Cprofile-generate=${{ github.workspace }}/profdata"
 
     - name: "Generate pgo data"
       working-directory: ${{ inputs.working-directory }}
-      run: bash "$GITHUB_ACTION_PATH/pgo.sh"
+      run: python "$GITHUB_ACTION_PATH/pgo.py"
       shell: bash
       env:
-        INPUTS_INTERPRETER: ${{ inputs.interpreter }}
-        INPUTS_PYTHON_ARCH: ${{ inputs.python-arch }}
         INPUTS_TARGET: ${{ inputs.target }}
+        INPUTS_INTERPRETER: ${{ inputs.interpreter }}
+        INPUTS_WORKING_DIRECTORY: ${{ inputs.working-directory }}
 
     - name: "Merge pgo data"
       run: ${{ env.LLVM_PROFDATA }} merge -o ${{ github.workspace }}/merged.profdata ${{ github.workspace }}/profdata # zizmor: ignore[template-injection]

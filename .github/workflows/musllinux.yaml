@@ -16,9 +16,8 @@ jobs:
       matrix:
         # Rust target `loongarch64-unknown-linux-musl` is not supported by PyPI
         #
-        # `s390x-unknown-linux-musl` is not available as prebuilt target for cross-compilation
-        # `s390x` is only supported for manylinux (gnu), not musllinux
-        # musllinux doesn't support Powerpc64 (ppc64)
+        # Rust targets `s390x-unknown-linux-musl`, `powerpc64-unknown-linux-musl`
+        # is not available for cross-compilation (only supported for manylinux)
         platform:
           - {
             # AMD64

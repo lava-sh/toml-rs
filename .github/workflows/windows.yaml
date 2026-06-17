@@ -21,7 +21,6 @@ jobs:
             # AMD64
             runner: windows-latest,
             target: x86_64-pc-windows-msvc,
-            python-arch: x64,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
@@ -30,7 +29,6 @@ jobs:
             # x86 (32-bit)
             runner: windows-latest,
             target: i686-pc-windows-msvc,
-            python-arch: x86,
             interpreter: *interpreters_without_pypy,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
@@ -39,7 +37,6 @@ jobs:
             # ARM64
             runner: windows-11-vs2026-arm,
             target: aarch64-pc-windows-msvc,
-            python-arch: arm64,
             interpreter: *interpreters_without_pypy,
             maturin-build-args: "--features mimalloc",
           }
@@ -80,7 +77,6 @@ jobs:
         uses: ./.github/actions/build-pgo-wheel
         with:
           target: ${{ matrix.platform.target }}
-          python-arch: ${{ matrix.platform.python-arch }}
           interpreter: ${{ matrix.platform.interpreter }}
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
           maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
