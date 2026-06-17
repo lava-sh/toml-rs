@@ -36,9 +36,9 @@ runs:
   steps:
     - name: "Prepare profiling directory"
       shell: bash
-      # making this ahead of the compile ensures that the local user can write to this
-      # directory; the maturin action (on linux) runs in docker so would create as root
-      run: mkdir -p ${{ github.workspace }}/profdata
+      run: |
+        echo "📁 Creating profiling directory"
+        mkdir -p ${{ github.workspace }}/profdata
 
     - name: "Install uv"
       uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
@@ -97,10 +97,13 @@ runs:
     - name: "Find built wheel"
       id: find_wheel
       working-directory: ${{ inputs.working-directory }}
+      shell: bash
       run: |
+        echo "📦 Found wheels:"
+        find dist -name "*.whl" -printf "  • %f\n"
+
         {
           echo "path<<EOF"
-          ls dist/*.whl
+          find dist -name "*.whl"
           echo "EOF"
-        } | tee -a "$GITHUB_OUTPUT"
-      shell: bash
+        } >> "$GITHUB_OUTPUT"
