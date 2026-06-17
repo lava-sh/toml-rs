@@ -17,10 +17,6 @@ class Context:
     rust_host: str
 
 
-def run(*args: str) -> None:
-    subprocess.run(args, check=True)
-
-
 def output(*args: str) -> str:
     return subprocess.check_output(args, text=True)
 
@@ -111,7 +107,7 @@ def uv_python(request: str) -> Path:
     path = result.stdout.strip()
 
     if not path:
-        run("uv", "python", "install", request)
+        subprocess.run("uv", "python", "install", request, check=True)
         path = output("uv", "python", "find", "--no-project", request)
 
     return Path(path)
@@ -130,10 +126,10 @@ def run_profile(version: str) -> None:
     venv = Path(".pgo-venv") / version.replace(".", "_")
     shutil.rmtree(venv, ignore_errors=True)
 
-    run("uv", "venv", str(venv), "--python", str(python))
+    subprocess.run("uv", "venv", str(venv), "--python", str(python), check=True)
     executable = venv_python(venv)
 
-    run(
+    subprocess.run(
         "uv",
         "pip",
         "install",
@@ -142,8 +138,9 @@ def run_profile(version: str) -> None:
         "--force-reinstall",
         "--no-deps",
         str(find_wheel(version)),
+        check=True,
     )
-    run(str(executable), str(ctx.workdir / "benchmark" / "pgo.py"))
+    subprocess.run(str(executable), str(ctx.workdir / "benchmark" / "pgo.py"), check=True)
 
 
 for interpreter in ctx.interpreters:
