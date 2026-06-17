@@ -96,7 +96,7 @@ runs:
       run: |
         & $env:LLVM_PROFDATA merge `
           -o "$env:GITHUB_WORKSPACE/merged.profdata" `
-          "$env:GITHUB_WORKSPACE_PATH/profdata"
+          "$env:GITHUB_WORKSPACE/profdata"
 
     - name: ""
       shell: bash
