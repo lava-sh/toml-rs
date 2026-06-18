@@ -10,7 +10,7 @@ nox.options.reuse_existing_virtualenvs = True
 # It is fully compatible with TOML v1.0.0
 #
 # https://pypi.org/project/tomli/2.4.1
-# Version 2.4.0 and later are compatible with TOML v1.1.0
+# Version 2.4.1 and later are compatible with TOML v1.1.0
 @nox.session
 @nox.parametrize("tomli_version", ["2.3.1", "2.4.1"])
 def test_compatibility(session: nox.Session, tomli_version: str) -> None:

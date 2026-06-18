@@ -3,10 +3,12 @@ target-version = "py310"
 line-length = 90
 
 include = [
+    ".github/actions/build-pgo-wheel/pgo.py",
     "py-src/**.py",
     "py-src/**.pyi",
     "tests/**.py",
-    "benchmark/**.py",
+    "benchmark/run.py",
+    "benchmark/pgo.py",
     "noxfile.py",
     "pyproject.toml",
     "README.md",
@@ -49,6 +51,12 @@ ignore = [
     ########
     "S101",    # Check for uses of the assert keyword.
     "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
+]
+".github/actions/build-pgo-wheel/**.py" = [
+    "S404",
+    "S603",
+    "S607",
+    "INP001",
 ]
 
 [lint.mccabe]
