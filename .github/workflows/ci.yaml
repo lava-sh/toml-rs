@@ -103,7 +103,7 @@ jobs:
       - name: "Run build on alpine"
         run: |
           docker build -t alpine-test .github/scripts/alpine
-          docker run --rm -v "$PWD":/app -w /app alpine
+          docker run --rm -v "$PWD":/app -w /app alpine-test
 
   tests:
     uses: ./.github/workflows/tests.yaml
