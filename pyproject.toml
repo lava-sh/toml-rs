@@ -49,7 +49,10 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 typos = ["typos == 1.47.2"]
 zizmor = ["zizmor == 1.25.2"]
 rumdl = ["rumdl == 0.2.19"]
-maturin = ["maturin[patchelf] == 1.14.1"]
+maturin = [
+    "maturin == 1.14.1 ; sys_platform != 'linux'",
+    "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
+]
 pytest = ["pytest == 9.1.0"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
