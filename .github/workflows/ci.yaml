@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   cargo-fmt:
-    name: "cargo fmt (nightly)"
+    name: "cargo fmt"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -29,18 +29,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Install Rust nightly + rustfmt"
-        run: rustup toolchain install nightly --component rustfmt
-
-      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-        if: github.ref_type != 'tag'
-        with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
-
-      - run: cargo fmt-nightly --check
+      - name: "Install Rust nightly & run rustfmt"
+        run: |
+          rustup toolchain install nightly --profile minimal --component rustfmt
+          cargo fmt-nightly --check
 
   cargo-clippy:
-    name: "cargo clippy (nightly)"
+    name: "cargo clippy"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -48,15 +43,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Install Rust nightly + clippy"
-        run: rustup toolchain install nightly --component clippy
-
       - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-        if: github.ref_type != 'tag'
+        if: github.ref_type != 'pull_request'
         with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
+           # zizmor: ignore[cache-poisoning]
+          lookup-only: false
 
-      - run: cargo clippy --all-targets
+      - name: "Install Rust nightly & run clippy"
+        run: |
+          rustup toolchain install nightly --profile minimal --component clippy
+          cargo clippy --all-targets
 
   tools:
     name: ${{ matrix.name }}
@@ -86,7 +82,8 @@ jobs:
       - name: "Install uv"
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
-          enable-cache: ${{ github.ref_type != 'tag' }} # zizmor: ignore[cache-poisoning]
+          # zizmor: ignore[cache-poisoning]
+          enable-cache: ${{ github.event_name == 'pull_request' }}
 
       - name: "Install ${{ matrix.name }}"
         run: uv pip install --group ${{ matrix.name }} --system
