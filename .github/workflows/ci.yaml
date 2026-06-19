@@ -32,7 +32,7 @@ jobs:
       - name: "Install Rust nightly & run rustfmt"
         run: |
           rustup toolchain install nightly --profile minimal --component rustfmt
-          cargo fmt-nightly --check
+          cargo +nightly fmt --all -- --config-path .rustfmt.nightly.toml --check
 
   cargo-clippy:
     name: "cargo clippy"
