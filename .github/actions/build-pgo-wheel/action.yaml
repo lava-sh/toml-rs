@@ -51,8 +51,7 @@ runs:
         : Building instrumented wheel
         echo "📊 Phase 1/4: Building instrumented wheel..."
 
-    - name: "Build initial wheel"
-      uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+    - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
       with:
         target: ${{ inputs.target }}
         rust-toolchain: ${{ inputs.rust-toolchain }}
