@@ -18,7 +18,7 @@ jobs:
             pyodide-version: "0.29.4"
             pyemscripten-version: "2025_0"
             emsdk-version: "4.0.9"
-            rust-toolchain: "nightly-2026-06-14"
+            rust-toolchain: "nightly-2026-06-19"
             rustflags: >-
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
@@ -32,7 +32,7 @@ jobs:
             pyodide-version: "314.0.0"
             pyemscripten-version: "2026_0"
             emsdk-version: "5.0.3"
-            rust-toolchain: "nightly-2026-06-14"
+            rust-toolchain: "nightly-2026-06-19"
             rustflags: >-
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
@@ -74,6 +74,7 @@ jobs:
             --release
             --target wasm32-unknown-emscripten
             --interpreter python${{ matrix.platform.python-version }}
+            --compatibility pypi
 
       - name: "Download pyodide"
         uses: pyodide/pyodide-actions/download-pyodide@012fa537869d343726d01863a34b773fc4d96a14 # v2

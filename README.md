@@ -49,6 +49,19 @@ pip install toml-rs
 uv pip install toml-rs
 ```
 
+<p>
+  <img
+    src="https://thesvg.org/icons/poetry/default.svg"
+    alt="Poetry"
+    height="14"
+  />
+  Using <a href="https://github.com/python-poetry/poetry">poetry</a>:
+</p>
+
+```bash
+poetry add toml-rs
+```
+
 ## Examples
 
 ```python
