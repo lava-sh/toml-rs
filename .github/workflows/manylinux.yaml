@@ -88,7 +88,6 @@ jobs:
           target: ${{ matrix.platform.target }}
           sccache: ${{ github.event_name == 'pull_request' }}
           manylinux: auto
-          container: ${{ matrix.platform.container }}
           args: >
             --release
             --out dist
