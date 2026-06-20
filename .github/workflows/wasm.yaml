@@ -74,6 +74,7 @@ jobs:
             --release
             --target wasm32-unknown-emscripten
             --interpreter python${{ matrix.platform.python-version }}
+            --compatibility pypi
 
       - name: "Download pyodide"
         uses: pyodide/pyodide-actions/download-pyodide@012fa537869d343726d01863a34b773fc4d96a14 # v2

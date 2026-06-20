@@ -67,10 +67,15 @@ jobs:
       - name: "Install rust stable + llvm-tools"
         if: matrix.platform.use-pgo == true
         id: rust-toolchain
-        uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
-        with:
-          components: llvm-tools
-          toolchain: stable
+        shell: bash
+        env:
+          RUSTUP_PERMIT_COPY_RENAME: 1
+        run: |
+          rustup toolchain install stable \
+                           --component llvm-tools \
+                           --profile minimal \
+                           --no-self-update
+          rustup default stable || true
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
