@@ -85,7 +85,6 @@ runs:
         LLVM_PROFDATA: ${{ env.LLVM_PROFDATA }}
         GITHUB_WORKSPACE: ${{ github.workspace }}
       run: |
-        : Merging profile data
         echo "🧬 Phase 3/4: Merging profile data..."
         & $env:LLVM_PROFDATA merge `
           -o "$env:GITHUB_WORKSPACE/merged.profdata" `
