@@ -2,42 +2,124 @@
 
 ## Create and activate virtual environment
 
+<p>
+  <span style="white-space: nowrap;">
+    <img
+      src="https://thesvg.org/icons/linux/default.svg"
+      alt="linux"
+      height="14"
+    />
+    Linux /
+    <picture>
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="https://thesvg.org/icons/apple/default.svg"
+      />
+      <img
+        src="https://thesvg.org/icons/apple/mono.svg"
+        alt="macos"
+        height="14"
+      />
+    </picture>
+    MacOS:
+  </span>
+</p>
+
 ```bash
-# Linux / MacOS
 python3 -m venv .venv  # or uv venv .venv --seed
 source .venv/bin/activate
 ```
 
+<p>
+  <img
+    src="https://thesvg.org/icons/windows11/default.svg"
+    alt="windows"
+    height="14"
+  />
+  Windows:
+</p>
+
 ```bash
-# Windows
 py -m venv .venv  # or uv venv .venv --seed
 .venv\scripts\activate
 ```
 
 ## Install benchmark dependencies
 
+<p>
+  <img
+    src="https://thesvg.org/icons/python/default.svg"
+    alt="Python"
+    height="14"
+  />
+  Using <a href="https://github.com/pypa/pip">pip</a>:
+</p>
+
 ```bash
-# Using pip
 pip install . --group bench
 ```
 
+<p>
+  <img
+    src="https://thesvg.org/icons/uv/default.svg"
+    alt="uv"
+    height="14"
+  />
+  Using <a href="https://github.com/astral-sh/uv">uv</a>:
+</p>
+
 ```bash
-# Using uv
 uv pip install . --group bench
 ```
 
 ## Run `benchmark/run.py`
 
 ```bash
-python benchmark/run.py                                                                                                                             
+python benchmark/run.py
 ```
 
 ## Results
 
-### loads
+Benchmarks are updated daily and stored in [this](https://github.com/lava-sh/benchmarks/tree/main/toml-rs) repository.
 
-![TOML loads benchmark](loads.svg)
+<details>
+<summary>
+<img src="https://thesvg.org/icons/linux/default.svg" height="16" />
+Linux
+</summary>
 
-### dumps
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/ubuntu-loads.svg">
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/ubuntu-dumps.svg">
 
-![TOML parser benchmark](dumps.svg)
+</details>
+
+<details>
+<summary>
+<picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="https://thesvg.org/icons/apple/default.svg"
+  />
+  <img
+    src="https://thesvg.org/icons/apple/mono.svg"
+    height="16"
+  />
+</picture>
+macOS
+</summary>
+
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-loads.svg">
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-loads.svg">
+
+</details>
+
+<details>
+<summary>
+<img src="https://thesvg.org/icons/windows/default.svg" height="16" />
+Windows
+</summary>
+
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/windows-loads.svg">
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/windows-dumps.svg">
+
+</details>
