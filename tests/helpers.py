@@ -10,7 +10,7 @@ __all__ = (
 from pathlib import Path
 from textwrap import dedent
 
-import tomli  # ty: ignore
+import tomli
 
 _init_only = {
     "eq": False,

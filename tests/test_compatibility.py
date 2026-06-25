@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 import toml_rs
-import tomli as tomllib  # ty: ignore
+import tomli as tomllib
 
 from .burntsushi import convert, normalize
 from .helpers import TOML, TOML_VERSION

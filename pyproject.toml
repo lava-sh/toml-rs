@@ -47,8 +47,8 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 
 [dependency-groups]
 typos = ["typos == 1.47.2"]
-zizmor = ["zizmor == 1.25.2"]
-rumdl = ["rumdl == 0.2.20"]
+zizmor = ["zizmor == 1.26.1"]
+rumdl = ["rumdl == 0.2.22"]
 maturin = [
     "maturin == 1.14.1 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
@@ -60,16 +60,23 @@ wasm-test = [
     "pytest-pyodide == 0.59.2",
     "pytest-httpserver == 1.1.5",
 ]
+# https://pypi.org/project/tomli/2.3.1
+# It is fully compatible with TOML v1.0.0
+tomli_1 = ["tomli == 2.3.1"]
+# https://pypi.org/project/tomli/2.4.1
+# Version 2.4.1 and later are compatible with TOML v1.1.0
+tomli_1_1 = ["tomli == 2.4.1"]
 nox = [
     { include-group = "pytest" },
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.51",
-    "ruff == 0.15.18",
+    "ty == 0.0.53",
+    "ruff == 0.15.19",
     "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
+    { include-group = "tomli_1_1" },
 ]
 dev = [
     { include-group = "ci" },
@@ -86,8 +93,8 @@ bench = [
     "rtoml",
     "tomli ; python_version < '3.11'",
     "tomli-w",
-    "polars == 1.41.2",
-    "altair == 6.2.1",
+    "polars == 1.42.0",
+    "altair == 6.2.2",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo == 9.0.0",
 ]
