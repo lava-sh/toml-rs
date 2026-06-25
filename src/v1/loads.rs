@@ -100,10 +100,8 @@ fn to_python<'py>(
 
                 Ok(py_time.into_any())
             }
-
             _ => unreachable!(),
         },
-
         DeValue::Array(array) => {
             if array.is_empty() {
                 return Ok(PyList::empty(py).into_any());
@@ -116,7 +114,6 @@ fn to_python<'py>(
             }
             Ok(py_list.into_any())
         }
-
         DeValue::Table(table) => {
             if table.is_empty() {
                 return Ok(PyDict::new(py).into_any());
