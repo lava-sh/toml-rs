@@ -60,6 +60,12 @@ wasm-test = [
     "pytest-pyodide == 0.59.2",
     "pytest-httpserver == 1.1.5",
 ]
+# https://pypi.org/project/tomli/2.3.1
+# It is fully compatible with TOML v1.0.0
+tomli_1 = ["tomli == 2.3.1"]
+# https://pypi.org/project/tomli/2.4.1
+# Version 2.4.1 and later are compatible with TOML v1.1.0
+tomli_1_1 = ["tomli == 2.4.1"]
 nox = [
     { include-group = "pytest" },
     { include-group = "tomli-w" },
@@ -70,6 +76,7 @@ ci = [
     "nox == 2026.4.10",
     { include-group = "nox" },
     { include-group = "maturin" },
+    { include-group = "tomli_1_1" },
 ]
 dev = [
     { include-group = "ci" },
