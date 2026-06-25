@@ -4,9 +4,9 @@ line-length = 90
 
 include = [
     ".github/actions/build-pgo-wheel/pgo.py",
-    "py-src/**.py",
-    "py-src/**.pyi",
-    "tests/**.py",
+    "py-src/**/*.py",
+    "py-src/**/*.pyi",
+    "tests/*.py",
     "benchmark/run.py",
     "benchmark/pgo.py",
     "noxfile.py",
