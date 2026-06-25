@@ -78,8 +78,7 @@ fn to_python<'py>(
         DeValue::Datetime(datetime) => match (datetime.date, datetime.time, datetime.offset) {
             (Some(date), Some(time), Some(offset)) => {
                 let py_tzinfo = create_timezone_from_offset(py, offset)?;
-                let tzinfo = Some(&py_tzinfo);
-                Ok(create_py_datetime_v1!(py, date, time, tzinfo)?.into_any())
+                Ok(create_py_datetime_v1!(py, date, time, Some(&py_tzinfo))?.into_any())
             }
             (Some(date), Some(time), None) => {
                 Ok(create_py_datetime_v1!(py, date, time, None)?.into_any())
