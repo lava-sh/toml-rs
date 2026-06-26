@@ -32,7 +32,7 @@ source .venv/bin/activate
 
 <p>
   <img
-    src="https://thesvg.org/icons/windows11/default.svg"
+    src="https://thesvg.org/icons/windows/default.svg"
     alt="windows"
     height="14"
   />
@@ -85,7 +85,7 @@ Benchmarks are updated daily and stored in [this](https://github.com/lava-sh/ben
 <details>
 <summary>
 <img src="https://thesvg.org/icons/linux/default.svg" height="16" />
-Linux
+Linux (click me)
 </summary>
 
 <img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/ubuntu-loads.svg">
@@ -105,7 +105,7 @@ Linux
     height="16"
   />
 </picture>
-macOS
+macOS (click me)
 </summary>
 
 <img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-loads.svg">
@@ -116,7 +116,7 @@ macOS
 <details>
 <summary>
 <img src="https://thesvg.org/icons/windows/default.svg" height="16" />
-Windows
+Windows (click me)
 </summary>
 
 <img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/windows-loads.svg">

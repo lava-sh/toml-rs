@@ -3,6 +3,7 @@ import time
 from collections.abc import Callable
 from importlib.metadata import version
 from pathlib import Path
+from pprint import pprint
 
 import altair as alt
 import cpuinfo
@@ -18,8 +19,11 @@ import tomlkit
 
 N = 500
 
-CPU = cpuinfo.get_cpu_info()["brand_raw"]
+CPU_INFO = cpuinfo.get_cpu_info()
+pprint({k: v for k, v in CPU_INFO.items() if k != "flags"})
+print()
 PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
+print(PY_VERSION)
 
 
 def get_lib_version(lib: str) -> str:
@@ -47,13 +51,10 @@ def plot_benchmark(
     }).sort("exec_time")
 
     df = df.with_columns(
-        (pl.col("exec_time") / pl.col("exec_time").min()).alias("slowdown"),
-    )
-
-    df = df.with_columns(
-        pl.Series(
-            "parser_label",
-            [f"{p}\n{get_lib_version(p.split()[0])}" for p in df["parser"]],
+        slowdown=(pl.col("exec_time") / pl.col("exec_time").min()),
+        parser_label=pl.col("parser").map_elements(
+            lambda parser: f"{parser}\n{get_lib_version(parser.split()[0])}",
+            return_dtype=pl.String,
         ),
     )
 
@@ -110,7 +111,7 @@ def plot_benchmark(
         height=600,
         title={
             "text": f"TOML parsers benchmark ({run_type})",
-            "subtitle": f"Python: {PY_VERSION} | CPU: {CPU}",
+            "subtitle": f"Python: {PY_VERSION} | CPU: {CPU_INFO['brand_raw']}",
         },
     ).save(save_path)
 
