@@ -54,7 +54,7 @@ jobs:
           fi
 
       - name: "Install dependencies"
-        run: uv pip install --group ci
+        run: uv pip install --group ci --group bench
 
       - name: "Run maturin"
         run: maturin build --out wheel --features mimalloc
