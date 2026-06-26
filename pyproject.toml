@@ -93,8 +93,7 @@ bench = [
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars == 1.42.0",
-    "altair == 6.2.2",
+    "polars[plot] == 1.42.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]

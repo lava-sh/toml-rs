@@ -45,6 +45,8 @@ ignore = [
 [lint.per-file-ignores]
 "benchmark/**.py" = [
     "INP001", # Check for packages that are missing an __init__.py file.
+    "T201",
+    "T203",
 ]
 "tests/**.py" = [
     "DOC",     # Docstring's
