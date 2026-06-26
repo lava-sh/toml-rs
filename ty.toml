@@ -8,6 +8,7 @@ include = [
     "py-src/**/*.pyi",
     "tests/*.py",
     "noxfile.py",
+    "benchmark/*.py",
 ]
 exclude = [
     "tests/test_wasm.py",
