@@ -1,5 +1,4 @@
 import platform
-import sys
 import time
 from collections.abc import Callable
 from importlib.metadata import version
@@ -13,13 +12,9 @@ import qtoml
 import rtoml
 import toml
 import toml_rs
+import tomli as tomllib
 import tomli_w
 import tomlkit
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # ty: ignore
 
 N = 500
 
@@ -62,6 +57,8 @@ def plot_benchmark(
         ),
     )
 
+    max_time = df.select(pl.max("exec_time")).item()
+
     chart = (
         alt
         .Chart(df)
@@ -80,7 +77,7 @@ def plot_benchmark(
             y=alt.Y(
                 "exec_time:Q",
                 title="Execution Time (seconds, lower=better)",
-                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.04)),
+                scale=alt.Scale(domain=(0, max_time * 1.05)),
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color("parser:N", legend=None, scale=alt.Scale(scheme="dark2")),
