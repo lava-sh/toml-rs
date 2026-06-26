@@ -3,7 +3,6 @@ import time
 from collections.abc import Callable
 from importlib.metadata import version
 from pathlib import Path
-from pprint import pprint
 
 import altair as alt
 import cpuinfo
@@ -18,12 +17,6 @@ import tomli_w
 import tomlkit
 
 N = 500
-
-CPU_INFO = cpuinfo.get_cpu_info()
-pprint({k: v for k, v in CPU_INFO.items() if k != "flags"})
-print()
-PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
-print(PY_VERSION)
 
 
 def get_lib_version(lib: str) -> str:
@@ -106,12 +99,16 @@ def plot_benchmark(
         .encode(text="label:N")
     )
 
+    cpu_info = cpuinfo.get_cpu_info()
+    cpu_brand = cpu_info.get("brand_raw", "Unknown")
+    py_version = f"{platform.python_version()} ({platform.system()} {platform.release()})"
+
     (chart + text).properties(
         width=800,
         height=600,
         title={
             "text": f"TOML parsers benchmark ({run_type})",
-            "subtitle": f"Python: {PY_VERSION} | CPU: {CPU_INFO['brand_raw']}",
+            "subtitle": f"Python: {py_version} | CPU: {cpu_brand}",
         },
     ).save(save_path)
 
