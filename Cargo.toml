@@ -13,7 +13,7 @@ crate-type = ["cdylib"]
 pyo3 = { version = "=0.29.0", features = ["num-bigint"] }
 memchr = "=2.8.2"
 rustc-hash = "=2.1.3"
-num-bigint = "=0.4.6"
+num-bigint = "=0.5.0"
 smallvec = "=2.0.0-alpha.12"
 bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
 
