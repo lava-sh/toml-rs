@@ -46,6 +46,11 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        if: matrix.platform.target == 'x86_64-pc-windows-msvc'
+        with:
+          python-version: *interpreters
+
       - name: "Install uv"
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
