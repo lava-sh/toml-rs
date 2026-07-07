@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.14"
+version = "0.3.15"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -87,14 +87,33 @@ features = [
     "unbounded",
 ]
 
+# mimalloc v3
+# See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
 [dependencies.mimalloc]
 optional = true
 version = "=0.1.52"
 features = [
-    # mimalloc v3
-    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
     "override",
     "local_dynamic_tls",
+]
+
+[target.'cfg(target_os = "macos")'.dependencies.mimalloc]
+optional = true
+version = "=0.1.52"
+# Do not enable mimalloc's "override" feature on macOS.
+#
+# It installs process-wide malloc interposition and replaces macOS malloc zone/fork
+# hooks when the extension is imported via dlopen. That breaks fork-based subprocess
+# spawning, e.g., asyncio/playwright can fail.
+features = [
+    "local_dynamic_tls",
+]
+
+[target.'cfg(target_os = "windows")'.dependencies.mimalloc]
+optional = true
+version = "=0.1.52"
+features = [
+    "win_direct_tls",
 ]
 
 [dependencies.snmalloc-rs]
