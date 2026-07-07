@@ -89,12 +89,12 @@ features = [
 
 # mimalloc v3
 # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
-[dependencies.mimalloc]
-optional = true
-version = "=0.1.52"
-features = [
-    "override",
-    "local_dynamic_tls",
+[target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies.mimalloc]  
+optional = true  
+version = "=0.1.52"  
+features = [  
+    "override",  
+    "local_dynamic_tls",  
 ]
 
 [target.'cfg(target_os = "macos")'.dependencies.mimalloc]
