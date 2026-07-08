@@ -109,7 +109,7 @@ macOS (click me)
 </summary>
 
 <img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-loads.svg">
-<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-loads.svg">
+<img src="https://github.com/lava-sh/benchmarks/blob/main/toml-rs/macos-dumps.svg">
 
 </details>
 
