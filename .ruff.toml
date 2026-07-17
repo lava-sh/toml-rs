@@ -32,6 +32,7 @@ ignore = [
     "S311",    # Force `random` -> `secrets`
     "ANN401",  # Check `typing.Any`
     "SIM105",  # Force `try-except-pass` -> `contextlib.suppress`
+    "RUF105",
     #######
     "PLR6201", # Checks for membership tests on list and tuple literals.
     "PTH207",  # Force `glob` -> `Path.glob` or `Path.rglob`
