@@ -45,7 +45,6 @@ toml_v1 = {
         "preserve_order", # save order
     ],
 }
-
 toml_parser_v1 = {
     git = "https://github.com/lava-sh/toml",
     rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",

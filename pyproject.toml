@@ -51,7 +51,7 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 [dependency-groups]
 typos = ["typos == 1.48.0"]
 zizmor = ["zizmor == 1.27.0"]
-rumdl = ["rumdl == 0.2.34"]
+rumdl = ["rumdl == 0.2.37"]
 maturin = [
     "maturin == 1.14.1 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
@@ -74,7 +74,7 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.60",
+    "ty == 0.0.61",
     "ruff == 0.15.22",
     "nox == 2026.7.11",
     { include-group = "nox" },
