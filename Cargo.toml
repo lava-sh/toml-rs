@@ -38,17 +38,16 @@ lexical-core = {
 ###########################################################
 toml_v1 = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    rev = "b955b81816bac03d4a00fc1d12616ee9ce65829e",
     features = [
         "fast_hash", # uses `foldhash`
         "unbounded", # disables default recursion limit
         "preserve_order", # save order
     ],
 }
-
 toml_parser_v1 = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    rev = "b955b81816bac03d4a00fc1d12616ee9ce65829e",
     features = [
         "std",
         "simd",
@@ -57,7 +56,7 @@ toml_parser_v1 = {
 }
 toml_edit_v1 = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    rev = "b955b81816bac03d4a00fc1d12616ee9ce65829e",
     features = [
         "serde",
         "unbounded",
