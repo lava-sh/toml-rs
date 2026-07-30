@@ -23,6 +23,8 @@ extra-standard-library = ["tomllib"]
 [lint]
 preview = true
 
+output-prefer-rule-codes = true
+
 select = ["ALL"]
 ignore = [
     "ARG",     # Unused method argument
