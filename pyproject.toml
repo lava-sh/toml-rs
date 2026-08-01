@@ -51,7 +51,7 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 [dependency-groups]
 typos = ["typos == 1.48.0"]
 zizmor = ["zizmor == 1.28.0"]
-rumdl = ["rumdl == 0.2.46"]
+rumdl = ["rumdl == 0.2.48"]
 maturin = [
     "maturin == 1.14.1 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
@@ -96,7 +96,7 @@ bench = [
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars[plot] == 1.43.1",
+    "polars[plot] == 1.43.2",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]

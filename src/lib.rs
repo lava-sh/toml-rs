@@ -4,13 +4,17 @@ mod error;
 mod v1;
 mod v1_1;
 
-#[cfg(feature = "mimalloc")]
-#[global_allocator]
-static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
-
-#[cfg(feature = "snmalloc")]
-#[global_allocator]
-static GLOBAL_ALLOCATOR: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
+cfg_select! {
+    feature = "mimalloc" => {
+        #[global_allocator]
+        static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
+    }
+    feature = "snmalloc" => {
+        #[global_allocator]
+        static GLOBAL_ALLOCATOR: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
+    }
+    _ => {}
+}
 
 #[pyo3::pymodule(name = "_toml_rs")]
 mod toml_rs {
