@@ -44,6 +44,20 @@ jobs:
               -Z link-native-libraries=no
               -C symbol-mangling-version=v0
 
+          - python-version: "3.15"
+            # pyodide:
+            # 315.0.0a1 (emscripten 6.0.5)
+            pyodide-version: "315.0.0a1"
+            pyemscripten-version: "2026_0"
+            emsdk-version: "6.0.5"
+            rust-toolchain: *rust-nightly
+            rustflags: >-
+              -C link-arg=-sSIDE_MODULE=2
+              -C link-arg=-sWASM_BIGINT
+              -C relocation-model=pic
+              -Z link-native-libraries=no
+              -C symbol-mangling-version=v0
+
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
