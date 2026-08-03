@@ -339,6 +339,7 @@ macro_rules! impl_dumps {
                     }
                     let delta = utc_offset.cast::<pyo3::types::PyDelta>().ok()?;
 
+                    #[rustfmt::skip]
                     let seconds = cfg_select! {
                         not(Py_LIMITED_API) => delta.get_days() * 86400 + delta.get_seconds(),
                         Py_LIMITED_API => {

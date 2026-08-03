@@ -62,10 +62,12 @@ macro_rules! toml_dt_v1 {
             },
             nanosecond: cfg_select! {
                 not(Py_LIMITED_API) => $py_time.get_microsecond() * 1000,
-                Py_LIMITED_API => $py_time
-                    .getattr(pyo3::intern!($py_time.py(), "microsecond"))?
-                    .extract::<u32>()?
-                    * 1000,
+                Py_LIMITED_API => {
+                    $py_time
+                        .getattr(pyo3::intern!($py_time.py(), "microsecond"))?
+                        .extract::<u32>()?
+                        * 1000
+                }
             },
         }
     };
