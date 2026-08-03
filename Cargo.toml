@@ -11,7 +11,7 @@ name = "_toml_rs"
 crate-type = ["cdylib"]
 
 [build-dependencies]
-pyo3-build-config = "=0.29.0"
+pyo3-build-config = "=0.29.1"
 
 [dependencies]
 pyo3 = {
