@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.13"
+version = "0.3.16"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -14,91 +14,114 @@ crate-type = ["cdylib"]
 pyo3-build-config = "=0.29.0"
 
 [dependencies]
-pyo3 = { version = "=0.29.0", features = ["num-bigint"] }
-memchr = "=2.8.2"
-rustc-hash = "=2.1.2"
-num-bigint = "=0.4.6"
+pyo3 = {
+    version = "=0.29.1",
+    features = ["num-bigint"],
+}
+num-bigint = "=0.4.8"
+memchr = "=2.8.3"
+rustc-hash = "=2.1.3"
 smallvec = "=2.0.0-alpha.12"
-bytecount = { version = "=0.6.9", features = ["runtime-dispatch-simd"] }
-
-[dependencies.lexical-core]
-git = "https://github.com/Alexhuszagh/rust-lexical"
-rev = "afb2efa651f42f63415a3bf3d51ced6143132b2b"
-default-features = false
-features = [
-    "radix",
-    "parse-floats",
-    "parse-integers",
-]
-
+bytecount = {
+    version = "=0.6.9",
+    features = ["runtime-dispatch-simd"],
+}
+lexical-core = {
+    git = "https://github.com/Alexhuszagh/rust-lexical",
+    rev = "afb2efa651f42f63415a3bf3d51ced6143132b2b",
+    default-features = false,
+    features = [
+        "radix",
+        "parse-floats",
+        "parse-integers",
+    ],
+}
 ###########################################################
 #                   TOML v1.0.0 support                   #
 # https://github.com/lava-sh/toml/tree/for_python_toml_rs #
 ###########################################################
-[dependencies.toml_v1]
-git = "https://github.com/lava-sh/toml"
-rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3"
-features = [
-    "fast_hash", # uses `foldhash`
-    "unbounded", # disables default recursion limit
-    "preserve_order", # save order
-]
-
-[dependencies.toml_parser_v1]
-git = "https://github.com/lava-sh/toml"
-rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3"
-features = [
-    "std",
-    "simd",
-    "unsafe",
-]
-
-[dependencies.toml_edit_v1]
-git = "https://github.com/lava-sh/toml"
-rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3"
-features = [
-    "serde",
-    "unbounded",
-]
-
+toml_v1 = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    features = [
+        "fast_hash", # uses `foldhash`
+        "unbounded", # disables default recursion limit
+        "preserve_order", # save order
+    ],
+}
+toml_parser_v1 = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    features = [
+        "std",
+        "simd",
+        "unsafe",
+    ],
+}
+toml_edit_v1 = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b1581597f0fc10c0cc61faa03a3668b8f49e23f3",
+    features = [
+        "serde",
+        "unbounded",
+    ],
+}
 ##############################################################
 #                    TOML v1.1.0 support                     #
 # https://github.com/lava-sh/toml/tree/python_toml_rs_v1.1.0 #
 ##############################################################
-[dependencies.toml]
-git = "https://github.com/lava-sh/toml"
-rev = "b249d89fa447802bdde710943de1c4ce062b4181"
-features = [
-    "fast_hash", # uses `foldhash`
-    "unbounded", # disables default recursion limit
-    "preserve_order", # save order
-]
-
-[dependencies.toml_parser]
-git = "https://github.com/lava-sh/toml"
-rev = "b249d89fa447802bdde710943de1c4ce062b4181"
-features = [
-    "std",
-    "simd",
-    "unsafe",
-]
-
-[dependencies.toml_edit]
-git = "https://github.com/lava-sh/toml"
-rev = "b249d89fa447802bdde710943de1c4ce062b4181"
-features = [
-    "serde",
-    "unbounded",
-]
-
-[dependencies.mimalloc]
+toml = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    features = [
+        "fast_hash", # uses `foldhash`
+        "unbounded", # disables default recursion limit
+        "preserve_order", # save order
+    ]
+}
+toml_parser = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    features = [
+        "std",
+        "simd",
+        "unsafe",
+    ]
+}
+toml_edit = {
+    git = "https://github.com/lava-sh/toml",
+    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    features = [
+        "serde",
+        "unbounded",
+    ]
+}
+# mimalloc v3
+[target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies.mimalloc]
 optional = true
 version = "=0.1.52"
 features = [
-    # mimalloc v3
-    # See: https://github.com/microsoft/mimalloc/tree/dev3?tab=readme-ov-file#branches
     "override",
     "local_dynamic_tls",
+]
+
+[target.'cfg(target_os = "macos")'.dependencies.mimalloc]
+optional = true
+version = "=0.1.52"
+# Do not enable mimalloc's "override" feature on macOS.
+#
+# It installs process-wide malloc interposition and replaces macOS malloc zone/fork
+# hooks when the extension is imported via dlopen. That breaks fork-based subprocess
+# spawning, e.g., asyncio/playwright can fail.
+features = [
+    "local_dynamic_tls",
+]
+
+[target.'cfg(target_os = "windows")'.dependencies.mimalloc]
+optional = true
+version = "=0.1.52"
+features = [
+    "win_direct_tls",
 ]
 
 [dependencies.snmalloc-rs]
@@ -129,10 +152,10 @@ codegen-units = 1
 warnings = "deny"
 
 [lints.clippy]
-perf = { level = "deny", priority = 1 }
-style = { level = "deny", priority = -1 }
-pedantic = { level = "deny", priority = -1 }
-nursery = { level = "deny", priority = -1 }
+perf       = { level = "deny", priority = 1 }
+style      = { level = "deny", priority = -1 }
+pedantic   = { level = "deny", priority = -1 }
+nursery    = { level = "deny", priority = -1 }
 complexity = { level = "deny", priority = -1 }
 suspicious = { level = "deny", priority = -1 }
 

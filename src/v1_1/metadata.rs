@@ -16,19 +16,16 @@ use toml::{
 };
 
 use crate::{
-    core::{
-        loads::create_timezone_from_offset,
-        metadata::{
-            DocIndex, KeyLoc, NodeKind, ValueLoc, array_has_value_metadata, build_dict,
-            classify_array_item_table_kind, classify_keyed_array_kind, classify_keyed_table_kind,
-            empty_value_loc, raw_slice, set_key_fields, set_value_metadata_fields,
-            table_needs_wrapper,
-        },
+    core::metadata::{
+        DocIndex, KeyLoc, NodeKind, ValueLoc, array_has_value_metadata, build_dict,
+        classify_array_item_table_kind, classify_keyed_array_kind, classify_keyed_table_kind,
+        empty_value_loc, raw_slice, set_key_fields, set_value_metadata_fields, table_needs_wrapper,
     },
     create_py_datetime,
     error::TomlError,
     parse_int,
     toml_rs::TOMLDecodeError,
+    v1_1::loads::create_timezone_from_offset,
 };
 
 fn make_key_loc(idx: &DocIndex<'_>, doc: &str, key: &Spanned<DeString<'_>>) -> KeyLoc {
@@ -70,13 +67,17 @@ fn scalar_to_py_obj<'py>(
         DeValue::Integer(int) => {
             let bytes = int.as_str().as_bytes();
             let radix = int.radix();
-            let options = ParseIntegerOptions::new();
-            if let Ok(i_64) = parse_int!(i64, bytes, &options, radix) {
-                return i_64.into_py_any(py);
+
+            let parse_options = ParseIntegerOptions::new();
+
+            if let Ok(int_64) = parse_int!(i64, bytes, &parse_options, radix) {
+                return int_64.into_py_any(py);
             }
+
             if let Some(big_int) = BigInt::parse_bytes(bytes, radix) {
                 return big_int.into_py_any(py);
             }
+
             let error_start = raw_span.start;
             let mut err = TomlError::custom(
                 format!(
@@ -93,8 +94,8 @@ fn scalar_to_py_obj<'py>(
             )))
         }
         DeValue::Float(float) => {
-            let bytes = float.as_str().as_bytes();
-            let parsed: f64 = lexical_core::parse(bytes).map_err(|err| {
+            let float_bytes = float.as_str().as_bytes();
+            let parsed: f64 = lexical_core::parse(float_bytes).map_err(|err| {
                 TOMLDecodeError::new_err((
                     format!("invalid float '{}': {err}", float.as_str()),
                     doc.to_string(),
@@ -250,20 +251,21 @@ pub fn extract_metadata<'py>(
 
 pub fn to_python<'py>(
     py: Python<'py>,
-    value: &DeValue<'_>,
+    de_value: &DeValue<'_>,
     span: Range<usize>,
     doc: &str,
 ) -> PyResult<Bound<'py, PyAny>> {
-    match value {
+    match de_value {
         DeValue::String(str) => str.into_bound_py_any(py),
         DeValue::Boolean(bool) => bool.into_bound_py_any(py),
         DeValue::Integer(int) => {
             let bytes = int.as_str().as_bytes();
             let radix = int.radix();
-            let options = ParseIntegerOptions::new();
 
-            if let Ok(i_64) = parse_int!(i64, bytes, &options, radix) {
-                return i_64.into_bound_py_any(py);
+            let parse_options = ParseIntegerOptions::new();
+
+            if let Ok(int_64) = parse_int!(i64, bytes, &parse_options, radix) {
+                return int_64.into_bound_py_any(py);
             }
 
             if let Some(big_int) = BigInt::parse_bytes(bytes, radix) {
@@ -287,8 +289,8 @@ pub fn to_python<'py>(
             )))
         }
         DeValue::Float(float) => {
-            let bytes = float.as_str().as_bytes();
-            let parsed: f64 = lexical_core::parse(bytes).map_err(|err| {
+            let float_bytes = float.as_str().as_bytes();
+            let parsed: f64 = lexical_core::parse(float_bytes).map_err(|err| {
                 TOMLDecodeError::new_err((
                     format!("invalid float '{}': {err}", float.as_str()),
                     doc.to_string(),
@@ -321,6 +323,10 @@ pub fn to_python<'py>(
             _ => unreachable!(),
         },
         DeValue::Array(array) => {
+            if array.is_empty() {
+                return Ok(PyList::empty(py).into_any());
+            }
+
             let py_list = PyList::empty(py);
             for item in array {
                 py_list.append(to_python(py, item.get_ref(), item.span(), doc)?)?;
@@ -328,10 +334,16 @@ pub fn to_python<'py>(
             Ok(py_list.into_any())
         }
         DeValue::Table(table) => {
+            if table.is_empty() {
+                return Ok(PyDict::new(py).into_any());
+            }
+
             let py_dict = PyDict::new(py);
-            for (k, v) in table {
-                let val = to_python(py, v.get_ref(), v.span(), doc)?;
-                py_dict.set_item(k.get_ref().as_ref(), val)?;
+            for (key, value) in table {
+                py_dict.set_item(
+                    key.as_ref(),
+                    to_python(py, value.get_ref(), value.span(), doc)?,
+                )?;
             }
             Ok(py_dict.into_any())
         }

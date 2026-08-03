@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.14.0"]
+requires = ["maturin == 1.14.1"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -18,8 +18,11 @@ authors = [
     { name = "chirizxc", email = "chirizxc@proton.me" }
 ]
 keywords = [
-    "toml",
-    "parser",
+    "TOML",
+    "TOML 1.0",
+    "TOML 1.1",
+    "TOML parser",
+    "TOML dumper",
 ]
 classifiers = [
     "Typing :: Typed",
@@ -46,27 +49,37 @@ Repository = "https://github.com/lava-sh/toml-rs"
 Issues = "https://github.com/lava-sh/toml-rs/issues"
 
 [dependency-groups]
-typos = ["typos == 1.47.2"]
-zizmor = ["zizmor == 1.25.2"]
-rumdl = ["rumdl == 0.2.17"]
-maturin = ["maturin == 1.14.0"]
-pytest = ["pytest == 9.1.0"]
+typos = ["typos == 1.48.0"]
+zizmor = ["zizmor == 1.29.0"]
+rumdl = ["rumdl == 0.2.49"]
+maturin = [
+    "maturin == 1.14.1 ; sys_platform != 'linux'",
+    "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
+]
+pytest = ["pytest == 9.1.1"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
     { include-group = "pytest" },
     "pytest-pyodide == 0.59.2",
     "pytest-httpserver == 1.1.5",
 ]
+# https://pypi.org/project/tomli/2.3.1
+# It is fully compatible with TOML v1.0.0
+tomli-1 = ["tomli == 2.4.1"]
+# https://pypi.org/project/tomli/2.4.1
+# Version 2.4.1 and later are compatible with TOML v1.1.0
+tomli-1-1 = ["tomli == 2.4.1"]
 nox = [
     { include-group = "pytest" },
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.49",
-    "ruff == 0.15.17",
-    "nox == 2026.4.10",
+    "ty == 0.0.65",
+    "ruff == 0.16.1",
+    "nox == 2026.7.11",
     { include-group = "nox" },
     { include-group = "maturin" },
+    { include-group = "tomli-1-1" },
 ]
 dev = [
     { include-group = "ci" },
@@ -81,13 +94,17 @@ bench = [
     "tomlkit",
     "qtoml",
     "rtoml",
-    "tomli ; python_version < '3.11'",
+    { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars == 1.41.2",
-    "altair == 6.2.1",
+    "polars[plot] == 1.43.2",
     "vl-convert-python == 1.9.0.post1",
-    "py-cpuinfo == 9.0.0",
+    "py-cpuinfo2 == 10.1.1",
 ]
 
-[tool.uv.dependency-groups]
-wasm-test = { requires-python = ">= 3.13" }
+[tool.uv]
+conflicts = [[
+    { group = "tomli-1" },
+    { group = "tomli-1-1" },
+]]
+dependency-groups.wasm-test = { requires-python = ">= 3.13" }
+

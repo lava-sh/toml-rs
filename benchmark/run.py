@@ -1,5 +1,4 @@
 import platform
-import sys
 import time
 from collections.abc import Callable
 from importlib.metadata import version
@@ -13,18 +12,11 @@ import qtoml
 import rtoml
 import toml
 import toml_rs
+import tomli as tomllib
 import tomli_w
 import tomlkit
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # ty: ignore
-
 N = 500
-
-CPU = cpuinfo.get_cpu_info()["brand_raw"]
-PY_VERSION = f"{platform.python_version()} ({platform.system()} {platform.release()})"
 
 
 def get_lib_version(lib: str) -> str:
@@ -52,15 +44,14 @@ def plot_benchmark(
     }).sort("exec_time")
 
     df = df.with_columns(
-        (pl.col("exec_time") / pl.col("exec_time").min()).alias("slowdown"),
-    )
-
-    df = df.with_columns(
-        pl.Series(
-            "parser_label",
-            [f"{p}\n{get_lib_version(p.split()[0])}" for p in df["parser"]],
+        slowdown=(pl.col("exec_time") / pl.col("exec_time").min()),
+        parser_label=pl.col("parser").map_elements(
+            lambda parser: f"{parser}\n{get_lib_version(parser.split()[0])}",
+            return_dtype=pl.String,
         ),
     )
+
+    max_time = df.select(pl.max("exec_time")).item()
 
     chart = (
         alt
@@ -80,7 +71,7 @@ def plot_benchmark(
             y=alt.Y(
                 "exec_time:Q",
                 title="Execution Time (seconds, lower=better)",
-                scale=alt.Scale(domain=(0, df["exec_time"].max() * 1.04)),
+                scale=alt.Scale(domain=(0, max_time * 1.05)),
                 axis=alt.Axis(grid=False),
             ),
             color=alt.Color("parser:N", legend=None, scale=alt.Scale(scheme="dark2")),
@@ -108,12 +99,16 @@ def plot_benchmark(
         .encode(text="label:N")
     )
 
+    cpu_info = cpuinfo.get_cpu_info()
+    cpu_brand = cpu_info.get("brand_raw", "Unknown")
+    py_version = f"{platform.python_version()} ({platform.system()} {platform.release()})"
+
     (chart + text).properties(
         width=800,
         height=600,
         title={
             "text": f"TOML parsers benchmark ({run_type})",
-            "subtitle": f"Python: {PY_VERSION} | CPU: {CPU}",
+            "subtitle": f"Python: {py_version} | CPU: {cpu_brand}",
         },
     ).save(save_path)
 

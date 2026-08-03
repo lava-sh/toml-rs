@@ -2,11 +2,15 @@ target-version = "py310"
 
 line-length = 90
 
+output-prefer-rule-codes = true
+
 include = [
-    "py-src/**.py",
-    "py-src/**.pyi",
-    "tests/**.py",
-    "benchmark/**.py",
+    ".github/actions/build-pgo-wheel/pgo.py",
+    "py-src/**/*.py",
+    "py-src/**/*.pyi",
+    "tests/*.py",
+    "benchmark/run.py",
+    "benchmark/pgo.py",
     "noxfile.py",
     "pyproject.toml",
     "README.md",
@@ -30,6 +34,7 @@ ignore = [
     "S311",    # Force `random` -> `secrets`
     "ANN401",  # Check `typing.Any`
     "SIM105",  # Force `try-except-pass` -> `contextlib.suppress`
+    "RUF105",  # Force `noqa: ...` -> `ruff: ignore[...]`
     #######
     "PLR6201", # Checks for membership tests on list and tuple literals.
     "PTH207",  # Force `glob` -> `Path.glob` or `Path.rglob`
@@ -43,12 +48,20 @@ ignore = [
 [lint.per-file-ignores]
 "benchmark/**.py" = [
     "INP001", # Check for packages that are missing an __init__.py file.
+    "T201",
+    "T203",
 ]
 "tests/**.py" = [
     "DOC",     # Docstring's
     ########
     "S101",    # Check for uses of the assert keyword.
     "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
+]
+".github/actions/build-pgo-wheel/**.py" = [
+    "S404",
+    "S603",
+    "S607",
+    "INP001",
 ]
 
 [lint.mccabe]
