@@ -339,22 +339,22 @@ macro_rules! impl_dumps {
                     }
                     let delta = utc_offset.cast::<pyo3::types::PyDelta>().ok()?;
 
-                    #[cfg(not(Py_LIMITED_API))]
-                    let seconds = delta.get_days() * 86400 + delta.get_seconds();
-
-                    #[cfg(Py_LIMITED_API)]
-                    let seconds = {
-                        let days = delta
-                            .getattr(pyo3::intern!(delta.py(), "days"))
-                            .ok()?
-                            .extract::<i32>()
-                            .ok()?;
-                        let secs = delta
-                            .getattr(pyo3::intern!(delta.py(), "seconds"))
-                            .ok()?
-                            .extract::<i32>()
-                            .ok()?;
-                        days * 86400 + secs
+                    let seconds = cfg_select! {
+                        not(Py_LIMITED_API) => delta.get_days() * 86400 + delta.get_seconds(),
+                        Py_LIMITED_API => (
+                            // days * 86400 + seconds
+                            delta
+                                .getattr(pyo3::intern!(delta.py(), "days"))
+                                .ok()?
+                                .extract::<i32>()
+                                .ok()? * 86400
+                        ) + (
+                            delta
+                                .getattr(pyo3::intern!(delta.py(), "seconds"))
+                                .ok()?
+                                .extract::<i32>()
+                                .ok()?
+                        ),
                     };
 
                     Some(Offset::Custom {
