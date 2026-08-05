@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 * Bump
 
-## [0.3.16] - 07.07.2026
+## [0.3.16] - 2026-07-07
 
 ### Bug Fixes
 
