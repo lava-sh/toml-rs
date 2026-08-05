@@ -77,7 +77,7 @@ def test_invalid_tomls(invalid: Path, toml_version: toml_rs._lib.TomlVersion) ->
         # Some BurntSushi tests are not valid UTF-8. Skip those.
         pytest.skip(f"Invalid UTF-8: {invalid}")
     with pytest.raises(toml_rs.TOMLDecodeError):
-        toml_rs.loads(toml_str)
+        toml_rs.loads(toml_str, toml_version=toml_version)
 
 
 @pytest.mark.parametrize(
