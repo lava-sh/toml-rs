@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ### Bug Fixes
 
-- Fix inccorect benchmark `.svg` link (by [@chirizxc][gh-chirizxc])
+- Fix incorrect benchmark `.svg` link (by [@chirizxc][gh-chirizxc])
 
 ### Internal
 
@@ -51,4 +51,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 [Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.3.16...HEAD
 
 
+[0.4.0]: https://github.com/lava-sh/toml-rs/compare/0.3.16...0.4.0
 [0.3.16]: https://github.com/lava-sh/toml-rs/compare/0.3.15...0.3.16
