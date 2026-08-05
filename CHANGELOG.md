@@ -9,7 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 ### Breaking Changes
 
 - Change default [TOML][site-toml] version from `1.0.0` to `1.1.0`. Functions that do not explicitly specify
-  `toml_version` now parse and emit [TOML][site-toml] `1.1.0` by default.
+  `toml_version` now parse and emit [TOML][site-toml] `1.1.0` by default
+
+- Drop support for Python 3.10 ([#245][gh-pull-245] by [@chirizxc][gh-chirizxc])
 
 ### Bug Fixes
 
@@ -35,6 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 [gh-issue-229]: https://github.com/lava-sh/toml-rs/issues/229
 
 [gh-pull-231]: https://github.com/lava-sh/toml-rs/pull/231
+[gh-pull-245]: https://github.com/lava-sh/toml-rs/pull/245
 
 [gh-chirizxc]: https://github.com/chirizxc
 [gh-mermyly]: https://github.com/mermyly
