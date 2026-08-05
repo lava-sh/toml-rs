@@ -12,7 +12,7 @@ from ._toml_rs import (
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]
 
-DEFAULT_TOML_VERSION: TomlVersion = "1.0.0"
+DEFAULT_TOML_VERSION: TomlVersion = "1.1.0"
 
 
 def load(
