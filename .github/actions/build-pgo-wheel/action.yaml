@@ -88,7 +88,7 @@ runs:
           -o "$env:GITHUB_WORKSPACE/merged.profdata" `
           "$env:GITHUB_WORKSPACE/profdata"
 
-    - name: "uilding PGO-optimized wheel"
+    - name: "Building PGO-optimized wheel"
       shell: bash
       run: |
         echo "⚡ Phase 4/4: Building PGO-optimized wheel..."
@@ -109,7 +109,8 @@ runs:
       env:
         RUSTFLAGS: "-Cprofile-use=${{ github.workspace }}/merged.profdata"
 
-    - id: find_wheel
+    - name: "Found wheels"
+      id: find_wheel
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       run: |
