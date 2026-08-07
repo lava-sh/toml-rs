@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.0] - xx.10.2026
+
 ### Breaking Changes
 
 - Change default [TOML][site-toml] version from `1.0.0` to `1.1.0`. Functions that do not explicitly specify
@@ -48,7 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 [site-toml]: https://toml.io/en
 
-[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.3.16...HEAD
+[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.0...HEAD
 
 
 [0.4.0]: https://github.com/lava-sh/toml-rs/compare/0.3.16...0.4.0
