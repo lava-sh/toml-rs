@@ -37,7 +37,6 @@ runs:
     - name: "Prepare profiling directory"
       shell: bash
       run: |
-        : Creating profiling directory
         echo "📁 Creating profiling directory"
         mkdir -p ${{ github.workspace }}/profdata
 
@@ -45,10 +44,10 @@ runs:
       uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
       with:
         enable-cache: ${{ github.event_name == 'pull_request' }}
-
-    - shell: bash
+      
+    - name: "Building instrumented wheel"
+      shell: bash
       run: |
-        : Building instrumented wheel
         echo "📊 Phase 1/4: Building instrumented wheel..."
 
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
@@ -67,7 +66,7 @@ runs:
       env:
         RUSTFLAGS: "-Cprofile-generate=${{ github.workspace }}/profdata"
 
-    - name: "Generate pgo data"
+    - name: "Generate PGO data"
       working-directory: ${{ inputs.working-directory }}
       env:
         INPUTS_TARGET: ${{ inputs.target }}
@@ -75,11 +74,10 @@ runs:
         INPUTS_WORKING_DIRECTORY: ${{ inputs.working-directory }}
       shell: bash
       run: |
-        : Generate PGO data
         echo "🔬 Phase 2/4: Generate PGO data..."
         python "$GITHUB_ACTION_PATH/pgo.py"
 
-    - name: "Merge pgo data"
+    - name: "Merge PGO data"
       shell: pwsh
       env:
         LLVM_PROFDATA: ${{ env.LLVM_PROFDATA }}
@@ -90,9 +88,9 @@ runs:
           -o "$env:GITHUB_WORKSPACE/merged.profdata" `
           "$env:GITHUB_WORKSPACE/profdata"
 
-    - shell: bash
+    - name: "uilding PGO-optimized wheel"
+      shell: bash
       run: |
-        : Building PGO-optimized wheel
         echo "⚡ Phase 4/4: Building PGO-optimized wheel..."
 
     - uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
