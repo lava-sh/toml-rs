@@ -8,11 +8,7 @@ on:
       - main
     tags:
       - "*"
-    paths-ignore:
-      - "benchmark/**"
   pull_request:
-    paths-ignore:
-      - "benchmark/**"
   workflow_dispatch:
 
 concurrency:
