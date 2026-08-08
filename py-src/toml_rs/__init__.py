@@ -20,6 +20,4 @@ from ._lib import (
     load_with_metadata,
     loads,
 )
-from ._toml_rs import (
-    _VERSION as __version__,  # noqa: N811
-)
+from ._toml_rs import _VERSION as __version__  # noqa: N811
