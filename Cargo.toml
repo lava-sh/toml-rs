@@ -146,9 +146,7 @@ mimalloc = {
     # mimalloc v3
     optional = true,
     version = "=0.1.52",
-    features = [
-        "win_direct_tls",
-    ]
+    features = [],
 }
 snmalloc-rs = {
     optional = true,
