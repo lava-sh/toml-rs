@@ -14,6 +14,8 @@ invalid/array/no-close-07.toml
 invalid/array/no-close-08.toml
 invalid/array/no-close-table-01.toml
 invalid/array/no-close-table-02.toml
+invalid/array/no-close-table-03.toml
+invalid/array/no-close-table-04.toml
 invalid/array/no-comma-01.toml
 invalid/array/no-comma-02.toml
 invalid/array/no-comma-03.toml
@@ -49,6 +51,10 @@ invalid/control/comment-ff.toml
 invalid/control/comment-lf.toml
 invalid/control/comment-null.toml
 invalid/control/comment-us.toml
+invalid/control/linetab-number-01.toml
+invalid/control/linetab-number-02.toml
+invalid/control/linetab-number-03.toml
+invalid/control/linetab-number-04.toml
 invalid/control/multi-del.toml
 invalid/control/multi-lf.toml
 invalid/control/multi-null.toml
@@ -75,6 +81,8 @@ invalid/datetime/day-zero.toml
 invalid/datetime/feb-29.toml
 invalid/datetime/feb-30.toml
 invalid/datetime/hour-over.toml
+invalid/datetime/leading-zero-date.toml
+invalid/datetime/leading-zero-datetime.toml
 invalid/datetime/mday-over.toml
 invalid/datetime/mday-under.toml
 invalid/datetime/minute-over.toml
@@ -105,7 +113,8 @@ invalid/datetime/second-trailing-dot.toml
 invalid/datetime/second-trailing-dotz.toml
 invalid/datetime/time-no-leads.toml
 invalid/datetime/trailing-x.toml
-invalid/datetime/y10k.toml
+invalid/datetime/y10k-date.toml
+invalid/datetime/y10k-datetime.toml
 invalid/encoding/bad-codepoint.toml
 invalid/encoding/bad-utf8-at-end.toml
 invalid/encoding/bad-utf8-in-array.toml
@@ -116,10 +125,15 @@ invalid/encoding/bad-utf8-in-string.toml
 invalid/encoding/bad-utf8-in-string-literal.toml
 invalid/encoding/bom-not-at-start-01.toml
 invalid/encoding/bom-not-at-start-02.toml
+invalid/encoding/bom-not-at-start-03.toml
 invalid/encoding/ideographic-space.toml
 invalid/encoding/utf16-bom.toml
 invalid/encoding/utf16-comment.toml
 invalid/encoding/utf16-key.toml
+invalid/float/arabic-zero-01.toml
+invalid/float/arabic-zero-02.toml
+invalid/float/arabic-zero-03.toml
+invalid/float/arabic-zero-04.toml
 invalid/float/double-dot-01.toml
 invalid/float/double-dot-02.toml
 invalid/float/exp-dot-01.toml
@@ -191,6 +205,10 @@ invalid/inline-table/overwrite-08.toml
 invalid/inline-table/overwrite-09.toml
 invalid/inline-table/overwrite-10.toml
 invalid/inline-table/trailing-comma.toml
+invalid/integer/arabic-zero-01.toml
+invalid/integer/arabic-zero-02.toml
+invalid/integer/arabic-zero-03.toml
+invalid/integer/arabic-zero-04.toml
 invalid/integer/capital-bin.toml
 invalid/integer/capital-hex.toml
 invalid/integer/capital-oct.toml
@@ -277,9 +295,12 @@ invalid/key/quoted-unclosed-01.toml
 invalid/key/quoted-unclosed-02.toml
 invalid/key/single-open-bracket.toml
 invalid/key/space.toml
+invalid/key/space-quoted.toml
 invalid/key/special-character.toml
 invalid/key/start-bracket.toml
 invalid/key/start-dot.toml
+invalid/key/tab.toml
+invalid/key/tab-quoted.toml
 invalid/key/two-equals-01.toml
 invalid/key/two-equals-02.toml
 invalid/key/two-equals-03.toml
@@ -417,6 +438,7 @@ invalid/table/append-with-dotted-keys-04.toml
 invalid/table/append-with-dotted-keys-05.toml
 invalid/table/append-with-dotted-keys-06.toml
 invalid/table/append-with-dotted-keys-07.toml
+invalid/table/append-with-dotted-keys-08.toml
 invalid/table/array-empty.toml
 invalid/table/array-implicit.toml
 invalid/table/array-no-close-01.toml
@@ -437,6 +459,10 @@ invalid/table/duplicate-key-07.toml
 invalid/table/duplicate-key-08.toml
 invalid/table/duplicate-key-09.toml
 invalid/table/duplicate-key-10.toml
+invalid/table/duplicate-key-11.toml
+invalid/table/duplicate-key-12.toml
+invalid/table/duplicate-key-13.toml
+invalid/table/duplicate-key-14.toml
 invalid/table/empty.toml
 invalid/table/empty-implicit-table.toml
 invalid/table/equals-sign.toml
@@ -561,6 +587,8 @@ valid/example.json
 valid/example.toml
 valid/float/exponent.json
 valid/float/exponent.toml
+valid/float/exponent-upper.json
+valid/float/exponent-upper.toml
 valid/float/float.json
 valid/float/float.toml
 valid/float/inf-and-nan.json
@@ -645,6 +673,8 @@ valid/key/empty-02.json
 valid/key/empty-02.toml
 valid/key/empty-03.json
 valid/key/empty-03.toml
+valid/key/empty-04.json
+valid/key/empty-04.toml
 valid/key/equals-nospace.json
 valid/key/equals-nospace.toml
 valid/key/escapes.json
@@ -863,8 +893,10 @@ valid/table/names.json
 valid/table/names.toml
 valid/table/names-with-values.json
 valid/table/names-with-values.toml
-valid/table/no-eol.json
-valid/table/no-eol.toml
+valid/table/no-eol-01.json
+valid/table/no-eol-01.toml
+valid/table/no-eol-02.json
+valid/table/no-eol-02.toml
 valid/table/sub.json
 valid/table/sub.toml
 valid/table/sub-empty.json
@@ -881,3 +913,7 @@ valid/table/without-super.json
 valid/table/without-super.toml
 valid/table/without-super-with-values.json
 valid/table/without-super-with-values.toml
+valid/utf8-bom-01.json
+valid/utf8-bom-01.toml
+valid/utf8-bom-02.json
+valid/utf8-bom-02.toml

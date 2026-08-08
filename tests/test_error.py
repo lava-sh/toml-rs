@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MIT
 # SPDX-FileCopyrightText: 2021 Taneli Hukkinen
 # Licensed to PSF under a Contributor Agreement.
+#
+# SPDX-License-Identifier: Unlicense
+# SPDX-FileCopyrightText: 2026 chirizxc
 from typing import Any
 
 import pytest
