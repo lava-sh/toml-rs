@@ -81,6 +81,7 @@ ci = [
     { include-group = "tomli-1-1" },
 ]
 dev = [
+    "rust-just == 1.58.0",
     { include-group = "ci" },
     { include-group = "nox" },
     { include-group = "typos" },
