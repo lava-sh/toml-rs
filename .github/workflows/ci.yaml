@@ -56,6 +56,8 @@ jobs:
       - run: cargo clippy --all-targets
 
   tools:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
 
@@ -93,6 +95,8 @@ jobs:
         run: ${{ matrix.command }}
 
   tests-alpine:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+
     name: "tests / alpine / python 3.14"
     runs-on: ubuntu-latest
     timeout-minutes: 10
