@@ -15,6 +15,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
+env:
+  FORCE_COLOR: "1"
+  CARGO_TERM_COLOR: always
+
 jobs:
   cargo-fmt:
     name: "cargo fmt"
