@@ -19,57 +19,111 @@ jobs:
         #
         # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
         platform:
+          # AMD64
           - {
-            # AMD64
             runner: ubuntu-latest,
             target: x86_64-unknown-linux-gnu,
+            manylinux: "2_24",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
-            # x86 (32-bit)
+            runner: ubuntu-latest,
+            target: x86_64-unknown-linux-gnu,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc",
+          }
+          # x86 (32-bit)
+          - {
             runner: ubuntu-latest,
             target: i686-unknown-linux-gnu,
+            manylinux: "2_24",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
           }
           - {
-            # ARM64
+            runner: ubuntu-latest,
+            target: i686-unknown-linux-gnu,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc",
+          }
+          # ARM64
+          - {
             runner: ubuntu-26.04-arm,
             target: aarch64-unknown-linux-gnu,
+            manylinux: "2014",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
-            # ARMv7 (32-bit)
+            runner: ubuntu-26.04-arm,
+            target: aarch64-unknown-linux-gnu,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc",
+          }
+          # ARMv7 (32-bit)
+          - {
             runner: ubuntu-latest,
             target: armv7-unknown-linux-gnueabihf,
+            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            # IBM System z (s390x)
+            runner: ubuntu-latest,
+            target: armv7-unknown-linux-gnueabihf,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+          }
+          # IBM System z (s390x)
+          - {
             runner: ubuntu-latest,
             target: s390x-unknown-linux-gnu,
+            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            # PowerPC64 Little Endian
+            runner: ubuntu-latest,
+            target: s390x-unknown-linux-gnu,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+          }
+          # PowerPC64 Little Endian
+          - {
             runner: ubuntu-latest,
             target: powerpc64le-unknown-linux-gnu,
+            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            # PowerPC64 Big Endian
+            runner: ubuntu-latest,
+            target: powerpc64le-unknown-linux-gnu,
+            manylinux: "2_28",
+            interpreter: *interpreters,
+          }
+          # PowerPC64 Big Endian
+          - {
             runner: ubuntu-latest,
             target: powerpc64-unknown-linux-gnu,
+            manylinux: "auto",
             interpreter: *interpreters,
           }
+          # RISC-V 64-bit
           - {
-            # RISC-V 64-bit
             runner: ubuntu-latest,
             target: riscv64gc-unknown-linux-gnu,
+            manylinux: "2_31",
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc",
+          }
+          - {
+            runner: ubuntu-latest,
+            target: riscv64gc-unknown-linux-gnu,
+            manylinux: "2_39",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
           }
@@ -90,7 +144,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           sccache: *is_pull_request
-          manylinux: auto
+          manylinux: ${{ matrix.platform.manylinux }}
           args: >-
             --release
             --out dist

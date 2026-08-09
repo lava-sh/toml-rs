@@ -5,7 +5,8 @@ on:
 
 env:
   (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
-  ○_○: &rust-nightly "nightly-2026-07-31"
+  #
+  ○_○: &rust-nightly "nightly-2026-08-09"
 
 jobs:
   wasm:

@@ -51,6 +51,13 @@ jobs:
             maturin-build-args: "--features mimalloc"
           }
           - {
+            # ARMv7 (32-bit)
+            runner: ubuntu-latest,
+            target: armv7-unknown-linux-musleabihf,
+            interpreter: *interpreters,
+            maturin-build-args: "--features mimalloc"
+          }
+          - {
             # PowerPC64 Little Endian
             runner: ubuntu-latest,
             target: powerpc64le-unknown-linux-musl,
