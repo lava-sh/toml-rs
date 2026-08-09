@@ -116,14 +116,7 @@ jobs:
           - {
             runner: ubuntu-latest,
             target: riscv64gc-unknown-linux-gnu,
-            manylinux: "2_31",
-            interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-          }
-          - {
-            runner: ubuntu-latest,
-            target: riscv64gc-unknown-linux-gnu,
-            manylinux: "2_39",
+            manylinux: "auto",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
           }
