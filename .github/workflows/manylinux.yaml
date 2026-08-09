@@ -10,7 +10,7 @@ env:
 
 jobs:
   linux:
-    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }} (${{ matrix.platform.manylinux }})"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
