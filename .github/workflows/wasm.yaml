@@ -46,8 +46,8 @@ jobs:
 
           - python-version: "3.15"
             # pyodide:
-            # 315.0.0a1 (emscripten 6.0.5)
-            pyodide-version: "315.0.0a1"
+            # 315.0.0a1 - 315.0.0a2 (emscripten 6.0.5)
+            pyodide-version: "315.0.0a2"
             pyemscripten-version: "2026_0"
             emsdk-version: "6.0.5"
             rust-toolchain: *rust-nightly
