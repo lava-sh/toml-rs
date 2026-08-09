@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 env:
-  ○_○: &interpreters "3.10 3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
+  ○_○: &interpreters "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
   #
   (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
 

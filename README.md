@@ -1,8 +1,10 @@
+<!-- rumdl-disable MD036 MD041-->
 <div align="center">
 
 # toml-rs
 
 *A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust*
+<!-- rumdl-enable MD036 MD041-->
 
 <a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
 <a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
@@ -136,7 +138,7 @@ print(toml_rs.loads(t))
 # string values must be quoted, expected literal string
 ```
 
-2. Supports serialization (`toml_rs.dumps` and `toml_rs.dump`)
+2. Supports serialization like [tomli-w](https://github.com/hukkin/tomli-w) (`toml_rs.dumps` and `toml_rs.dump`)
 
 ```python
 from pathlib import Path

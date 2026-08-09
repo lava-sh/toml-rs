@@ -12,36 +12,38 @@ from ._toml_rs import (
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]
 
-DEFAULT_TOML_VERSION: TomlVersion = "1.0.0"
+DEFAULT_TOML_VERSION: TomlVersion = "1.1.0"
 
 
 def load(
-    fp: BinaryIO,
+    file_obj: BinaryIO,
     /,
     *,
     parse_float: ParseFloat = float,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
-    toml_bytes = fp.read()
+    b = file_obj.read()
     try:
-        toml_str = toml_bytes.decode()
+        s = b.decode()
     except AttributeError:
         msg = "File must be opened in binary mode, e.g. use `open('foo.toml', 'rb')`"
         raise TypeError(msg) from None
-    return loads(toml_str, parse_float=parse_float, toml_version=toml_version)
+
+    return loads(s, parse_float=parse_float, toml_version=toml_version)
 
 
 def loads(
-    s: str,
+    str_obj: str,
     /,
     *,
     parse_float: ParseFloat = float,
     toml_version: TomlVersion = DEFAULT_TOML_VERSION,
 ) -> dict[str, Any]:
-    if not isinstance(s, str):
-        msg = f"Expected str object, not '{type(s).__qualname__}'"
+    if not isinstance(str_obj, str):
+        msg = f"Expected str object, not '{type(str_obj).__qualname__}'"
         raise TypeError(msg)
-    return _loads(s, parse_float=parse_float, toml_version=toml_version)
+
+    return _loads(str_obj, parse_float=parse_float, toml_version=toml_version)
 
 
 def dump(

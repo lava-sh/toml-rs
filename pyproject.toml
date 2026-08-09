@@ -9,7 +9,7 @@ module-name = "toml_rs._toml_rs"
 [project]
 name = "toml-rs"
 dynamic = ["version"]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 description = "A High-Performance TOML Parser for Python written in Rust"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "Unlicense"
@@ -30,7 +30,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -49,9 +48,9 @@ Repository = "https://github.com/lava-sh/toml-rs"
 Issues = "https://github.com/lava-sh/toml-rs/issues"
 
 [dependency-groups]
-typos = ["typos == 1.48.0"]
-zizmor = ["zizmor == 1.28.0"]
-rumdl = ["rumdl == 0.2.48"]
+typos = ["typos == 1.49.0"]
+zizmor = ["zizmor == 1.29.0"]
+rumdl = ["rumdl == 0.2.52"]
 maturin = [
     "maturin == 1.14.1 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
@@ -74,14 +73,15 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.65",
-    "ruff == 0.16.1",
+    "ty == 0.0.69",
+    "ruff == 0.16.2",
     "nox == 2026.7.11",
     { include-group = "nox" },
     { include-group = "maturin" },
     { include-group = "tomli-1-1" },
 ]
 dev = [
+    "rust-just == 1.58.0",
     { include-group = "ci" },
     { include-group = "nox" },
     { include-group = "typos" },

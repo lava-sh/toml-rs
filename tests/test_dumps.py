@@ -120,7 +120,7 @@ def test_dumps() -> None:
             "server": "192.168.1.1",
         },
     }
-    assert toml_rs.dumps(obj) == read_toml("test_dumps.toml")
+    assert toml_rs.dumps(obj, toml_version="1.0.0") == read_toml("test_dumps.toml")
 
 
 def test_dumps_inline_tables() -> None:

@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: 2021 Taneli Hukkinen
+# Licensed to PSF under a Contributor Agreement.
+#
+# SPDX-License-Identifier: Unlicense
+# SPDX-FileCopyrightText: 2026 chirizxc
 import json
 import math
 import platform
@@ -21,7 +27,8 @@ DATA_DIR = tests_path / "data"
 
 
 # Test files were taken from this commit:
-# https://github.com/toml-lang/toml-test/commit/229ce2e7bb565d1704eac5f41e939870d4b1bce7
+#
+# https://github.com/toml-lang/toml-test/commit/9eef1b959e0449d41a31d4e4e0a839faee534b36
 def read_toml_files_file(version: str) -> tuple:
     lines = (
         (DATA_DIR / f"files-toml-{version}")
@@ -77,7 +84,7 @@ def test_invalid_tomls(invalid: Path, toml_version: toml_rs._lib.TomlVersion) ->
         # Some BurntSushi tests are not valid UTF-8. Skip those.
         pytest.skip(f"Invalid UTF-8: {invalid}")
     with pytest.raises(toml_rs.TOMLDecodeError):
-        toml_rs.loads(toml_str)
+        toml_rs.loads(toml_str, toml_version=toml_version)
 
 
 @pytest.mark.parametrize(
