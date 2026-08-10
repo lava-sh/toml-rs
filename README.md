@@ -160,6 +160,6 @@ toml_rs.dump(data, Path("example.toml"))
 
 ## Contributing
 
-[![lava-sh/toml-rs contributors](https://shieldcn.dev/contributors/lava-sh/toml-rs.svg?title=false&preset=transparent&size=80&names=true&titleAlign=center&mode=light&font=geist&image=https%3A%2F%2Fimages.wallpaperscraft.ru%2Fimage%2Fsingle%2Foblaka_nebo_ogni_1647475_3840x2400.jpg&overlay=0.3)](https://github.com/lava-sh/toml-rs/graphs/contributors)
+[![lava-sh/toml-rs contributors](https://shieldcn.dev/contributors/lava-sh/toml-rs.svg?title=false&theme=slate&size=80&bots=true&titleAlign=center&mode=light&font=geist&border=false&image=https%3A%2F%2Fimages.wallpaperscraft.ru%2Fimage%2Fsingle%2Foblaka_nebo_ogni_1647475_3840x2400.jpg&overlay=0.3)](https://github.com/lava-sh/toml-rs/graphs/contributors)
 
 </div>
