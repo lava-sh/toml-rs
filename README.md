@@ -1,18 +1,18 @@
-<!-- rumdl-disable MD036 -->
+<!-- rumdl-disable MD036 MD041 -->
 <div align="center">
 
 # toml-rs
 
 _A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust_
-<!-- rumdl-enable MD036 -->
+<!-- rumdl-enable MD036 MD041 -->
 
-<a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
-<a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
-<a href="https://pypi.org/project/toml-rs"><img alt="Python Version" src="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
+<a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
+<a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
+<a href="https://pypi.org/project/toml-rs"><img alt="Python Version" src="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
 
-<a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&animate=pulse&mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&animate=pulse&mode=light"></picture></a>
-<a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
-<a href="https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=dark"><img alt="License" src="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist-mono&size=xs&mode=light"></picture></a>
+<a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=light"></picture></a>
+<a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=light"></picture></a>
+<a href="https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist&size=xs&mode=dark"><img alt="License" src="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist&size=xs&mode=light"></picture></a>
 
 </div>
 
@@ -155,3 +155,11 @@ print(toml_rs.dumps(data))
 toml_rs.dump(data, Path("example.toml"))
 # or `toml_rs.dump(data, "example.toml")`
 ```
+
+<div align="center">
+
+## Contributing
+
+[![lava-sh/toml-rs contributors](https://shieldcn.dev/contributors/lava-sh/toml-rs.svg?title=false&preset=transparent&size=80&names=true&titleAlign=center&mode=light&font=geist&image=https%3A%2F%2Fimages.wallpaperscraft.ru%2Fimage%2Fsingle%2Foblaka_nebo_ogni_1647475_3840x2400.jpg&overlay=0.3)](https://github.com/lava-sh/toml-rs/graphs/contributors)
+
+</div>
