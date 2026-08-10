@@ -6,9 +6,9 @@
 _A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust_
 <!-- rumdl-enable MD036 MD041 -->
 
-<a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
-<a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
-<a href="https://pypi.org/project/toml-rs"><img alt="Python Version" src="https://shieldcn.dev/pypi/python/toml-rs.svg?variant=branded&font=geist&size=xs"/></a>
+![PyPI version](https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.version&variant=branded&size=xs&mode=light&logo=python&label=pypi+version)
+![PyPI downloads](https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypistats.org%2Fapi%2Fpackages%2Ftoml-rs%2Frecent&query=%24.data.last_month&suffix=%2Fmonth&size=xs&mode=light&logo=python&logoColor=ffffff&label=downloads&color=3775A9)
+![PyPI requires python](https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.requires_python&size=xs&mode=light&logo=python&logoColor=ffffff&label=requires+python&color=3775A9)
 
 <a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=light"></picture></a>
 <a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=light"></picture></a>
