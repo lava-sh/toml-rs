@@ -1,10 +1,10 @@
-<!-- rumdl-disable MD036 MD041-->
+<!-- rumdl-disable MD036 -->
 <div align="center">
 
 # toml-rs
 
-*A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust*
-<!-- rumdl-enable MD036 MD041-->
+_A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust_
+<!-- rumdl-enable MD036 -->
 
 <a href="https://pypi.org/project/toml-rs"><img alt="PyPI Version" src="https://shieldcn.dev/pypi/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
 <a href="https://pypi.org/project/toml-rs"><img alt="Monthly Downloads" src="https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&font=geist-mono&size=xs"/></a>
