@@ -17,24 +17,24 @@ jobs:
       matrix:
         # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
         platform:
-          # Intel Mac
           - {
+            # Intel Mac
             runner: macos-26-intel,
             target: x86_64-apple-darwin,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
-          # Apple Silicon M1-M4
           - {
+            # Apple Silicon M1-M4
             runner: macos-latest,
             target: aarch64-apple-darwin,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
-          # Universal binary (Intel + Apple Silicon)
           - {
+            # Universal binary (Intel + Apple Silicon)
             runner: macos-latest,
             target: universal2-apple-darwin,
             interpreter: *interpreters,

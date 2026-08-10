@@ -10,7 +10,7 @@ env:
 
 jobs:
   linux:
-    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }} (${{ matrix.platform.manylinux }})"
+    name: "${{ matrix.platform.runner }} / ${{ matrix.platform.target }}"
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       fail-fast: false
@@ -19,106 +19,57 @@ jobs:
         #
         # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
         platform:
-          # AMD64
           - {
+            # AMD64
             runner: ubuntu-latest,
             target: x86_64-unknown-linux-gnu,
-            manylinux: "2_24",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
-            runner: ubuntu-latest,
-            target: x86_64-unknown-linux-gnu,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
-          }
-          # x86 (32-bit)
-          - {
+            # x86 (32-bit)
             runner: ubuntu-latest,
             target: i686-unknown-linux-gnu,
-            manylinux: "2_24",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
           }
           - {
-            runner: ubuntu-latest,
-            target: i686-unknown-linux-gnu,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-          }
-          # ARM64
-          - {
+            # ARM64
             runner: ubuntu-26.04-arm,
             target: aarch64-unknown-linux-gnu,
-            manylinux: "2014",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
             use-pgo: true,
           }
           - {
-            runner: ubuntu-26.04-arm,
-            target: aarch64-unknown-linux-gnu,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
-          }
-          # ARMv7 (32-bit)
-          - {
+            # ARMv7 (32-bit)
             runner: ubuntu-latest,
             target: armv7-unknown-linux-gnueabihf,
-            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            runner: ubuntu-latest,
-            target: armv7-unknown-linux-gnueabihf,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-          }
-          # IBM System z (s390x)
-          - {
+            # IBM System z (s390x)
             runner: ubuntu-latest,
             target: s390x-unknown-linux-gnu,
-            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            runner: ubuntu-latest,
-            target: s390x-unknown-linux-gnu,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-          }
-          # PowerPC64 Little Endian
-          - {
+            # PowerPC64 Little Endian
             runner: ubuntu-latest,
             target: powerpc64le-unknown-linux-gnu,
-            manylinux: "2014",
             interpreter: *interpreters,
           }
           - {
-            runner: ubuntu-latest,
-            target: powerpc64le-unknown-linux-gnu,
-            manylinux: "2_28",
-            interpreter: *interpreters,
-          }
-          # PowerPC64 Big Endian
-          - {
+            # PowerPC64 Big Endian
             runner: ubuntu-latest,
             target: powerpc64-unknown-linux-gnu,
-            manylinux: "auto",
             interpreter: *interpreters,
           }
-          # RISC-V 64-bit
           - {
+            # RISC-V 64-bit
             runner: ubuntu-latest,
             target: riscv64gc-unknown-linux-gnu,
-            manylinux: "auto",
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
           }
@@ -139,7 +90,7 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           sccache: *is_pull_request
-          manylinux: ${{ matrix.platform.manylinux }}
+          manylinux: auto
           args: >-
             --release
             --out dist
