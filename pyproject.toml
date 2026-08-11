@@ -46,6 +46,7 @@ dependencies = []
 Homepage = "https://github.com/lava-sh/toml-rs"
 Repository = "https://github.com/lava-sh/toml-rs"
 Issues = "https://github.com/lava-sh/toml-rs/issues"
+Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 typos = ["typos == 1.49.0"]
