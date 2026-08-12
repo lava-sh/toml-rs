@@ -73,5 +73,10 @@ jobs:
         run: ty check
 
       - name: "Run nox"
-        # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners#:~:text=ubuntu%2Dlatest
+        if: matrix.os == 'windows-latest' && matrix.python-version != '3.15' && matrix.python-version != '3.15t'
+        run: nox
+
+      - name: "Run nox"
+        # See: https://github.com/wntrblm/nox/issues/1164
+        if: matrix.os != 'windows-latest' || matrix.python-version == '3.15' || matrix.python-version == '3.15t'
         run: nox --parallel 4
