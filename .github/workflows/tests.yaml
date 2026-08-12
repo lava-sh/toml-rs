@@ -73,4 +73,9 @@ jobs:
         run: ty check
 
       - name: "Run nox"
+        if: matrix.os == 'windows-latest' && matrix.python-version != '3.15' && matrix.python-version != '3.15t'
         run: nox
+
+      - name: "Run nox"
+        if: matrix.os != 'windows-latest' || matrix.python-version == '3.15' || matrix.python-version == '3.15t'
+        run: nox --parallel 4
