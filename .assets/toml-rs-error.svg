@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="840"
-     height="244"
-     viewBox="0 0 840 244">
+     width="942"
+     height="266"
+     viewBox="0 0 942 266">
 <rect width="100%" height="100%" fill="#0d1117"/>
 <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-   font-size="13"
+   font-size="15"
    dominant-baseline="hanging"
    fill="#ffffff">
 <text x="12" y="12">Traceback&#160;(most&#160;recent&#160;call&#160;last):</text>
-<text x="12" y="32">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">28</tspan>,&#160;in&#160;<tspan fill="#ff00ff">get_traceback</tspan></text>
-<text x="12" y="52">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">loader</tspan><tspan fill="#ff0000" font-weight="bold">(&quot;x&#160;=&#160;&quot;)</tspan></text>
-<text x="12" y="72">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^</tspan></text>
-<text x="12" y="92">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\.venv\Lib\site-packages\toml_rs\_lib.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">46</tspan>,&#160;in&#160;<tspan fill="#ff00ff">loads</tspan></text>
-<text x="12" y="112">&#160;&#160;&#160;&#160;return&#160;_loads(str_obj,&#160;parse_float=parse_float,&#160;toml_version=toml_version)</text>
-<text x="12" y="132"><tspan fill="#ff00ff" font-weight="bold">toml_rs._lib.TOMLDecodeError</tspan>:&#160;<tspan fill="#ff00ff">TOML&#160;parse&#160;error&#160;at&#160;line&#160;1,&#160;column&#160;5</tspan></text>
-<text x="12" y="152">&#160;&#160;|</text>
-<text x="12" y="172">1&#160;|&#160;x&#160;=&#160;</text>
-<text x="12" y="192">&#160;&#160;|&#160;&#160;&#160;&#160;&#160;^</text>
-<text x="12" y="212">string&#160;values&#160;must&#160;be&#160;quoted,&#160;expected&#160;literal&#160;string</text>
+<text x="12" y="34">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">27</tspan>,&#160;in&#160;<tspan fill="#ff00ff">get_traceback</tspan></text>
+<text x="12" y="56">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">loader</tspan><tspan fill="#ff0000" font-weight="bold">(&quot;x&#160;=&#160;&quot;)</tspan></text>
+<text x="12" y="78">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^</tspan></text>
+<text x="12" y="100">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\.venv\Lib\site-packages\toml_rs\_lib.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">46</tspan>,&#160;in&#160;<tspan fill="#ff00ff">loads</tspan></text>
+<text x="12" y="122">&#160;&#160;&#160;&#160;return&#160;_loads(str_obj,&#160;parse_float=parse_float,&#160;toml_version=toml_version)</text>
+<text x="12" y="144"><tspan fill="#ff00ff" font-weight="bold">toml_rs._lib.TOMLDecodeError</tspan>:&#160;<tspan fill="#ff00ff">TOML&#160;parse&#160;error&#160;at&#160;line&#160;1,&#160;column&#160;5</tspan></text>
+<text x="12" y="166">&#160;&#160;|</text>
+<text x="12" y="188">1&#160;|&#160;x&#160;=&#160;</text>
+<text x="12" y="210">&#160;&#160;|&#160;&#160;&#160;&#160;&#160;^</text>
+<text x="12" y="232">string&#160;values&#160;must&#160;be&#160;quoted,&#160;expected&#160;literal&#160;string</text>
 </g>
 </svg>

@@ -32,24 +32,24 @@ def get_traceback(
     raise RuntimeError(msg)
 
 
-def escape(text: str) -> str:
-    return html.escape(text).replace(" ", "&#160;")
-
-
 def render_line(line: str) -> str:
     parts = ANSI.split(line)
     matches = ANSI.findall(line)
-    result = escape(parts[0])
+    result = html.escape(parts[0]).replace(" ", "&#160;")
 
     for ansi, part in zip(matches, parts[1:], strict=True):
         color, bold = COLORS[ansi]
 
         if color is None:
-            result += escape(part)
+            result += html.escape(part).replace(" ", "&#160;")
             continue
 
         weight = ' font-weight="bold"' if bold else ""
-        result += f'<tspan fill="{color}"{weight}>{escape(part)}</tspan>'
+        result += (
+            f'<tspan fill="{color}"{weight}>'
+            f"{html.escape(part).replace(' ', '&#160;')}"
+            "</tspan>"
+        )
 
     return result
 
@@ -66,9 +66,9 @@ def make_svg(
     lines = text.rstrip("\r\n").splitlines()
     rendered = [render_line(line) for line in lines]
 
-    line_height = 20
+    line_height = 22
     padding = 12
-    width = max(map(len, lines), default=1) * 8 + padding * 2
+    width = max(map(len, lines), default=1) * 9 + padding * 2
     height = len(lines) * line_height + padding * 2
 
     elements = "\n".join(
@@ -83,7 +83,7 @@ def make_svg(
      viewBox="0 0 {width} {height}">
 <rect width="100%" height="100%" fill="#0d1117"/>
 <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-   font-size="13"
+   font-size="15"
    dominant-baseline="hanging"
    fill="#ffffff">
 {elements}

@@ -1,26 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg"
-     width="1048"
-     height="324"
-     viewBox="0 0 1048 324">
+     width="1176"
+     height="354"
+     viewBox="0 0 1176 354">
 <rect width="100%" height="100%" fill="#0d1117"/>
 <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-   font-size="13"
+   font-size="15"
    dominant-baseline="hanging"
    fill="#ffffff">
 <text x="12" y="12">Traceback&#160;(most&#160;recent&#160;call&#160;last):</text>
-<text x="12" y="32">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">28</tspan>,&#160;in&#160;<tspan fill="#ff00ff">get_traceback</tspan></text>
-<text x="12" y="52">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">loader</tspan><tspan fill="#ff0000" font-weight="bold">(&quot;x&#160;=&#160;&quot;)</tspan></text>
-<text x="12" y="72">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^</tspan></text>
-<text x="12" y="92">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">174</tspan>,&#160;in&#160;<tspan fill="#ff00ff">loads</tspan></text>
-<text x="12" y="112">&#160;&#160;&#160;&#160;pos&#160;=&#160;key_value_rule(src,&#160;pos,&#160;out,&#160;header,&#160;parse_float)</text>
-<text x="12" y="132">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">403</tspan>,&#160;in&#160;<tspan fill="#ff00ff">key_value_rule</tspan></text>
-<text x="12" y="152">&#160;&#160;&#160;&#160;pos,&#160;key,&#160;value&#160;=&#160;<tspan fill="#ff0000">parse_key_value_pair</tspan><tspan fill="#ff0000" font-weight="bold">(src,&#160;pos,&#160;parse_float)</tspan></text>
-<text x="12" y="172">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~~~~~~~~~~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^^^^^^^^^^^^^^^^</tspan></text>
-<text x="12" y="192">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">446</tspan>,&#160;in&#160;<tspan fill="#ff00ff">parse_key_value_pair</tspan></text>
-<text x="12" y="212">&#160;&#160;&#160;&#160;pos,&#160;value&#160;=&#160;<tspan fill="#ff0000">parse_value</tspan><tspan fill="#ff0000" font-weight="bold">(src,&#160;pos,&#160;parse_float)</tspan></text>
-<text x="12" y="232">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^^^^^^^^^^^^^^^^</tspan></text>
-<text x="12" y="252">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">728</tspan>,&#160;in&#160;<tspan fill="#ff00ff">parse_value</tspan></text>
-<text x="12" y="272">&#160;&#160;&#160;&#160;raise&#160;TOMLDecodeError(&quot;Invalid&#160;value&quot;,&#160;src,&#160;pos)</text>
-<text x="12" y="292"><tspan fill="#ff00ff" font-weight="bold">tomllib.TOMLDecodeError</tspan>:&#160;<tspan fill="#ff00ff">Invalid&#160;value&#160;(at&#160;end&#160;of&#160;document)</tspan></text>
+<text x="12" y="34">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">27</tspan>,&#160;in&#160;<tspan fill="#ff00ff">get_traceback</tspan></text>
+<text x="12" y="56">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">loader</tspan><tspan fill="#ff0000" font-weight="bold">(&quot;x&#160;=&#160;&quot;)</tspan></text>
+<text x="12" y="78">&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^</tspan></text>
+<text x="12" y="100">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">174</tspan>,&#160;in&#160;<tspan fill="#ff00ff">loads</tspan></text>
+<text x="12" y="122">&#160;&#160;&#160;&#160;pos&#160;=&#160;key_value_rule(src,&#160;pos,&#160;out,&#160;header,&#160;parse_float)</text>
+<text x="12" y="144">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">403</tspan>,&#160;in&#160;<tspan fill="#ff00ff">key_value_rule</tspan></text>
+<text x="12" y="166">&#160;&#160;&#160;&#160;pos,&#160;key,&#160;value&#160;=&#160;<tspan fill="#ff0000">parse_key_value_pair</tspan><tspan fill="#ff0000" font-weight="bold">(src,&#160;pos,&#160;parse_float)</tspan></text>
+<text x="12" y="188">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~~~~~~~~~~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^^^^^^^^^^^^^^^^</tspan></text>
+<text x="12" y="210">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">446</tspan>,&#160;in&#160;<tspan fill="#ff00ff">parse_key_value_pair</tspan></text>
+<text x="12" y="232">&#160;&#160;&#160;&#160;pos,&#160;value&#160;=&#160;<tspan fill="#ff0000">parse_value</tspan><tspan fill="#ff0000" font-weight="bold">(src,&#160;pos,&#160;parse_float)</tspan></text>
+<text x="12" y="254">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<tspan fill="#ff0000">~~~~~~~~~~~</tspan><tspan fill="#ff0000" font-weight="bold">^^^^^^^^^^^^^^^^^^^^^^^</tspan></text>
+<text x="12" y="276">&#160;&#160;File&#160;<tspan fill="#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</tspan>,&#160;line&#160;<tspan fill="#ff00ff">728</tspan>,&#160;in&#160;<tspan fill="#ff00ff">parse_value</tspan></text>
+<text x="12" y="298">&#160;&#160;&#160;&#160;raise&#160;TOMLDecodeError(&quot;Invalid&#160;value&quot;,&#160;src,&#160;pos)</text>
+<text x="12" y="320"><tspan fill="#ff00ff" font-weight="bold">tomllib.TOMLDecodeError</tspan>:&#160;<tspan fill="#ff00ff">Invalid&#160;value&#160;(at&#160;end&#160;of&#160;document)</tspan></text>
 </g>
 </svg>
