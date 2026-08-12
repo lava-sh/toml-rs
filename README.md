@@ -118,22 +118,7 @@ toml = "x = "
 print(tomllib.loads(toml))
 ```
 
-<pre><code>Traceback (most recent call last):
-  File <span style="color:#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</span>, line <span style="color:#ff00ff">27</span>, in <span style="color:#ff00ff">get_traceback</span>
-    <span style="color:#ff0000">loader</span><span style="color:#ff0000;font-weight:bold">(&quot;x = &quot;)</span>
-    <span style="color:#ff0000">~~~~~~</span><span style="color:#ff0000;font-weight:bold">^^^^^^^^</span>
-  File <span style="color:#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</span>, line <span style="color:#ff00ff">174</span>, in <span style="color:#ff00ff">loads</span>
-    pos = key_value_rule(src, pos, out, header, parse_float)
-  File <span style="color:#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</span>, line <span style="color:#ff00ff">403</span>, in <span style="color:#ff00ff">key_value_rule</span>
-    pos, key, value = <span style="color:#ff0000">parse_key_value_pair</span><span style="color:#ff0000;font-weight:bold">(src, pos, parse_float)</span>
-                      <span style="color:#ff0000">~~~~~~~~~~~~~~~~~~~~</span><span style="color:#ff0000;font-weight:bold">^^^^^^^^^^^^^^^^^^^^^^^</span>
-  File <span style="color:#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</span>, line <span style="color:#ff00ff">446</span>, in <span style="color:#ff00ff">parse_key_value_pair</span>
-    pos, value = <span style="color:#ff0000">parse_value</span><span style="color:#ff0000;font-weight:bold">(src, pos, parse_float)</span>
-                 <span style="color:#ff0000">~~~~~~~~~~~</span><span style="color:#ff0000;font-weight:bold">^^^^^^^^^^^^^^^^^^^^^^^</span>
-  File <span style="color:#ff00ff">&quot;cpython-3.14.4-windows-x86_64-none\Lib\tomllib\_parser.py&quot;</span>, line <span style="color:#ff00ff">728</span>, in <span style="color:#ff00ff">parse_value</span>
-    raise TOMLDecodeError(&quot;Invalid value&quot;, src, pos)
-<span style="color:#ff00ff;font-weight:bold">tomllib.TOMLDecodeError</span>: <span style="color:#ff00ff">Invalid value (at end of document)</span>
-</code></pre>
+<img src=".assets/tomllib-error.svg" alt="tomllib error">
 
 <div align="center">
 
@@ -149,18 +134,7 @@ toml = "x = "
 print(toml_rs.loads(toml))
 ``` 
 
-<pre><code>Traceback (most recent call last):
-  File <span style="color:#ff00ff">&quot;toml-rs\scripts\readme_traceback.py&quot;</span>, line <span style="color:#ff00ff">27</span>, in <span style="color:#ff00ff">get_traceback</span>
-    <span style="color:#ff0000">loader</span><span style="color:#ff0000;font-weight:bold">(&quot;x = &quot;)</span>
-    <span style="color:#ff0000">~~~~~~</span><span style="color:#ff0000;font-weight:bold">^^^^^^^^</span>
-  File <span style="color:#ff00ff">&quot;toml-rs\.venv\Lib\site-packages\toml_rs\_lib.py&quot;</span>, line <span style="color:#ff00ff">46</span>, in <span style="color:#ff00ff">loads</span>
-    return _loads(str_obj, parse_float=parse_float, toml_version=toml_version)
-<span style="color:#ff00ff;font-weight:bold">toml_rs._lib.TOMLDecodeError</span>: <span style="color:#ff00ff">TOML parse error at line 1, column 5
-  |
-1 | x =
-  |     ^
-string values must be quoted, expected literal string</span>
-</code></pre>
+<img src=".assets/toml-rs-error.svg" alt="toml-rs error">
 
 2. Supports serialization like [tomli-w](https://github.com/hukkin/tomli-w) (`toml_rs.dumps` and `toml_rs.dump`)
 
