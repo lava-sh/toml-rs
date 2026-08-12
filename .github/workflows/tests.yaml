@@ -73,4 +73,5 @@ jobs:
         run: ty check
 
       - name: "Run nox"
-        run: nox
+        # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners#:~:text=ubuntu%2Dlatest
+        run: nox --parallel 4
