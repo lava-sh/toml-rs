@@ -1,6 +1,7 @@
 set windows-shell := ["pwsh.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 alias i := install
+alias b := bump-dependency-groups
 
 WHEEL_DIR := "wheel/"
 
@@ -8,9 +9,9 @@ WHEEL_DIR := "wheel/"
 @default:
     just --list
 
-[windows]
-[script("pwsh.exe", "-NoLogo", "-NoProfile", "-Command")]
 [doc("Build Python wheel with mimalloc")]
+[script("pwsh.exe", "-NoLogo", "-NoProfile", "-Command")]
+[windows]
 install:
     $ErrorActionPreference = "Stop"
 
@@ -32,10 +33,10 @@ install:
         pip install $wheel.FullName --force-reinstall
     }
 
-[doc("Bump deps & gitHub actions")]
+[doc("Bump Python dependency-groups")]
 [script("pwsh.exe", "-NoLogo", "-NoProfile", "-Command")]
 [windows]
-bump:
+bump-dependency-groups:
     $ErrorActionPreference = "Stop"
 
     $branch = git branch --show-current
@@ -56,16 +57,6 @@ bump:
         Write-Host "Switched to $newBranch"
     }
 
-    actions-up --yes --min-age 0
-    git add .github
-
-    git diff --cached --quiet
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "skipping commit"
-    } else {
-        git commit -m "bump GitHub Actions pinned SHAs"
-    }
-
     uv run scripts/bump_python_deps.py
     git add pyproject.toml
 
@@ -75,5 +66,3 @@ bump:
     } else {
         git commit -m "bump python dependency-groups"
     }
-
-    cargo upgrade --dry-run --verbose --pinned --verbose
