@@ -63,7 +63,15 @@ jobs:
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
+       env:
+          RUSTFLAGS: >-
+            -C linker=rust-lld 
+            -C linker-flavor=ld64.lld 
+            -C link-arg=--icf=safe
 
+      - name: "Upload wheels"
+          RUSTFLAGS: "-C linker=rust-lld -C linker-flavor=ld64.lld -C link-arg=--icf=safe"
+      - name: "Upload wheels"
       - name: "Install Rust stable + llvm-tools-preview"
         if: matrix.platform.use-pgo == true
         id: rust-toolchain
