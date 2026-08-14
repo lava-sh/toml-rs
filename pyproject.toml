@@ -102,15 +102,19 @@ bench = [
     "py-cpuinfo2 == 10.1.1",
 ]
 
+
 [tool.uv]
+# https://docs.astral.sh/uv/concepts/resolution/#conflicting-dependencies
 conflicts = [[
     { group = "tomli-1" },
     { group = "tomli-1-1" },
 ]]
 
+# https://docs.astral.sh/uv/concepts/projects/dependencies/#dependency-sources
 [tool.uv.sources]
 nox = { git = "https://github.com/wntrblm/nox", rev = "c699c47cb806df85e900d0bd51a79bdf1829c33f", group = "ci" }
 
+# https://docs.astral.sh/uv/concepts/projects/dependencies/#group-requires-python
 [tool.uv.dependency-groups]
 wasm-test = { requires-python = ">= 3.13" }
 
