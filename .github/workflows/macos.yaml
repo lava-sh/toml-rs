@@ -63,7 +63,7 @@ jobs:
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
-       env:
+         env:
           RUSTFLAGS: >-
             -C linker=rust-lld 
             -C linker-flavor=ld64.lld 
