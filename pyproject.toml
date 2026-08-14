@@ -104,7 +104,6 @@ bench = [
     "py-cpuinfo2 == 10.1.1",
 ]
 
-
 [tool.uv]
 # https://docs.astral.sh/uv/concepts/resolution/#conflicting-dependencies
 conflicts = [[
