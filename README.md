@@ -172,6 +172,7 @@ toml_rs.dump(data, Path("example.toml"))
 [pypistats]: https://pypistats.org/packages/toml-rs
 
 [pypi-version-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.version&variant=branded&size=xs&mode=light&logo=python&label=pypi+version
-[pypi-downloads-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypistats.org%2Fapi%2Fpackages%2Ftoml-rs%2Frecent&query=%24.data.last_month&suffix=%2Fmonth&size=xs&mode=light&logo=python&logoColor=ffffff&label=downloads&color=3775A9
+
+[pypi-downloads-badge]: https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&size=xs&logo=python&logoColor=ffffff
 [pypi-requires-python-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.requires_python&size=xs&mode=light&logo=python&logoColor=ffffff&label=requires+python&color=3775A9
 [contributors-badge]: https://shieldcn.dev/contributors/lava-sh/toml-rs.svg?title=false&theme=slate&size=80&bots=true&titleAlign=center&mode=light&font=geist&border=false&image=https%3A%2F%2Fimages.wallpaperscraft.ru%2Fimage%2Fsingle%2Foblaka_nebo_ogni_1647475_3840x2400.jpg&overlay=0.3
