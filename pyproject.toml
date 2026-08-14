@@ -107,5 +107,10 @@ conflicts = [[
     { group = "tomli-1" },
     { group = "tomli-1-1" },
 ]]
-dependency-groups.wasm-test = { requires-python = ">= 3.13" }
+
+[tool.uv.sources]
+nox = { git = "https://github.com/wntrblm/nox", rev = "c699c47cb806df85e900d0bd51a79bdf1829c33f", group = "ci" }
+
+[tool.uv.dependency-groups]
+wasm-test = { requires-python = ">= 3.13" }
 
