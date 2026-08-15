@@ -113,30 +113,28 @@ print(toml_rs_dumps)
 ```python
 import tomllib
 
-t = """\
-x = 1
-y = 2
-v = 
-"""
-print(tomllib.loads(t))
-# tomllib.TOMLDecodeError: Invalid value (at line 3, column 5)
+toml = "x = "
+
+print(tomllib.loads(toml))
 ```
+
+<img src=".assets/tomllib-error.svg" alt="tomllib error">
+
+<div align="center">
+
+### vs
+
+</div>
 
 ```python
 import toml_rs
 
-t = """\
-x = 1
-y = 2
-v = 
-"""
-print(toml_rs.loads(t))
-# toml_rs.TOMLDecodeError: TOML parse error at line 3, column 5
-#   |
-# 3 | v = 
-#   |     ^
-# string values must be quoted, expected literal string
-```
+toml = "x = "
+
+print(toml_rs.loads(toml))
+``` 
+
+<img src=".assets/toml-rs-error.svg" alt="toml-rs error">
 
 2. Supports serialization like [tomli-w](https://github.com/hukkin/tomli-w) (`toml_rs.dumps` and `toml_rs.dump`)
 

@@ -14,6 +14,7 @@ include = [
     "noxfile.py",
     "pyproject.toml",
     "README.md",
+    "scripts/readme_traceback.py",
 ]
 
 [lint.isort]
@@ -45,18 +46,21 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"benchmark/**.py" = [
-    "INP001", # Check for packages that are missing an __init__.py file.
+"scripts/*.py" = [
+    "INP001", # Check for packages that are missing an `__init__.py` file
+]
+"benchmark/*.py" = [
+    "INP001", # Check for packages that are missing an `__init__.py` file
     "T201",
     "T203",
 ]
-"tests/**.py" = [
+"tests/*.py" = [
     "DOC",     # Docstring's
     ########
     "S101",    # Check for uses of the assert keyword.
-    "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
+    "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons
 ]
-".github/actions/build-pgo-wheel/**.py" = [
+".github/actions/build-pgo-wheel/*.py" = [
     "S404",
     "S603",
     "S607",
