@@ -15,7 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 - Drop support for Python 3.10 ([#245][gh-pull-245] by [@chirizxc][gh-chirizxc])
 
-### Bug Fixes
+### Fixes
 
 - Fix incorrect benchmark `.svg` link (by [@chirizxc][gh-chirizxc])
 
@@ -24,6 +24,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 - Bump [pyodide][gh-pyodide] (`314.0.2` -> `314.0.4`)
 - Bump [pyo3][gh-pyo3] (`=0.29.0` -> `=0.29.2`)
 - Bump [memchr][gh-memchr] (`=2.8.2` -> `=2.8.3`)
+- Bump [toml-test][gh-toml-test] (`229ce2e7` -> `9eef1b95`)
+- Drop [snmalloc-rs][gh-snmalloc-rs]
 
 ## [0.3.16] - 07.07.2026
 
@@ -47,6 +49,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 [gh-pyodide]: https://github.com/pyodide/pyodide
 [gh-pyo3]: https://github.com/pyo3/pyo3
 [gh-memchr]: https://github.com/BurntSushi/memchr
+[gh-snmalloc-rs]: https://github.com/microsoft/snmalloc/tree/main/snmalloc-rs
+[gh-toml-test]: https://github.com/toml-lang/toml-test
 
 [site-toml]: https://toml.io/en
 
