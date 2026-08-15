@@ -126,7 +126,17 @@ We use [ty](https://github.com/astral-sh/ty) to check Python types. To run it, d
 ty check
 ```
 
-### Rust
+### <picture>
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="https://thesvg.org/icons/rust/dark.svg"
+  />
+  <img
+    src="https://thesvg.org/icons/rust/light.svg"
+    alt="Rust"
+    height="16"
+  />
+</picture> Rust
 
 We use [rustfmt](https://github.com/rust-lang/rustfmt) to format Rust code. To run it, do:
 
