@@ -76,6 +76,10 @@ jobs:
         if: runner.os == 'Linux'
         run: rustup target add "${{ matrix.platform.target }}"
 
+      - name: "Install Zig"
+        if: runner.os == 'Linux'
+        run: uv tool install ziglang
+
       - name: "Create virtual environments"
         shell: bash
         run: |
@@ -141,7 +145,8 @@ jobs:
                 --target "${{ matrix.platform.target }}" \
                 --interpreter "$PYTHON" \
                 --out "wheel/$allocator" \
-                --features "$allocator"
+                --features "$allocator" \
+                --zig
             fi
           done
 
