@@ -67,17 +67,6 @@ jobs:
           lookup-only: false # zizmor: ignore[cache-poisoning]
           shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
 
-      - name: "Create virtual environments"
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          for allocator in default mimalloc snmalloc jemalloc; do
-            uv venv \
-              ".venv-${{ matrix.python-version }}-$allocator" \
-              --python "${{ matrix.python-version }}"
-          done
-
       - name: "Build default wheel"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
         with:
@@ -87,8 +76,7 @@ jobs:
           args: >-
             --release
             --out dist/default
-            --interpreter
-            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-default/bin/python
+            --interpreter ${{ matrix.python-version }}
             --compatibility pypi
 
       - name: "Build mimalloc wheel"
@@ -100,8 +88,7 @@ jobs:
           args: >-
             --release
             --out dist/mimalloc
-            --interpreter
-            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-mimalloc/bin/python
+            --interpreter ${{ matrix.python-version }}
             --features mimalloc
             --compatibility pypi
 
@@ -114,8 +101,7 @@ jobs:
           args: >-
             --release
             --out dist/snmalloc
-            --interpreter
-            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-snmalloc/bin/python
+            --interpreter ${{ matrix.python-version }}
             --features snmalloc
             --compatibility pypi
 
@@ -128,10 +114,20 @@ jobs:
           args: >-
             --release
             --out dist/jemalloc
-            --interpreter
-            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-jemalloc/bin/python
+            --interpreter ${{ matrix.python-version }}
             --features jemalloc
             --compatibility pypi
+
+      - name: "Create virtual environments"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for allocator in default mimalloc snmalloc jemalloc; do
+            uv venv \
+              ".venv-${{ matrix.python-version }}-$allocator" \
+              --python "${{ matrix.python-version }}"
+          done
 
       - name: "Install wheels"
         shell: bash
