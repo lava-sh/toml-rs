@@ -66,7 +66,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         if: github.event_name == 'pull_request' && github.run_attempt == 1
         with:
-          lookup-only: false
+          lookup-only: false # zizmor: ignore[cache-poisoning]
           shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
 
       - name: "Install maturin"
@@ -93,39 +93,20 @@ jobs:
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
-            case "$allocator" in
-              default)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
-                  --out "wheel/$allocator"
-                ;;
-              mimalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
-                  --out "wheel/$allocator" \
-                  --features mimalloc
-                ;;
-              snmalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
-                  --out "wheel/$allocator" \
-                  --features snmalloc
-                ;;
-              jemalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
-                  --out "wheel/$allocator" \
-                  --features jemalloc
-                ;;
-            esac
+            if [[ "$allocator" == "default" ]]; then
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --interpreter "$PYTHON" \
+                --out "wheel/$allocator"
+            else
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --interpreter "$PYTHON" \
+                --out "wheel/$allocator" \
+                --features "$allocator"
+            fi
           done
 
       - name: "Build wheels on Linux"
@@ -142,41 +123,22 @@ jobs:
 
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            export PATH="$VENV/bin:$PATH"
+            PYTHON="$VENV/bin/$PYTHON_NAME"
 
-            case "$allocator" in
-              default)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON_NAME" \
-                  --out "wheel/$allocator"
-                ;;
-              mimalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON_NAME" \
-                  --out "wheel/$allocator" \
-                  --features mimalloc
-                ;;
-              snmalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON_NAME" \
-                  --out "wheel/$allocator" \
-                  --features snmalloc
-                ;;
-              jemalloc)
-                maturin build \
-                  --release \
-                  --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON_NAME" \
-                  --out "wheel/$allocator" \
-                  --features jemalloc
-                ;;
-            esac
+            if [[ "$allocator" == "default" ]]; then
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --interpreter "$PYTHON" \
+                --out "wheel/$allocator"
+            else
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --interpreter "$PYTHON" \
+                --out "wheel/$allocator" \
+                --features "$allocator"
+            fi
           done
 
       - name: "Install wheels"
