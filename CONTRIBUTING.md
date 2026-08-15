@@ -12,7 +12,7 @@
     alt="Python"
     height="14"
   />
-  using <a href="[https://github.com/pypa/pip](https://git-scm.com/install)">git</a>:
+  using <a href="https://git-scm.com/install">git</a>:
 </p>
 
 ```console
