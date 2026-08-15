@@ -72,6 +72,10 @@ jobs:
       - name: "Install maturin"
         run: uv tool install maturin
 
+      - name: "Install Rust target"
+        if: runner.os == 'Linux'
+        run: rustup target add "${{ matrix.platform.target }}"
+
       - name: "Create virtual environments"
         shell: bash
         run: |
@@ -158,6 +162,8 @@ jobs:
 
       - name: "Run benchmark"
         shell: bash
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
           set -euo pipefail
 
