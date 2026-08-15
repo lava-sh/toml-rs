@@ -1,6 +1,6 @@
 name: "bench"
 
-permissions: { }
+permissions: {}
 
 on:
   push:
@@ -80,16 +80,25 @@ jobs:
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV=".venv-${{ matrix.python-version }}-$allocator"
 
-            echo "Creating $VENV"
+            echo
+            echo "========================================"
+            echo "Creating: $VENV"
+            echo "========================================"
 
-            uv venv \
-              "$VENV" \
-              --python "${{ matrix.python-version }}"
+            uv venv "$VENV" --python "${{ matrix.python-version }}"
 
             PYTHON="$PWD/$VENV/bin/python"
 
-            echo "Python interpreter: $PYTHON"
             "$PYTHON" --version
+
+            echo "Executable:"
+            "$PYTHON" -c 'import sys; print(sys.executable)'
+
+            echo "Implementation:"
+            "$PYTHON" -c 'import sys; print(sys.implementation.name)'
+
+            echo "Free-threaded:"
+            "$PYTHON" -c 'import sys; print(getattr(sys, "_is_gil_enabled", lambda: True)() is False)'
           done
 
       - name: "Build wheels"
@@ -101,27 +110,50 @@ jobs:
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
-            FEATURES=()
-            case "$allocator" in
-              mimalloc|snmalloc|jemalloc)
-                FEATURES=(--features "$allocator")
-                ;;
-            esac
-
             echo
             echo "========================================"
             echo "Allocator: $allocator"
             echo "Python:    $PYTHON"
-            "$PYTHON" --version
             echo "Target:    ${{ matrix.platform.target }}"
             echo "========================================"
 
-            maturin build \
-              --release \
-              --target "${{ matrix.platform.target }}" \
-              --interpreter "$PYTHON" \
-              --out "wheel/$allocator" \
-              "${FEATURES[@]}"
+            "$PYTHON" --version
+
+            case "$allocator" in
+              default)
+                echo "Features: default"
+                export CARGO_FEATURES=""
+                ;;
+              mimalloc)
+                echo "Features: mimalloc"
+                export CARGO_FEATURES="mimalloc"
+                ;;
+              snmalloc)
+                echo "Features: snmalloc"
+                export CARGO_FEATURES="snmalloc"
+                ;;
+              jemalloc)
+                echo "Features: jemalloc"
+                export CARGO_FEATURES="jemalloc"
+                ;;
+            esac
+
+            export PYO3_PYTHON="$PYTHON"
+
+            echo "PYO3_PYTHON=$PYO3_PYTHON"
+
+            if [[ -n "$CARGO_FEATURES" ]]; then
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --out "wheel/$allocator" \
+                --features "$CARGO_FEATURES"
+            else
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --out "wheel/$allocator"
+            fi
           done
 
       - name: "Install wheels"
@@ -134,16 +166,41 @@ jobs:
             PYTHON="$VENV/bin/python"
 
             echo
-            echo "Installing $allocator wheel into $VENV"
+            echo "========================================"
+            echo "Installing: $allocator"
+            echo "Venv:       $VENV"
+            echo "========================================"
 
             uv pip install \
               --python "$PYTHON" \
               wheel/"$allocator"/*.whl
 
-            "$PYTHON" -c "import toml_rs; print('toml_rs:', toml_rs.__file__)"
+            "$PYTHON" -c '
+            import sys
+            import toml_rs
+
+            print("Python:", sys.version)
+            print("Executable:", sys.executable)
+            print("toml_rs:", toml_rs.__file__)
+            '
           done
 
       - name: "Run benchmark"
-        env:
-          PYTHON_VERSION: ${{ matrix.python-version }}
-        run: python bench.py
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          for allocator in default mimalloc snmalloc jemalloc; do
+            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
+            PYTHON="$VENV/bin/python"
+
+            echo
+            echo "========================================"
+            echo "BENCHMARK: $allocator"
+            echo "Python:    $PYTHON"
+            echo "========================================"
+
+            "$PYTHON" --version
+
+            "$PYTHON" bench.py
+          done
