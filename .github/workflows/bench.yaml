@@ -21,15 +21,15 @@ env:
 
 jobs:
   bench:
-    name: "${{ matrix.platform.name }} / Python ${{ matrix.python-version }}"
+    name: "${{ matrix.platform.name }} / Python ${{ matrix.python-version }} / ${{ matrix.allocator }}"
     runs-on: ${{ matrix.platform.runner }}
 
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - "3.14"
-          - "3.14t"
+        python-version: ["3.14", "3.14t"]
+
+        allocator: [default, mimalloc, snmalloc, jemalloc]
 
         platform:
           - {
@@ -59,126 +59,62 @@ jobs:
           persist-credentials: false
 
       - name: "Install uv"
-        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d
         with:
           enable-cache: false
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         if: github.event_name == 'pull_request' && github.run_attempt == 1
         with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
-          shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
+          lookup-only: false
+          shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}-${{ matrix.allocator }}
 
-      - name: "Install maturin"
-        run: uv tool install maturin
+      - name: "Create virtual environment"
+        shell: bash
+        run: |
+          set -euo pipefail
 
-      - name: "Install Rust target"
-        if: runner.os == 'Linux'
-        run: rustup target add "${{ matrix.platform.target }}"
+          uv venv \
+            ".venv-${{ matrix.python-version }}-${{ matrix.allocator }}" \
+            --python "${{ matrix.python-version }}"
 
-      - name: "Install Zig"
-        if: runner.os == 'Linux'
-        uses: mlugg/setup-zig@v2 # zizmor: ignore[unpinned-uses]
+      - name: "Build wheel"
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
         with:
-          version: 0.17.0-dev.1756+613c03321
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ runner.os == 'Linux' && 'musllinux_1_2' || '' }}
+          sccache: false
+          args: >-
+            --release
+            --out dist
+            --interpreter
+            ${{ runner.os == 'Linux'
+              && format('$PWD/.venv-{0}-{1}/bin/python{0}', matrix.python-version, matrix.allocator)
+              || format('$PWD/.venv-{0}-{1}/bin/python', matrix.python-version, matrix.allocator) }}
+            ${{ matrix.allocator != 'default' && format('--features {0}', matrix.allocator) || '' }}
+            --compatibility pypi
 
-      - name: "Check Zig"
-        if: runner.os == 'Linux'
-        run: zig version
-
-      - name: "Create virtual environments"
+      - name: "Install wheel"
         shell: bash
         run: |
           set -euo pipefail
 
-          for allocator in default mimalloc snmalloc jemalloc; do
-            uv venv \
-              ".venv-${{ matrix.python-version }}-$allocator" \
-              --python "${{ matrix.python-version }}"
-          done
+          PYTHON="$PWD/.venv-${{ matrix.python-version }}-${{ matrix.allocator }}/bin/python"
 
-      - name: "Build wheels on macOS"
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          set -euo pipefail
+          uv pip install \
+            --python "$PYTHON" \
+            dist/*.whl
 
-          for allocator in default mimalloc snmalloc jemalloc; do
-            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/python"
-
-            if [[ "$allocator" == "default" ]]; then
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --interpreter "$PYTHON" \
-                --out "wheel/$allocator"
-            else
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --interpreter "$PYTHON" \
-                --out "wheel/$allocator" \
-                --features "$allocator"
-            fi
-          done
-
-      - name: "Build wheels on Linux"
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${{ matrix.python-version }}" == "3.14t" ]]; then
-            PYTHON_NAME="python3.14t"
-          else
-            PYTHON_NAME="python3.14"
-          fi
-
-          for allocator in default mimalloc snmalloc jemalloc; do
-            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/$PYTHON_NAME"
-
-            if [[ "$allocator" == "default" ]]; then
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --interpreter "$PYTHON" \
-                --out "wheel/$allocator"
-            else
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --interpreter "$PYTHON" \
-                --out "wheel/$allocator" \
-                --features "$allocator" \
-                --zig
-            fi
-          done
-
-      - name: "Install wheels"
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          for allocator in default mimalloc snmalloc jemalloc; do
-            PYTHON="$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python"
-
-            uv pip install \
-              --python "$PYTHON" \
-              wheel/"$allocator"/*.whl
-
-            "$PYTHON" -c "import toml_rs"
-          done
+          "$PYTHON" -c "import toml_rs"
 
       - name: "Run benchmark"
         shell: bash
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
+          ALLOCATOR: ${{ matrix.allocator }}
         run: |
           set -euo pipefail
 
-          for allocator in default mimalloc snmalloc jemalloc; do
-            PYTHON="$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python"
-            "$PYTHON" bench.py
-          done
+          PYTHON="$PWD/.venv-${{ matrix.python-version }}-${{ matrix.allocator }}/bin/python"
+
+          "$PYTHON" bench.py
