@@ -26,6 +26,11 @@ inputs:
     required: false
     default: "."
 
+  rustflags:
+    description: "Additional RUSTFLAGS"
+    required: false
+    default: ""
+
 outputs:
   wheel:
     description: "Path to the built wheel"
@@ -59,7 +64,9 @@ runs:
           --compatibility pypi
         docker-options: -e CI -e RUSTFLAGS
       env:
-        RUSTFLAGS: "-Cprofile-generate=${{ github.workspace }}/profdata"
+        RUSTFLAGS: >-
+          -Cprofile-generate=${{ github.workspace }}/profdata
+          ${{ inputs.rustflags }}
 
     - name: "🔬 Phase 2/4: Generate PGO data"
       working-directory: ${{ inputs.working-directory }}
@@ -98,7 +105,9 @@ runs:
         rust-toolchain: ${{ inputs.rust-toolchain }}
         docker-options: -e CI -e RUSTFLAGS
       env:
-        RUSTFLAGS: "-Cprofile-use=${{ github.workspace }}/merged.profdata"
+        RUSTFLAGS: >-
+          -Cprofile-generate=${{ github.workspace }}/merged.profdata
+          ${{ inputs.rustflags }}
 
     - name: "Show built wheels"
       id: find_wheel

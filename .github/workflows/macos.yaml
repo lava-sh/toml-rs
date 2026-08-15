@@ -23,6 +23,7 @@ jobs:
             target: x86_64-apple-darwin,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
+            rustflags: "-C linker=rust-lld -C linker-flavor=ld64.lld -C link-arg=--icf=safe",
             use-pgo: true,
           }
           - {
@@ -31,6 +32,7 @@ jobs:
             target: aarch64-apple-darwin,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",
+            rustflags: "-C linker=rust-lld -C linker-flavor=ld64.lld -C link-arg=--icf=safe",
             use-pgo: true,
           }
           - {
@@ -84,6 +86,7 @@ jobs:
           interpreter: ${{ matrix.platform.interpreter }}
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
           maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
+          rustflags: ${{ matrix.platform.rustflags || '' }}
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
