@@ -85,76 +85,86 @@ jobs:
             echo "Creating: $VENV"
             echo "========================================"
 
-            uv venv "$VENV" --python "${{ matrix.python-version }}"
+            uv venv \
+              "$VENV" \
+              --python "${{ matrix.python-version }}"
 
             PYTHON="$PWD/$VENV/bin/python"
 
             "$PYTHON" --version
-
-            echo "Executable:"
             "$PYTHON" -c 'import sys; print(sys.executable)'
-
-            echo "Implementation:"
-            "$PYTHON" -c 'import sys; print(sys.implementation.name)'
-
-            echo "Free-threaded:"
-            "$PYTHON" -c 'import sys; print(getattr(sys, "_is_gil_enabled", lambda: True)() is False)'
           done
+
+      - name: "Configure Python for maturin"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ matrix.platform.target }}" == *"-musl" ]]; then
+            echo "PYO3_CROSS_PYTHON_VERSION=${{ matrix.python-version }}" >> "$GITHUB_ENV"
+          fi
 
       - name: "Build wheels"
         shell: bash
         run: |
           set -euo pipefail
 
+          mkdir -p wheel
+
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
+            case "$allocator" in
+              default)
+                FEATURES=()
+                ;;
+              mimalloc)
+                FEATURES=(--features mimalloc)
+                ;;
+              snmalloc)
+                FEATURES=(--features snmalloc)
+                ;;
+              jemalloc)
+                FEATURES=(--features jemalloc)
+                ;;
+            esac
+
             echo
             echo "========================================"
-            echo "Allocator: $allocator"
-            echo "Python:    $PYTHON"
-            echo "Target:    ${{ matrix.platform.target }}"
+            echo "Allocator : $allocator"
+            echo "Python    : $PYTHON"
+            echo "Target    : ${{ matrix.platform.target }}"
+            echo "Features  : ${FEATURES[*]:-default}"
             echo "========================================"
 
             "$PYTHON" --version
 
-            case "$allocator" in
-              default)
-                echo "Features: default"
-                export CARGO_FEATURES=""
-                ;;
-              mimalloc)
-                echo "Features: mimalloc"
-                export CARGO_FEATURES="mimalloc"
-                ;;
-              snmalloc)
-                echo "Features: snmalloc"
-                export CARGO_FEATURES="snmalloc"
-                ;;
-              jemalloc)
-                echo "Features: jemalloc"
-                export CARGO_FEATURES="jemalloc"
-                ;;
-            esac
-
-            export PYO3_PYTHON="$PYTHON"
-
-            echo "PYO3_PYTHON=$PYO3_PYTHON"
-
-            if [[ -n "$CARGO_FEATURES" ]]; then
+            if [[ "${{ matrix.platform.target }}" == *"-musl" ]]; then
               maturin build \
                 --release \
                 --target "${{ matrix.platform.target }}" \
                 --out "wheel/$allocator" \
-                --features "$CARGO_FEATURES"
+                "${FEATURES[@]}"
             else
               maturin build \
                 --release \
                 --target "${{ matrix.platform.target }}" \
-                --out "wheel/$allocator"
+                --interpreter "$PYTHON" \
+                --out "wheel/$allocator" \
+                "${FEATURES[@]}"
             fi
           done
+
+      - name: "Show built wheels"
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo
+          echo "================ BUILT WHEELS ================"
+          find wheel -type f -name "*.whl" -print | sort
+          echo "==============================================="
 
       - name: "Install wheels"
         shell: bash
@@ -167,8 +177,8 @@ jobs:
 
             echo
             echo "========================================"
-            echo "Installing: $allocator"
-            echo "Venv:       $VENV"
+            echo "Installing : $allocator"
+            echo "Python     : $PYTHON"
             echo "========================================"
 
             uv pip install \
@@ -190,14 +200,19 @@ jobs:
         run: |
           set -euo pipefail
 
+          echo
+          echo "=============================================="
+          echo "RUNNING BENCHMARK"
+          echo "=============================================="
+
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
             echo
             echo "========================================"
-            echo "BENCHMARK: $allocator"
-            echo "Python:    $PYTHON"
+            echo "BENCHMARK : $allocator"
+            echo "Python    : $PYTHON"
             echo "========================================"
 
             "$PYTHON" --version
