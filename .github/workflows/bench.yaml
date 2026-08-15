@@ -78,7 +78,7 @@ jobs:
 
       - name: "Install Zig"
         if: runner.os == 'Linux'
-        uses: https://codeberg.org/mlugg/setup-zig@v2 # zizmor: ignore[unpinned-uses]
+        uses: mlugg/setup-zig@v2 # zizmor: ignore[unpinned-uses]
         with:
           version: 0.17.0-dev.1756+613c03321
 
