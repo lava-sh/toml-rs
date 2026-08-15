@@ -83,7 +83,7 @@ jobs:
         shell: bash
         run: |
           for allocator in default mimalloc snmalloc jemalloc; do
-            VENV=".venv-${{ matrix.python-version }}-$allocator"
+            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
 
             case "$allocator" in
               default)
@@ -100,22 +100,22 @@ jobs:
                 ;;
             esac
 
-            maturin build \
-              --release \
-              --target "${{ matrix.platform.target }}" \
-              --interpreter "$PWD/$VENV/bin/python" \
-              --out "wheel/$allocator" \
-              $FEATURES
+            PYO3_PYTHON="$VENV/bin/python" \
+              maturin build \
+                --release \
+                --target "${{ matrix.platform.target }}" \
+                --out "wheel/$allocator" \
+                $FEATURES
           done
 
       - name: "Install wheels"
         shell: bash
         run: |
           for allocator in default mimalloc snmalloc jemalloc; do
-            VENV=".venv-${{ matrix.python-version }}-$allocator"
+            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
 
             uv pip install \
-              --python "$PWD/$VENV/bin/python" \
+              --python "$VENV/bin/python" \
               wheel/$allocator/*.whl
           done
 

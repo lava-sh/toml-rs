@@ -1,5 +1,6 @@
 import os
 import platform
+import statistics
 import subprocess
 import sys
 import time
@@ -7,15 +8,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 EXAMPLE = ROOT / "tests" / "data" / "example.toml"
-
-VERSION = os.environ["PYTHON_VERSION"]
+PYTHON_VERSION = os.environ["PYTHON_VERSION"]
 
 PYTHONS = {
-    "default": ROOT / f".venv-{VERSION}-default" / "bin" / "python",
-    "mimalloc": ROOT / f".venv-{VERSION}-mimalloc" / "bin" / "python",
-    "snmalloc": ROOT / f".venv-{VERSION}-snmalloc" / "bin" / "python",
-    "jemalloc": ROOT / f".venv-{VERSION}-jemalloc" / "bin" / "python",
+    "default": ROOT / f".venv-{PYTHON_VERSION}-default" / "bin" / "python",
+    "mimalloc": ROOT / f".venv-{PYTHON_VERSION}-mimalloc" / "bin" / "python",
+    "snmalloc": ROOT / f".venv-{PYTHON_VERSION}-snmalloc" / "bin" / "python",
+    "jemalloc": ROOT / f".venv-{PYTHON_VERSION}-jemalloc" / "bin" / "python",
 }
+
 SAMPLES = 15
 RUNS = 10_000
 WARMUP = 2_000
@@ -62,7 +63,7 @@ def main():
         toml_rs.loads(data)
 
     samples = []
-    peak_memory = 0
+    peak_memory = get_memory()
 
     for _ in range(%d):
         start = time.perf_counter_ns()
@@ -75,19 +76,16 @@ def main():
         samples.append(elapsed)
         peak_memory = max(peak_memory, get_memory())
 
-    samples.sort()
-
     mean = statistics.mean(samples)
     median = statistics.median(samples)
-    stdev = statistics.stdev(samples) if len(samples) > 1 else 0
+    stdev = statistics.stdev(samples)
 
     print(
         median,
         mean,
         stdev,
-        samples[0],
-        samples[-1],
-        percentile(samples, 0.50),
+        min(samples),
+        max(samples),
         percentile(samples, 0.90),
         percentile(samples, 0.95),
         percentile(samples, 0.99),
@@ -100,9 +98,7 @@ if __name__ == "__main__":
 """ % (WARMUP, SAMPLES, RUNS)
 
 
-def run_bench(
-    python: Path,
-) -> tuple[float, ...]:
+def run_bench(python: Path) -> tuple[float, ...]:
     result = subprocess.run(
         [
             str(python),
@@ -142,7 +138,7 @@ def print_header() -> None:
     print(f"  Architecture : {platform.machine()}")
     print(f"  CPU          : {platform.processor() or 'unknown'}")
     print(f"  CPUs         : {os.cpu_count()}")
-    print(f"  Python       : {sys.version.split()[0]}")
+    print(f"  Python       : {PYTHON_VERSION}")
     print(f"  File         : {EXAMPLE}")
     print(f"  File size    : {EXAMPLE.stat().st_size / 1024:.2f} KiB")
     print(f"  Samples      : {SAMPLES:,}")
@@ -151,9 +147,7 @@ def print_header() -> None:
     print()
 
 
-def print_table(
-    results: dict[str, tuple[float, ...]],
-) -> None:
+def print_table(results: dict[str, tuple[float, ...]]) -> None:
     baseline = results["default"][0]
 
     rows = []
@@ -165,7 +159,6 @@ def print_table(
             stdev,
             minimum,
             maximum,
-            p50,
             p90,
             p95,
             p99,
@@ -208,32 +201,37 @@ def print_table(
         for i in range(len(headers))
     ]
 
-    print("  ┌" + "─┬".join("─" * width for width in widths) + "┐")
+    print("  ┌" + "┬".join("─" * (width + 2) for width in widths) + "┐")
 
     print(
         "  │"
-        + "│".join(f" {header:^{width - 2}} " for header, width in zip(headers, widths))
+        + "│".join(
+            f" {header:^{width}} "
+            for header, width in zip(headers, widths)
+        )
         + "│",
     )
 
-    print("  ├" + "┼".join("─" * width for width in widths) + "┤")
+    print("  ├" + "┼".join("─" * (width + 2) for width in widths) + "┤")
 
     for row in rows:
         print(
             "  │"
             + "│".join(
-                (f" {value:<{width - 2}} " if i == 0 else f" {value:>{width - 2}} ")
+                (
+                    f" {value:<{width}} "
+                    if i == 0
+                    else f" {value:>{width}} "
+                )
                 for i, (value, width) in enumerate(zip(row, widths))
             )
             + "│",
         )
 
-    print("  └" + "┴".join("─" * width for width in widths) + "┘")
+    print("  └" + "┴".join("─" * (width + 2) for width in widths) + "┘")
 
 
-def print_summary(
-    results: dict[str, tuple[float, ...]],
-) -> None:
+def print_summary(results: dict[str, tuple[float, ...]]) -> None:
     baseline = results["default"][0]
 
     fastest = min(
@@ -243,7 +241,7 @@ def print_summary(
 
     lowest_memory = min(
         results.items(),
-        key=lambda item: item[1][9],
+        key=lambda item: item[1][8],
     )
 
     most_stable = min(
@@ -262,18 +260,20 @@ def print_summary(
     )
 
     print(
-        f"│  Lowest memory : {lowest_memory[0]} ({format_memory(lowest_memory[1][9])})",
+        f"│  Lowest memory : {lowest_memory[0]} "
+        f"({format_memory(lowest_memory[1][8])})",
     )
 
     print(
-        f"│  Most stable   : {most_stable[0]} (stdev {format_time(most_stable[1][2])})",
+        f"│  Most stable   : {most_stable[0]} "
+        f"(stdev {format_time(most_stable[1][2])})",
     )
 
     print("│")
 
     for name, values in results.items():
         median = values[0]
-        memory = values[9]
+        memory = values[8]
 
         delta = ((median / baseline) - 1) * 100
 
@@ -281,15 +281,19 @@ def print_summary(
             print("│  default       : baseline")
         elif delta < 0:
             print(
-                f"│  {name:<14}: {abs(delta):.2f}% faster than default",
+                f"│  {name:<14}: "
+                f"{abs(delta):.2f}% faster than default",
             )
         else:
             print(
-                f"│  {name:<14}: {delta:.2f}% slower than default",
+                f"│  {name:<14}: "
+                f"{delta:.2f}% slower than default",
             )
 
         print(
-            f"│                  time={format_time(median)}, RSS={format_memory(memory)}",
+            f"│                  "
+            f"time={format_time(median)}, "
+            f"RSS={format_memory(memory)}",
         )
 
     print("│")
@@ -303,8 +307,9 @@ def main() -> None:
 
     for name, python in PYTHONS.items():
         if not python.exists():
-            print(f"  [skip] {name}: {python}")
-            continue
+            raise SystemExit(
+                f"Python interpreter not found: {python}",
+            )
 
         print(
             f"  Benchmarking {name:<10} ...",
@@ -323,9 +328,6 @@ def main() -> None:
             f"  done ({wall:.2f}s)",
             flush=True,
         )
-
-    if "default" not in results:
-        raise SystemExit("default Python environment not found")
 
     print()
     print_table(results)
