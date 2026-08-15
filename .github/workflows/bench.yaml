@@ -1,0 +1,113 @@
+name: "bench"
+
+on:
+  workflow_call:
+
+env:
+  FORCE_COLOR: "1"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  bench:
+    name: "${{ matrix.platform.name }} / Python ${{ matrix.python-version }}"
+    runs-on: ${{ matrix.platform.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.14", "3.14t"]
+
+        platform:
+          - {
+              name: "macOS Intel",
+              runner: "macos-26-intel",
+              target: "x86_64-apple-darwin",
+            }
+          - {
+              name: "macOS ARM",
+              runner: "macos-latest",
+              target: "aarch64-apple-darwin",
+            }
+          - {
+              name: "Linux ARM musl",
+              runner: "ubuntu-26.04-arm",
+              target: "aarch64-unknown-linux-musl",
+            }
+          - {
+              name: "Linux x86_64 musl",
+              runner: "ubuntu-latest",
+              target: "x86_64-unknown-linux-musl",
+            }
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v10.0.0
+        with:
+          enable-cache: false
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        if: github.event_name == 'pull_request' && github.run_attempt == 1
+        with:
+          lookup-only: false # zizmor: ignore[cache-poisoning]
+          shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
+
+      - name: "Install maturin"
+        run: uv tool install maturin
+
+      - name: "Create virtual environments"
+        shell: bash
+        run: |
+          for allocator in default mimalloc snmalloc jemalloc; do
+            uv venv \
+              ".venv-${{ matrix.python-version }}-$allocator" \
+              --python "${{ matrix.python-version }}"
+          done
+
+      - name: "Build wheels"
+        shell: bash
+        run: |
+          for allocator in default mimalloc snmalloc jemalloc; do
+            VENV=".venv-${{ matrix.python-version }}-$allocator"
+
+            case "$allocator" in
+              default)
+                FEATURES=""
+                ;;
+              mimalloc)
+                FEATURES="--features mimalloc"
+                ;;
+              snmalloc)
+                FEATURES="--features snmalloc"
+                ;;
+              jemalloc)
+                FEATURES="--features jemalloc"
+                ;;
+            esac
+
+            maturin build \
+              --release \
+              --target "${{ matrix.platform.target }}" \
+              --interpreter "$PWD/$VENV/bin/python" \
+              --out "wheel/$allocator" \
+              $FEATURES
+          done
+
+      - name: "Install wheels"
+        shell: bash
+        run: |
+          for allocator in default mimalloc snmalloc jemalloc; do
+            VENV=".venv-${{ matrix.python-version }}-$allocator"
+
+            uv pip install \
+              --python "$PWD/$VENV/bin/python" \
+              wheel/$allocator/*.whl
+          done
+
+      - name: "Run benchmark"
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: python bench.py

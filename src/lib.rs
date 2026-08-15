@@ -11,6 +11,12 @@ cfg_select! {
         #[global_allocator]
         static GLOBAL_ALLOCATOR: MiMalloc = MiMalloc;
     }
+    feature = "jemalloc" => {
+        use tikv_jemallocator::Jemalloc;
+
+        #[global_allocator]
+        static GLOBAL_ALLOCATOR: Jemalloc = Jemalloc;
+    }
     feature = "snmalloc" => {
         use snmalloc_rs::SnMalloc;
 
