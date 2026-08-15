@@ -4,21 +4,9 @@ mod error;
 mod v1;
 mod v1_1;
 
-cfg_select! {
-    feature = "mimalloc" => {
-        use mimalloc::MiMalloc;
-
-        #[global_allocator]
-        static GLOBAL_ALLOCATOR: MiMalloc = MiMalloc;
-    }
-    feature = "snmalloc" => {
-        use snmalloc_rs::SnMalloc;
-
-        #[global_allocator]
-        static GLOBAL_ALLOCATOR: SnMalloc = SnMalloc;
-    }
-    _ => {}
-}
+#[cfg(feature = "mimalloc")]
+#[global_allocator]
+static GLOBAL_ALLOCATOR: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[pyo3::pymodule(name = "_toml_rs")]
 mod toml_rs {

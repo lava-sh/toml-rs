@@ -6,119 +6,188 @@
 
 2. Clone your fork
 
-via [git](https://git-scm.com/install):
+<p>
+  <img
+    src="https://thesvg.org/icons/git/default.svg"
+    alt="Python"
+    height="14"
+  />
+  using <a href="[https://github.com/pypa/pip](https://git-scm.com/install)">git</a>:
+</p>
 
-```bash
+```console
 git clone https://github.com/<USERNAME>/toml-rs.git
 cd toml-rs
 ```
 
-via [GitHub CLI](https://cli.github.com):
+<p>
+  <img
+    src="https://thesvg.org/icons/refined-github/default.svg"
+    alt="GitHub"
+    height="14"
+  />
+  using <a href="https://cli.github.com">GitHub CLI</a>:
+</p>
 
-```bash
+```console
 gh repo clone <USERNAME>/toml-rs
 cd toml-rs
 ```
 
-3. Create and activate [virtual environment](https://docs.python.org/3/library/venv.html):
+3. Create and activate a [virtual environment](https://docs.python.org/3/library/venv.html):
 
-on Linux / MacOS:
+<p>
+  <span style="white-space: nowrap;">
+    <img
+      src="https://thesvg.org/icons/linux/default.svg"
+      alt="linux"
+      height="14"
+    />
+    Linux /
+    <picture>
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="https://thesvg.org/icons/apple/default.svg"
+      />
+      <img
+        src="https://thesvg.org/icons/apple/mono.svg"
+        alt="macos"
+        height="14"
+      />
+    </picture>
+    MacOS:
+  </span>
+</p>
 
-```bash
-python3 -m venv .venv  # or uv venv .venv --seed
+```console
+python3 -m venv .venv
+# or uv venv .venv --seed
+
 source .venv/bin/activate
 ```
 
-on Windows:
+<p>
+  <img
+    src="https://thesvg.org/icons/windows/default.svg"
+    alt="windows"
+    height="14"
+  />
+  Windows:
+</p>
 
-```bash
-py -m venv .venv  # or uv venv .venv --seed
+```console
+py -m venv .venv
+# or uv venv .venv --seed
+
 .venv\scripts\activate
 ```
 
-4. Install development dependencies and project itself:
+4. Install development dependencies and the project itself:
 
-via pip:
+<p>
+  <img
+    src="https://thesvg.org/icons/python/default.svg"
+    alt="Python"
+    height="14"
+  />
+  using <a href="https://github.com/pypa/pip">pip</a>:
+</p>
 
-```bash
+```console
 pip install -e . --group dev
 ```
 
-via [uv](https://github.com/astral-sh/uv):
+<p>
+  <img
+    src="https://thesvg.org/icons/uv/default.svg"
+    alt="uv"
+    height="14"
+  />
+  using <a href="https://github.com/astral-sh/uv">uv</a>:
+</p>
 
 ```text
 uv pip install -e . --group dev
 ```
 
-## Running linters
+## Running linters, code formatters, type checkers
 
-We use [ruff](https://github.com/astral-sh/ruff) to check code. To run it do:
+### Python
 
-```bash
+We use [ruff](https://github.com/astral-sh/ruff) to lint Python code. To run it, do:
+
+```console
 ruff check
 ```
 
-We use [rumdl](https://github.com/rvben/rumdl) to lint Markdown files. To run it do:
+We use [ty](https://github.com/astral-sh/ty) to check Python types. To run it, do:
 
-```bash
-rumdl check
+```console
+ty check
 ```
 
-## Running type checker
+### Rust
 
-We use [ty](https://github.com/astral-sh/ty) to check types. To run it do:
+We use [rustfmt](https://github.com/rust-lang/rustfmt) to format Rust code. To run it, do:
 
-```bash
-ty check
+```console
+cargo fmt-nightly
+```
+
+We use [clippy](https://github.com/rust-lang/rust-clippy) to lint Rust code. To run it, do:
+
+```console
+cargo clippy
+```
+
+### Markdown
+
+We use [rumdl](https://github.com/rvben/rumdl) to lint Markdown files. To run it, do:
+
+```console
+rumdl check
 ```
 
 ## Running tests
 
-We use [nox](https://github.com/wntrblm/nox) for tests. To run it do:
+We use [nox](https://github.com/wntrblm/nox) for tests. To run it, do:
 
-```bash
+```console
 nox
 ```
 
 ## Running security audit for GitHub Actions
 
-We use [zizmor](https://github.com/zizmorcore/zizmor) to audit our GitHub Actions workflows for security issues. To run
-it do:
+We use [zizmor](https://github.com/zizmorcore/zizmor) to audit our
+GitHub Actions workflows for security issues. To run it, do:
 
-```bash
+```console
 zizmor .github/
 ```
 
 ## Running spell check
 
-We use [typos](https://github.com/crate-ci/typos) to check our code for spelling mistakes. To run it locally:
+We use [typos](https://github.com/crate-ci/typos) to check our code for spelling mistakes. To run it, do:
 
-```bash
+```console
 typos
 ```
 
 ## Building with alternative allocators
 
-Project supports compilation with alternative memory
-allocators: [mimalloc](https://github.com/microsoft/mimalloc/tree/dev3)
-and [snmalloc](https://github.com/microsoft/snmalloc).
+Project supports compilation with alternative memory allocators,
+such as [mimalloc](https://github.com/microsoft/mimalloc/tree/dev3).
 
-[Mimalloc](https://github.com/microsoft/mimalloc/tree/dev3) is used by default.
+[Mimalloc](https://github.com/microsoft/mimalloc/tree/dev3) is used where possible.
 
 Building with [mimalloc](https://github.com/microsoft/mimalloc/tree/dev3):
 
-```bash
+```console
 maturin develop --release --features mimalloc
 ```
 
-Building with [snmalloc](https://github.com/microsoft/snmalloc):
+Building with the default (system) allocator:
 
-```bash
-maturin develop --release --features snmalloc
-```
-
-Building with default allocator:
-
-```bash
+```console
 maturin develop --release
 ```
