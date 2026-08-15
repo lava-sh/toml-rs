@@ -106,7 +106,7 @@ pip install -e . --group dev
   using <a href="https://github.com/astral-sh/uv">uv</a>:
 </p>
 
-```text
+```console
 uv pip install -e . --group dev
 ```
 
