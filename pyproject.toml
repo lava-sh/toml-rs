@@ -65,7 +65,7 @@ wasm-test = [
 ]
 # https://pypi.org/project/tomli/2.3.1
 # It is fully compatible with TOML v1.0.0
-tomli-1 = ["tomli == 2.3.*"]
+tomli-1 = ["tomli == 2.3.1"]
 # https://pypi.org/project/tomli/2.4.1
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.4.1"]
