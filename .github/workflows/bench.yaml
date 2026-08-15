@@ -27,9 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version:
-          - "3.14"
-          - "3.14t"
+        python-version: ["3.14", "3.14t"]
 
         platform:
           - {
@@ -85,9 +83,7 @@ jobs:
             echo "Creating: $VENV"
             echo "========================================"
 
-            uv venv \
-              "$VENV" \
-              --python "${{ matrix.python-version }}"
+            uv venv "$VENV" --python "${{ matrix.python-version }}"
 
             PYTHON="$PWD/$VENV/bin/python"
 
@@ -95,16 +91,12 @@ jobs:
             "$PYTHON" -c 'import sys; print(sys.executable)'
           done
 
-      - name: "Configure Python for maturin"
-        shell: bash
-        run: |
-          set -euo pipefail
+      # ------------------------------------------------------------
+      # macOS
+      # ------------------------------------------------------------
 
-          if [[ "${{ matrix.platform.target }}" == *"-musl" ]]; then
-            echo "PYO3_CROSS_PYTHON_VERSION=${{ matrix.python-version }}" >> "$GITHUB_ENV"
-          fi
-
-      - name: "Build wheels"
+      - name: "Build macOS wheels"
+        if: runner.os == 'macOS'
         shell: bash
         run: |
           set -euo pipefail
@@ -117,44 +109,144 @@ jobs:
 
             case "$allocator" in
               default)
-                FEATURES=()
+                echo
+                echo "========================================"
+                echo "Allocator : default"
+                echo "Python    : $PYTHON"
+                echo "Target    : ${{ matrix.platform.target }}"
+                echo "Features  : default"
+                echo "========================================"
+
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --interpreter "$PYTHON" \
+                  --out "wheel/$allocator"
                 ;;
+
               mimalloc)
-                FEATURES=(--features mimalloc)
+                echo
+                echo "========================================"
+                echo "Allocator : mimalloc"
+                echo "Python    : $PYTHON"
+                echo "Target    : ${{ matrix.platform.target }}"
+                echo "Features  : mimalloc"
+                echo "========================================"
+
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --interpreter "$PYTHON" \
+                  --features mimalloc \
+                  --out "wheel/$allocator"
                 ;;
+
               snmalloc)
-                FEATURES=(--features snmalloc)
+                echo
+                echo "========================================"
+                echo "Allocator : snmalloc"
+                echo "Python    : $PYTHON"
+                echo "Target    : ${{ matrix.platform.target }}"
+                echo "Features  : snmalloc"
+                echo "========================================"
+
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --interpreter "$PYTHON" \
+                  --features snmalloc \
+                  --out "wheel/$allocator"
                 ;;
+
               jemalloc)
-                FEATURES=(--features jemalloc)
+                echo
+                echo "========================================"
+                echo "Allocator : jemalloc"
+                echo "Python    : $PYTHON"
+                echo "Target    : ${{ matrix.platform.target }}"
+                echo "Features  : jemalloc"
+                echo "========================================"
+
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --interpreter "$PYTHON" \
+                  --features jemalloc \
+                  --out "wheel/$allocator"
                 ;;
             esac
+          done
+
+      # ------------------------------------------------------------
+      # Linux musl
+      # ------------------------------------------------------------
+
+      - name: "Configure Python for Linux musl"
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "PYO3_CROSS_PYTHON_VERSION=${{ matrix.python-version }}" >> "$GITHUB_ENV"
+
+      - name: "Build Linux musl wheels"
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p wheel
+
+          for allocator in default mimalloc snmalloc jemalloc; do
+            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
+            PYTHON="$VENV/bin/python"
 
             echo
             echo "========================================"
             echo "Allocator : $allocator"
             echo "Python    : $PYTHON"
             echo "Target    : ${{ matrix.platform.target }}"
-            echo "Features  : ${FEATURES[*]:-default}"
             echo "========================================"
 
             "$PYTHON" --version
 
-            if [[ "${{ matrix.platform.target }}" == *"-musl" ]]; then
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --out "wheel/$allocator" \
-                "${FEATURES[@]}"
-            else
-              maturin build \
-                --release \
-                --target "${{ matrix.platform.target }}" \
-                --interpreter "$PYTHON" \
-                --out "wheel/$allocator" \
-                "${FEATURES[@]}"
-            fi
+            case "$allocator" in
+              default)
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --out "wheel/$allocator"
+                ;;
+
+              mimalloc)
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --features mimalloc \
+                  --out "wheel/$allocator"
+                ;;
+
+              snmalloc)
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --features snmalloc \
+                  --out "wheel/$allocator"
+                ;;
+
+              jemalloc)
+                maturin build \
+                  --release \
+                  --target "${{ matrix.platform.target }}" \
+                  --features jemalloc \
+                  --out "wheel/$allocator"
+                ;;
+            esac
           done
+
+      # ------------------------------------------------------------
+      # Verify wheels
+      # ------------------------------------------------------------
 
       - name: "Show built wheels"
         shell: bash
@@ -163,8 +255,25 @@ jobs:
 
           echo
           echo "================ BUILT WHEELS ================"
-          find wheel -type f -name "*.whl" -print | sort
+
+          find wheel \
+            -type f \
+            -name "*.whl" \
+            -print \
+            | sort
+
+          echo
+          echo "================ WHEEL TAGS =================="
+
+          for wheel in wheel/*/*.whl; do
+            echo "$wheel"
+          done
+
           echo "==============================================="
+
+      # ------------------------------------------------------------
+      # Install
+      # ------------------------------------------------------------
 
       - name: "Install wheels"
         shell: bash
@@ -193,7 +302,19 @@ jobs:
             print("Executable:", sys.executable)
             print("toml_rs:", toml_rs.__file__)
             '
+
+            "$PYTHON" -c '
+            import toml_rs
+
+            assert toml_rs.loads("foo = 42")["foo"] == 42
+
+            print("Import test: OK")
+            '
           done
+
+      # ------------------------------------------------------------
+      # Benchmark
+      # ------------------------------------------------------------
 
       - name: "Run benchmark"
         shell: bash
