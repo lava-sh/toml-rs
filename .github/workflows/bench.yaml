@@ -21,15 +21,13 @@ env:
 
 jobs:
   bench:
-    name: "${{ matrix.platform.name }} / Python ${{ matrix.python-version }} / ${{ matrix.allocator }}"
+    name: "${{ matrix.platform.name }} / Python ${{ matrix.python-version }}"
     runs-on: ${{ matrix.platform.runner }}
 
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.14", "3.14t"]
-
-        allocator: [default, mimalloc, snmalloc, jemalloc]
 
         platform:
           - {
@@ -66,19 +64,21 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         if: github.event_name == 'pull_request' && github.run_attempt == 1
         with:
-          lookup-only: false
-          shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}-${{ matrix.allocator }}
+          lookup-only: false # zizmor: ignore[cache-poisoning]
+          shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
 
-      - name: "Create virtual environment"
+      - name: "Create virtual environments"
         shell: bash
         run: |
           set -euo pipefail
 
-          uv venv \
-            ".venv-${{ matrix.python-version }}-${{ matrix.allocator }}" \
-            --python "${{ matrix.python-version }}"
+          for allocator in default mimalloc snmalloc jemalloc; do
+            uv venv \
+              ".venv-${{ matrix.python-version }}-$allocator" \
+              --python "${{ matrix.python-version }}"
+          done
 
-      - name: "Build wheel"
+      - name: "Build default wheel"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
         with:
           target: ${{ matrix.platform.target }}
@@ -86,35 +86,78 @@ jobs:
           sccache: false
           args: >-
             --release
-            --out dist
+            --out dist/default
             --interpreter
-            ${{ runner.os == 'Linux'
-              && format('$PWD/.venv-{0}-{1}/bin/python{0}', matrix.python-version, matrix.allocator)
-              || format('$PWD/.venv-{0}-{1}/bin/python', matrix.python-version, matrix.allocator) }}
-            ${{ matrix.allocator != 'default' && format('--features {0}', matrix.allocator) || '' }}
+            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-default/bin/python
             --compatibility pypi
 
-      - name: "Install wheel"
+      - name: "Build mimalloc wheel"
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ runner.os == 'Linux' && 'musllinux_1_2' || '' }}
+          sccache: false
+          args: >-
+            --release
+            --out dist/mimalloc
+            --interpreter
+            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-mimalloc/bin/python
+            --features mimalloc
+            --compatibility pypi
+
+      - name: "Build snmalloc wheel"
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ runner.os == 'Linux' && 'musllinux_1_2' || '' }}
+          sccache: false
+          args: >-
+            --release
+            --out dist/snmalloc
+            --interpreter
+            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-snmalloc/bin/python
+            --features snmalloc
+            --compatibility pypi
+
+      - name: "Build jemalloc wheel"
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b
+        with:
+          target: ${{ matrix.platform.target }}
+          manylinux: ${{ runner.os == 'Linux' && 'musllinux_1_2' || '' }}
+          sccache: false
+          args: >-
+            --release
+            --out dist/jemalloc
+            --interpreter
+            ${{ github.workspace }}/.venv-${{ matrix.python-version }}-jemalloc/bin/python
+            --features jemalloc
+            --compatibility pypi
+
+      - name: "Install wheels"
         shell: bash
         run: |
           set -euo pipefail
 
-          PYTHON="$PWD/.venv-${{ matrix.python-version }}-${{ matrix.allocator }}/bin/python"
+          for allocator in default mimalloc snmalloc jemalloc; do
+            PYTHON="$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python"
 
-          uv pip install \
-            --python "$PYTHON" \
-            dist/*.whl
+            uv pip install \
+              --python "$PYTHON" \
+              dist/"$allocator"/*.whl
 
-          "$PYTHON" -c "import toml_rs"
+            "$PYTHON" -c "import toml_rs"
+          done
 
       - name: "Run benchmark"
         shell: bash
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
-          ALLOCATOR: ${{ matrix.allocator }}
         run: |
           set -euo pipefail
 
-          PYTHON="$PWD/.venv-${{ matrix.python-version }}-${{ matrix.allocator }}/bin/python"
+          for allocator in default mimalloc snmalloc jemalloc; do
+            PYTHON="$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python"
 
-          "$PYTHON" bench.py
+            ALLOCATOR="$allocator" \
+              "$PYTHON" bench.py
+          done
