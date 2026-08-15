@@ -101,12 +101,12 @@ jobs:
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
-          FEATURES=()
-          case "$allocator" in
-            mimalloc|snmalloc|jemalloc)
-              FEATURES=(--features "$allocator")
-              ;;
-          esac
+            FEATURES=()
+            case "$allocator" in
+              mimalloc|snmalloc|jemalloc)
+                FEATURES=(--features "$allocator")
+                ;;
+            esac
 
             echo
             echo "========================================"
