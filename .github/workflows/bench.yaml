@@ -83,23 +83,6 @@ jobs:
               --python "${{ matrix.python-version }}"
           done
 
-      - name: "Prepare Linux interpreters"
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${{ matrix.python-version }}" == "3.14t" ]]; then
-            python_name="python3.14t"
-          else
-            python_name="python3.14"
-          fi
-
-          for allocator in default mimalloc snmalloc jemalloc; do
-            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            ln -s python "$VENV/bin/$python_name"
-          done
-
       - name: "Build wheels on macOS"
         if: runner.os == 'macOS'
         shell: bash
@@ -159,21 +142,21 @@ jobs:
 
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/$PYTHON_NAME"
+            export PATH="$VENV/bin:$PATH"
 
             case "$allocator" in
               default)
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
+                  --interpreter "$PYTHON_NAME" \
                   --out "wheel/$allocator"
                 ;;
               mimalloc)
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
+                  --interpreter "$PYTHON_NAME" \
                   --out "wheel/$allocator" \
                   --features mimalloc
                 ;;
@@ -181,7 +164,7 @@ jobs:
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
+                  --interpreter "$PYTHON_NAME" \
                   --out "wheel/$allocator" \
                   --features snmalloc
                 ;;
@@ -189,7 +172,7 @@ jobs:
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --interpreter "$PYTHON" \
+                  --interpreter "$PYTHON_NAME" \
                   --out "wheel/$allocator" \
                   --features jemalloc
                 ;;
