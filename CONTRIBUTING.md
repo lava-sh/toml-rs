@@ -112,7 +112,14 @@ uv pip install -e . --group dev
 
 ## Running linters, code formatters, type checkers
 
-### Python
+<h3>
+  <img
+    src="https://thesvg.org/icons/python/default.svg"
+    alt="Python"
+    height="16"
+  />
+  Python
+</h3>
 
 We use [ruff](https://github.com/astral-sh/ruff) to lint Python code. To run it, do:
 
@@ -126,7 +133,13 @@ We use [ty](https://github.com/astral-sh/ty) to check Python types. To run it, d
 ty check
 ```
 
-### Rust
+<h3>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://thesvg.org/icons/rust/dark.svg">
+    <img src="https://thesvg.org/icons/rust/light.svg" alt="Rust" height="16">
+  </picture>
+  Rust
+</h3>
 
 We use [rustfmt](https://github.com/rust-lang/rustfmt) to format Rust code. To run it, do:
 
@@ -140,7 +153,20 @@ We use [clippy](https://github.com/rust-lang/rust-clippy) to lint Rust code. To 
 cargo clippy
 ```
 
-### Markdown
+<h3>
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://thesvg.org/icons/markdown/dark.svg"
+    />
+    <img
+      src="https://thesvg.org/icons/markdown/light.svg"
+      alt="Markdown"
+      height="16"
+    />
+  </picture>
+  Markdown
+</h3>
 
 We use [rumdl](https://github.com/rvben/rumdl) to lint Markdown files. To run it, do:
 
