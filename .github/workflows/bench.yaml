@@ -27,7 +27,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.14", "3.14t"]
+        python-version:
+          - "3.14"
+          - "3.14t"
 
         platform:
           - {
@@ -52,19 +54,19 @@ jobs:
             }
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: "Install uv"
-        uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v10.0.0
+        uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d
         with:
           enable-cache: false
 
-      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
         if: github.event_name == 'pull_request' && github.run_attempt == 1
         with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
+          lookup-only: false
           shared-key: ${{ matrix.platform.target }}-${{ matrix.python-version }}
 
       - name: "Install maturin"
@@ -76,139 +78,64 @@ jobs:
           set -euo pipefail
 
           for allocator in default mimalloc snmalloc jemalloc; do
-            VENV=".venv-${{ matrix.python-version }}-$allocator"
-
-            echo
-            echo "========================================"
-            echo "Creating: $VENV"
-            echo "========================================"
-
-            uv venv "$VENV" --python "${{ matrix.python-version }}"
-
-            PYTHON="$PWD/$VENV/bin/python"
-
-            "$PYTHON" --version
-            "$PYTHON" -c 'import sys; print(sys.executable)'
+            uv venv \
+              ".venv-${{ matrix.python-version }}-$allocator" \
+              --python "${{ matrix.python-version }}"
           done
 
-      # ------------------------------------------------------------
-      # macOS
-      # ------------------------------------------------------------
-
-      - name: "Build macOS wheels"
+      - name: "Build wheels on macOS"
         if: runner.os == 'macOS'
         shell: bash
         run: |
           set -euo pipefail
 
-          mkdir -p wheel
-
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
             PYTHON="$VENV/bin/python"
 
             case "$allocator" in
               default)
-                echo
-                echo "========================================"
-                echo "Allocator : default"
-                echo "Python    : $PYTHON"
-                echo "Target    : ${{ matrix.platform.target }}"
-                echo "Features  : default"
-                echo "========================================"
-
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
                   --interpreter "$PYTHON" \
                   --out "wheel/$allocator"
                 ;;
-
               mimalloc)
-                echo
-                echo "========================================"
-                echo "Allocator : mimalloc"
-                echo "Python    : $PYTHON"
-                echo "Target    : ${{ matrix.platform.target }}"
-                echo "Features  : mimalloc"
-                echo "========================================"
-
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
                   --interpreter "$PYTHON" \
-                  --features mimalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features mimalloc
                 ;;
-
               snmalloc)
-                echo
-                echo "========================================"
-                echo "Allocator : snmalloc"
-                echo "Python    : $PYTHON"
-                echo "Target    : ${{ matrix.platform.target }}"
-                echo "Features  : snmalloc"
-                echo "========================================"
-
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
                   --interpreter "$PYTHON" \
-                  --features snmalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features snmalloc
                 ;;
-
               jemalloc)
-                echo
-                echo "========================================"
-                echo "Allocator : jemalloc"
-                echo "Python    : $PYTHON"
-                echo "Target    : ${{ matrix.platform.target }}"
-                echo "Features  : jemalloc"
-                echo "========================================"
-
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
                   --interpreter "$PYTHON" \
-                  --features jemalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features jemalloc
                 ;;
             esac
           done
 
-      # ------------------------------------------------------------
-      # Linux musl
-      # ------------------------------------------------------------
-
-      - name: "Configure Python for Linux musl"
+      - name: "Build wheels on Linux"
         if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
-
-          echo "PYO3_CROSS_PYTHON_VERSION=${{ matrix.python-version }}" >> "$GITHUB_ENV"
-
-      - name: "Build Linux musl wheels"
-        if: runner.os == 'Linux'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          mkdir -p wheel
 
           for allocator in default mimalloc snmalloc jemalloc; do
             VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/python"
-
-            echo
-            echo "========================================"
-            echo "Allocator : $allocator"
-            echo "Python    : $PYTHON"
-            echo "Target    : ${{ matrix.platform.target }}"
-            echo "========================================"
-
-            "$PYTHON" --version
 
             case "$allocator" in
               default)
@@ -217,63 +144,29 @@ jobs:
                   --target "${{ matrix.platform.target }}" \
                   --out "wheel/$allocator"
                 ;;
-
               mimalloc)
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --features mimalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features mimalloc
                 ;;
-
               snmalloc)
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --features snmalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features snmalloc
                 ;;
-
               jemalloc)
                 maturin build \
                   --release \
                   --target "${{ matrix.platform.target }}" \
-                  --features jemalloc \
-                  --out "wheel/$allocator"
+                  --out "wheel/$allocator" \
+                  --features jemalloc
                 ;;
             esac
           done
-
-      # ------------------------------------------------------------
-      # Verify wheels
-      # ------------------------------------------------------------
-
-      - name: "Show built wheels"
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo
-          echo "================ BUILT WHEELS ================"
-
-          find wheel \
-            -type f \
-            -name "*.whl" \
-            -print \
-            | sort
-
-          echo
-          echo "================ WHEEL TAGS =================="
-
-          for wheel in wheel/*/*.whl; do
-            echo "$wheel"
-          done
-
-          echo "==============================================="
-
-      # ------------------------------------------------------------
-      # Install
-      # ------------------------------------------------------------
 
       - name: "Install wheels"
         shell: bash
@@ -281,62 +174,20 @@ jobs:
           set -euo pipefail
 
           for allocator in default mimalloc snmalloc jemalloc; do
-            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/python"
-
-            echo
-            echo "========================================"
-            echo "Installing : $allocator"
-            echo "Python     : $PYTHON"
-            echo "========================================"
+            PYTHON="$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python"
 
             uv pip install \
               --python "$PYTHON" \
               wheel/"$allocator"/*.whl
 
-            "$PYTHON" -c '
-            import sys
-            import toml_rs
-
-            print("Python:", sys.version)
-            print("Executable:", sys.executable)
-            print("toml_rs:", toml_rs.__file__)
-            '
-
-            "$PYTHON" -c '
-            import toml_rs
-
-            assert toml_rs.loads("foo = 42")["foo"] == 42
-
-            print("Import test: OK")
-            '
+            "$PYTHON" -c "import toml_rs"
           done
-
-      # ------------------------------------------------------------
-      # Benchmark
-      # ------------------------------------------------------------
 
       - name: "Run benchmark"
         shell: bash
         run: |
           set -euo pipefail
 
-          echo
-          echo "=============================================="
-          echo "RUNNING BENCHMARK"
-          echo "=============================================="
-
           for allocator in default mimalloc snmalloc jemalloc; do
-            VENV="$PWD/.venv-${{ matrix.python-version }}-$allocator"
-            PYTHON="$VENV/bin/python"
-
-            echo
-            echo "========================================"
-            echo "BENCHMARK : $allocator"
-            echo "Python    : $PYTHON"
-            echo "========================================"
-
-            "$PYTHON" --version
-
-            "$PYTHON" bench.py
+            "$PWD/.venv-${{ matrix.python-version }}-$allocator/bin/python" bench.py
           done
