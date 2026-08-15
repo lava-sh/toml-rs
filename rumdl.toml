@@ -1,8 +1,9 @@
 [global]
 respect-gitignore = true
 include = [
+    "CONTRIBUTING.md",
     "README.md",
-    "benchmark/README.md"
+    "benchmark/README.md",
 ]
 exclude = [
     ".git/",
