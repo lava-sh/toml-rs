@@ -4,10 +4,14 @@ version = "0.4.0"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
+build = "build.rs"
 
 [lib]
 name = "_toml_rs"
 crate-type = ["cdylib"]
+
+[build-dependencies]
+pyo3-build-config = "=0.29.1"
 
 [dependencies]
 pyo3 = {
@@ -163,6 +167,8 @@ snmalloc-rs = {
 default = []
 mimalloc = ["dep:mimalloc"]
 snmalloc = ["dep:snmalloc-rs"]
+android = ["pyo3/abi3-py310"]
+ios = ["pyo3/abi3-py310"]
 
 [profile.release]
 opt-level = 3
