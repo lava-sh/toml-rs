@@ -80,7 +80,7 @@ jobs:
           persist-credentials: false
 
       - name: "Install uv"
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@ae62891fec2bb8e7d6c99fc78c9fec3a63790f8d # v10.0.0
         with:
           enable-cache: *is_pull_request
 
@@ -107,12 +107,13 @@ jobs:
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
-        uses: ./.github/actions/build-pgo-wheel
+        uses: lava-sh/build-pgo-wheel@main # zizmor: ignore[unpinned-uses]
         with:
           target: ${{ matrix.platform.target }}
-          interpreter: ${{ matrix.platform.interpreter }}
           rust-toolchain: ${{ steps.rust-toolchain.outputs.name }}
           maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
+          python-interpreter: ${{ matrix.platform.interpreter }}
+          pgo-training-command: "{python} benchmark/pgo.py"
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

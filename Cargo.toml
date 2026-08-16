@@ -95,7 +95,6 @@ toml_edit = {
 
 [target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies]
 mimalloc = {
-    # mimalloc v3
     optional = true,
     version = "=0.1.52",
     features = [
@@ -103,21 +102,9 @@ mimalloc = {
         "local_dynamic_tls",
     ]
 }
-snmalloc-rs = {
-    optional = true,
-    version = "=0.7.4",
-    default-features = false,
-    features = [
-        "lto",
-        "build_cc",
-        "native-cpu",
-        "local_dynamic_tls",
-    ]
-}
 
 [target.'cfg(target_os = "macos")'.dependencies]
 mimalloc = {
-    # mimalloc v3
     optional = true,
     version = "=0.1.52",
     # See: https://github.com/lava-sh/toml-rs/issues/229
@@ -129,40 +116,17 @@ mimalloc = {
         "local_dynamic_tls",
     ]
 }
-snmalloc-rs = {
-    optional = true,
-    version = "=0.7.4",
-    default-features = false,
-    features = [
-        "lto",
-        "build_cc",
-        "native-cpu",
-        "local_dynamic_tls",
-    ]
-}
 
 [target.'cfg(target_os = "windows")'.dependencies]
 mimalloc = {
-    # mimalloc v3
     optional = true,
     version = "=0.1.52",
     features = [],
-}
-snmalloc-rs = {
-    optional = true,
-    version = "=0.7.4",
-    features = [
-        "lto",
-        "build_cc",
-        "native-cpu",
-        "usewait-on-address",
-    ]
 }
 
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
-snmalloc = ["dep:snmalloc-rs"]
 
 [profile.release]
 opt-level = 3

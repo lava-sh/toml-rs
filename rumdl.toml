@@ -1,8 +1,9 @@
 [global]
 respect-gitignore = true
 include = [
+    "CONTRIBUTING.md",
     "README.md",
-    "benchmark/README.md"
+    "benchmark/README.md",
 ]
 exclude = [
     ".git/",
@@ -13,7 +14,5 @@ disable = []
 [MD033]
 allowed-elements = [
     "no-markdown-equivalent",
-    "img",
-    "p",
-    "a"
+    "img", "p", "a", "h3",
 ]

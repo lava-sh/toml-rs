@@ -26,7 +26,9 @@
 </p>
 
 ```bash
-python3 -m venv .venv  # or uv venv .venv --seed
+python3 -m venv .venv
+# or uv venv .venv --seed
+
 source .venv/bin/activate
 ```
 
@@ -40,7 +42,9 @@ source .venv/bin/activate
 </p>
 
 ```bash
-py -m venv .venv  # or uv venv .venv --seed
+py -m venv .venv
+# or uv venv .venv --seed
+
 .venv\scripts\activate
 ```
 
