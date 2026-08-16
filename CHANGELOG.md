@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
-## [0.4.0] - xx.10.2026
+## [0.4.0] - 15.08.2026
 
 ### Breaking Changes
 
