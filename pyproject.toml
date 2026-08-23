@@ -92,7 +92,9 @@ dev = [
 bench = [
     "pytomlpp",
     "toml",
+    "tomledit",
     "tomlkit",
+    "tomlrt",
     "qtoml",
     "rtoml",
     { include-group = "tomli-1-1" },
@@ -109,4 +111,3 @@ conflicts = [[
 ]]
 
 dependency-groups.wasm-test = { requires-python = ">= 3.13" }
-
