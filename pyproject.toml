@@ -95,7 +95,6 @@ bench = [
     "tomledit",
     "tomlkit",
     "tomlrt",
-    "qtoml",
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",

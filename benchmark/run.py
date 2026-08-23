@@ -8,7 +8,6 @@ import altair as alt
 import cpuinfo
 import polars as pl
 import pytomlpp
-import qtoml
 import rtoml
 import toml
 import toml_rs
@@ -118,7 +117,6 @@ def plot_benchmark(
 file = Path(__file__).resolve().parent
 example_toml = file.parent / "tests" / "data" / "example.toml"
 data = example_toml.read_bytes().decode()
-fixed_data = data.replace("\r\n", "\n")
 
 obj = tomllib.loads(example_toml.read_text())
 
@@ -131,7 +129,6 @@ def run(run_count: int) -> None:
         "tomllib": lambda: tomllib.loads(data),
         "toml": lambda: toml.loads(data),
         "tomledit": lambda: tomledit.loads(data),
-        "qtoml": lambda: qtoml.loads(fixed_data),
         "tomlkit": lambda: tomlkit.parse(data),
         "tomlrt": lambda: tomlrt.loads(data),
     }
@@ -141,7 +138,6 @@ def run(run_count: int) -> None:
         "pytomlpp": lambda: pytomlpp.dumps(obj),
         "toml": lambda: toml.dumps(obj),
         "tomledit": lambda: tomledit.dumps(obj),
-        "qtoml": lambda: qtoml.dumps(obj),
         "tomlkit": lambda: tomlkit.dumps(obj),
         "tomlrt": lambda: tomlrt.dumps(obj),
         "tomli-w": lambda: tomli_w.dumps(obj),
