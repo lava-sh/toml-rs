@@ -22,7 +22,10 @@ mod toml_rs {
     import_exception!(toml_rs, TOMLDecodeError);
     import_exception!(toml_rs, TOMLEncodeError);
 
-    #[pyfunction(name = "_loads")]
+    #[pyfunction(
+        name = "_loads",
+        signature = (toml_string, /, *, parse_float, toml_version),
+    )]
     fn load_toml_from_string(
         py: Python,
         toml_string: &str,
@@ -83,12 +86,15 @@ mod toml_rs {
     }
 
     #[expect(clippy::needless_pass_by_value)]
-    #[pyfunction(name = "_dumps")]
+    #[pyfunction(
+        name = "_dumps",
+        signature = (obj, /, inline_tables=None, *, pretty=false, toml_version),
+    )]
     fn dumps_toml(
         py: Python,
         obj: &Bound<'_, PyAny>,
-        pretty: bool,
         inline_tables: Option<FxHashSet<String>>,
+        pretty: bool,
         toml_version: &str,
     ) -> PyResult<String> {
         match toml_version {
@@ -102,9 +108,13 @@ mod toml_rs {
 
                 let mut doc = DocumentMut::new();
 
-                if let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
-                    *doc.as_table_mut() = table;
-                }
+                let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? else {
+                    return Err(TOMLEncodeError::new_err(format!(
+                        "Cannot serialize {} to TOML",
+                        crate::get_type!(obj),
+                    )));
+                };
+                *doc.as_table_mut() = table;
 
                 if let Some(ref paths) = inline_tables {
                     validate_inline_paths(doc.as_item(), paths)?;
@@ -126,9 +136,13 @@ mod toml_rs {
 
                 let mut doc = DocumentMut::new();
 
-                if let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? {
-                    *doc.as_table_mut() = table;
-                }
+                let Table(table) = python_to_toml(py, obj, inline_tables.as_ref())? else {
+                    return Err(TOMLEncodeError::new_err(format!(
+                        "Cannot serialize {} to TOML",
+                        crate::get_type!(obj),
+                    )));
+                };
+                *doc.as_table_mut() = table;
 
                 if let Some(ref paths) = inline_tables {
                     validate_inline_paths(doc.as_item(), paths)?;
@@ -146,7 +160,10 @@ mod toml_rs {
         }
     }
 
-    #[pyfunction(name = "_parse_metadata_from_string")]
+    #[pyfunction(
+        name = "_parse_metadata_from_string",
+        signature = (toml_string, /, *, toml_version),
+    )]
     fn parse_metadata_from_string(
         py: Python,
         toml_string: &str,
