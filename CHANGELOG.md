@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.1] - 23.08.2026
+
+### Fixes
+
+- Raise `TOMLEncodeError` instead of returning an empty string when serializing a non-mapping object
+  ([#274][gh-pull-274] by [@chirizxc][gh-chirizxc], reported in [#270][gh-issue-270] by
+  [@dimbleby][gh-dimbleby])
+
 ## [0.4.0] - 15.08.2026
 
 ### Breaking Changes
@@ -39,11 +47,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 - Bump [pyodide][gh-pyodide] (`314.0.0` -> `314.0.2`)
 
 [gh-issue-229]: https://github.com/lava-sh/toml-rs/issues/229
+[gh-issue-270]: https://github.com/lava-sh/toml-rs/issues/270
 
 [gh-pull-231]: https://github.com/lava-sh/toml-rs/pull/231
 [gh-pull-245]: https://github.com/lava-sh/toml-rs/pull/245
+[gh-pull-274]: https://github.com/lava-sh/toml-rs/pull/274
 
 [gh-chirizxc]: https://github.com/chirizxc
+[gh-dimbleby]: https://github.com/dimbleby
 [gh-mermyly]: https://github.com/mermyly
 
 [gh-pyodide]: https://github.com/pyodide/pyodide
@@ -54,8 +65,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 [site-toml]: https://toml.io/en
 
-[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.0...HEAD
+[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.1...HEAD
 
 
+[0.4.1]: https://github.com/lava-sh/toml-rs/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/lava-sh/toml-rs/compare/0.3.16...0.4.0
 [0.3.16]: https://github.com/lava-sh/toml-rs/compare/0.3.15...0.3.16
