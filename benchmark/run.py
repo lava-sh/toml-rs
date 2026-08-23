@@ -12,9 +12,11 @@ import qtoml
 import rtoml
 import toml
 import toml_rs
+import tomledit
 import tomli as tomllib
 import tomli_w
 import tomlkit
+import tomlrt
 
 N = 500
 
@@ -128,16 +130,20 @@ def run(run_count: int) -> None:
         "pytomlpp": lambda: pytomlpp.loads(data),
         "tomllib": lambda: tomllib.loads(data),
         "toml": lambda: toml.loads(data),
+        "tomledit": lambda: tomledit.loads(data),
         "qtoml": lambda: qtoml.loads(fixed_data),
         "tomlkit": lambda: tomlkit.parse(data),
+        "tomlrt": lambda: tomlrt.loads(data),
     }
     dumps = {
         "toml_rs": lambda: toml_rs.dumps(obj, toml_version="1.1.0"),
         "rtoml": lambda: rtoml.dumps(obj),
         "pytomlpp": lambda: pytomlpp.dumps(obj),
         "toml": lambda: toml.dumps(obj),
+        "tomledit": lambda: tomledit.dumps(obj),
         "qtoml": lambda: qtoml.dumps(obj),
         "tomlkit": lambda: tomlkit.dumps(obj),
+        "tomlrt": lambda: tomlrt.dumps(obj),
         "tomli-w": lambda: tomli_w.dumps(obj),
     }
     loads = {name: benchmark(func, run_count) for name, func in loads.items()}
