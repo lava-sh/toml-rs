@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.14.1"]
+requires = ["maturin == 1.15.0"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -51,10 +51,10 @@ Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 [dependency-groups]
 typos = ["typos == 1.49.0"]
 zizmor = ["zizmor == 1.29.0"]
-rumdl = ["rumdl == 0.2.60"]
+rumdl = ["rumdl == 0.2.61"]
 maturin = [
-    "maturin == 1.14.1 ; sys_platform != 'linux'",
-    "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
+    "maturin == 1.15.0 ; sys_platform != 'linux'",
+    "maturin[patchelf] == 1.15.0 ; sys_platform == 'linux'",
 ]
 pytest = ["pytest == 9.1.1"]
 tomli-w = ["tomli-w == 1.2.0"]
@@ -75,7 +75,7 @@ nox = [
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.74",
+    "ty == 0.0.75",
     "ruff == 0.16.4",
     { include-group = "nox" },
     { include-group = "maturin" },
@@ -98,7 +98,7 @@ bench = [
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars[plot] == 1.43.2",
+    "polars[plot] == 1.44.1",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]
