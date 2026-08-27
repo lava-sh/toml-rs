@@ -36,6 +36,21 @@ class MyMap(Mapping[str, Any]):
             {},
         ),
         (
+            None,
+            re.escape("Cannot serialize None (<class 'NoneType'>) to TOML"),
+            {},
+        ),
+        (
+            [],
+            re.escape("Cannot serialize [] (<class 'list'>) to TOML"),
+            {},
+        ),
+        (
+            [1, 2],
+            re.escape("Cannot serialize [1, 2] (<class 'list'>) to TOML"),
+            {},
+        ),
+        (
             {"x": lambda x: x},
             r"Cannot serialize <function <lambda> at 0x.*> \(<class 'function'>\)",
             {},

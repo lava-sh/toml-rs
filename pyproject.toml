@@ -51,7 +51,7 @@ Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 [dependency-groups]
 typos = ["typos == 1.49.0"]
 zizmor = ["zizmor == 1.29.0"]
-rumdl = ["rumdl == 0.2.55"]
+rumdl = ["rumdl == 0.2.60"]
 maturin = [
     "maturin == 1.14.1 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
@@ -70,15 +70,13 @@ tomli-1 = ["tomli == 2.3.1"]
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.4.1"]
 nox = [
-    # TODO: remove this after next release
-    "nox == 2026.8.10 ; sys_platform != 'win32' or python_version >= '3.15'",
-    "nox @ git+https://github.com/wntrblm/nox@c699c47cb806df85e900d0bd51a79bdf1829c33f ; sys_platform == 'win32' and python_version < '3.15'",
+    "nox == 2026.8.17",
     { include-group = "pytest" },
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.72",
-    "ruff == 0.16.3",
+    "ty == 0.0.74",
+    "ruff == 0.16.4",
     { include-group = "nox" },
     { include-group = "maturin" },
     { include-group = "tomli-1-1" },
@@ -94,8 +92,9 @@ dev = [
 bench = [
     "pytomlpp",
     "toml",
+    "tomledit",
     "tomlkit",
-    "qtoml",
+    "tomlrt",
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
@@ -111,4 +110,3 @@ conflicts = [[
 ]]
 
 dependency-groups.wasm-test = { requires-python = ">= 3.13" }
-
