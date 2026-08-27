@@ -1,7 +1,7 @@
 set windows-shell := ["pwsh.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 alias i := install
-alias b := bump-dependency-groups
+alias b := bump-python-dependencies
 
 WHEEL_DIR := "wheel/"
 
@@ -33,10 +33,10 @@ install:
         pip install $wheel.FullName --force-reinstall
     }
 
-[doc("Bump Python dependency-groups")]
+[doc("Bump Python dependencies")]
 [script("pwsh.exe", "-NoLogo", "-NoProfile", "-Command")]
 [windows]
-bump-dependency-groups:
+bump-python-dependencies:
     $ErrorActionPreference = "Stop"
 
     $branch = git branch --show-current
@@ -64,5 +64,5 @@ bump-dependency-groups:
     if ($LASTEXITCODE -eq 0) {
         Write-Host "skipping commit"
     } else {
-        git commit -m "bump python dependency-groups"
+        git commit -m "bump Python dependencies"
     }
