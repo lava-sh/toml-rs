@@ -17,7 +17,8 @@ mod toml_rs {
     use crate::document::TOMLDocument;
 
     #[pymodule_export]
-    const _VERSION: &str = env!("CARGO_PKG_VERSION");
+    #[allow(non_upper_case_globals, clippy::allow_attributes)]
+    const __version__: &str = env!("CARGO_PKG_VERSION");
 
     import_exception!(toml_rs, TOMLDecodeError);
     import_exception!(toml_rs, TOMLEncodeError);
