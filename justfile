@@ -1,9 +1,16 @@
 set windows-shell := ["pwsh.exe", "-NoLogo", "-NoProfile", "-Command"]
 
 alias i := install
-alias b := bump-dependency-groups
+alias b := bump-python-dependencies
+alias l := lint
 
 WHEEL_DIR := "wheel/"
+
+[unix]
+_activate_venv := "source .venv/bin/activate"
+
+[windows]
+_activate_venv := '.\.venv\Scripts\Activate.ps1'
 
 [private]
 @default:
@@ -19,7 +26,7 @@ install:
         Remove-Item {{ WHEEL_DIR }} -Recurse -Force
     }
 
-    .\.venv\Scripts\Activate.ps1
+    {{ _activate_venv }}
 
     maturin build --out {{ WHEEL_DIR }} --release --features mimalloc
 
@@ -33,10 +40,10 @@ install:
         pip install $wheel.FullName --force-reinstall
     }
 
-[doc("Bump Python dependency-groups")]
+[doc("Bump Python dependencies")]
 [script("pwsh.exe", "-NoLogo", "-NoProfile", "-Command")]
 [windows]
-bump-dependency-groups:
+bump-python-dependencies:
     $ErrorActionPreference = "Stop"
 
     $branch = git branch --show-current
@@ -64,5 +71,19 @@ bump-dependency-groups:
     if ($LASTEXITCODE -eq 0) {
         Write-Host "skipping commit"
     } else {
-        git commit -m "bump python dependency-groups"
+        git commit -m "bump Python dependencies"
     }
+
+[doc("Run all lints")]
+lint:
+    {{ _activate_venv }}
+    # Python
+    -ruff check
+    -ty check
+    -rumdl check
+    -typos
+    # GitHub Actions
+    -zizmor .github/
+    # Rust
+    -cargo fmt-nightly --check
+    -cargo clippy --all-features --all-targets
