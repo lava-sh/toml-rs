@@ -1,6 +1,6 @@
 # To run the benchmarks
 
-## Create and activate virtual environment
+## Create and activate a virtual environment
 
 <p>
   <span style="white-space: nowrap;">
@@ -26,7 +26,9 @@
 </p>
 
 ```bash
-python3 -m venv .venv  # or uv venv .venv --seed
+python3 -m venv .venv
+# or uv venv .venv --seed
+
 source .venv/bin/activate
 ```
 
@@ -40,7 +42,9 @@ source .venv/bin/activate
 </p>
 
 ```bash
-py -m venv .venv  # or uv venv .venv --seed
+py -m venv .venv
+# or uv venv .venv --seed
+
 .venv\scripts\activate
 ```
 
@@ -79,6 +83,29 @@ python benchmark/run.py
 ```
 
 ## Results
+
+> [!NOTE]
+> The dump benchmark serializes a plain Python `dict`.
+> This is representative of libraries whose primary representation
+> is a Python dict, but may not fully reflect the typical
+> workflow of a format-preserving library, for example `tomlkit`.
+>
+> A typical code with `tomlkit` looks like:
+>
+> ```python
+> import tomlkit
+>
+> doc = tomlkit.parse(text)
+> # edit doc
+> text = tomlkit.dumps(doc)
+> ```
+>
+> In this case, dumping an already-parsed document does not include
+> the cost of converting a plain Python dictionary into the library's
+> internal representation. Therefore, the dump benchmark should be
+> interpreted as a benchmark of **Python dict -> TOML
+> serialization**, rather than a complete benchmark of
+> format-preserving document editing.
 
 Benchmarks are updated daily and stored in [this](https://github.com/lava-sh/benchmarks/tree/main/toml-rs) repository.
 

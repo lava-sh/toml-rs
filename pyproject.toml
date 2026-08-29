@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.14.1"]
+requires = ["maturin == 1.15.0"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -9,7 +9,7 @@ module-name = "toml_rs._toml_rs"
 [project]
 name = "toml-rs"
 dynamic = ["version"]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 description = "A High-Performance TOML Parser for Python written in Rust"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "Unlicense"
@@ -30,7 +30,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -47,14 +46,15 @@ dependencies = []
 Homepage = "https://github.com/lava-sh/toml-rs"
 Repository = "https://github.com/lava-sh/toml-rs"
 Issues = "https://github.com/lava-sh/toml-rs/issues"
+Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-typos = ["typos == 1.48.0"]
+typos = ["typos == 1.50.0"]
 zizmor = ["zizmor == 1.29.0"]
-rumdl = ["rumdl == 0.2.49"]
+rumdl = ["rumdl == 0.2.62"]
 maturin = [
-    "maturin == 1.14.1 ; sys_platform != 'linux'",
-    "maturin[patchelf] == 1.14.1 ; sys_platform == 'linux'",
+    "maturin == 1.15.0 ; sys_platform != 'linux'",
+    "maturin[patchelf] == 1.15.0 ; sys_platform == 'linux'",
 ]
 pytest = ["pytest == 9.1.1"]
 tomli-w = ["tomli-w == 1.2.0"]
@@ -65,23 +65,24 @@ wasm-test = [
 ]
 # https://pypi.org/project/tomli/2.3.1
 # It is fully compatible with TOML v1.0.0
-tomli-1 = ["tomli == 2.4.1"]
+tomli-1 = ["tomli == 2.3.1"]
 # https://pypi.org/project/tomli/2.4.1
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.4.1"]
 nox = [
+    "nox == 2026.8.17",
     { include-group = "pytest" },
     { include-group = "tomli-w" },
 ]
 ci = [
-    "ty == 0.0.65",
-    "ruff == 0.16.1",
-    "nox == 2026.7.11",
+    "ty == 0.0.75",
+    "ruff == 0.16.5",
     { include-group = "nox" },
     { include-group = "maturin" },
     { include-group = "tomli-1-1" },
 ]
 dev = [
+    "rust-just == 1.58.0",
     { include-group = "ci" },
     { include-group = "nox" },
     { include-group = "typos" },
@@ -91,12 +92,13 @@ dev = [
 bench = [
     "pytomlpp",
     "toml",
+    "tomledit",
     "tomlkit",
-    "qtoml",
+    "tomlrt",
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars[plot] == 1.43.2",
+    "polars[plot] == 1.44.1",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]
@@ -106,5 +108,5 @@ conflicts = [[
     { group = "tomli-1" },
     { group = "tomli-1-1" },
 ]]
-dependency-groups.wasm-test = { requires-python = ">= 3.13" }
 
+dependency-groups.wasm-test = { requires-python = ">= 3.13" }

@@ -36,6 +36,21 @@ class MyMap(Mapping[str, Any]):
             {},
         ),
         (
+            None,
+            re.escape("Cannot serialize None (<class 'NoneType'>) to TOML"),
+            {},
+        ),
+        (
+            [],
+            re.escape("Cannot serialize [] (<class 'list'>) to TOML"),
+            {},
+        ),
+        (
+            [1, 2],
+            re.escape("Cannot serialize [1, 2] (<class 'list'>) to TOML"),
+            {},
+        ),
+        (
             {"x": lambda x: x},
             r"Cannot serialize <function <lambda> at 0x.*> \(<class 'function'>\)",
             {},
@@ -120,7 +135,7 @@ def test_dumps() -> None:
             "server": "192.168.1.1",
         },
     }
-    assert toml_rs.dumps(obj) == read_toml("test_dumps.toml")
+    assert toml_rs.dumps(obj, toml_version="1.0.0") == read_toml("test_dumps.toml")
 
 
 def test_dumps_inline_tables() -> None:

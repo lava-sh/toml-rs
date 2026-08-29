@@ -1,16 +1,13 @@
-target-version = "py310"
+target-version = "py311"
 
 line-length = 90
 
 output-prefer-rule-codes = true
 
 include = [
-    ".github/actions/build-pgo-wheel/pgo.py",
-    "py-src/**/*.py",
-    "py-src/**/*.pyi",
+    "py-src/**/*.{py,pyi}",
     "tests/*.py",
-    "benchmark/run.py",
-    "benchmark/pgo.py",
+    "benchmark/{run,pgo}.py",
     "noxfile.py",
     "pyproject.toml",
     "README.md",
@@ -20,7 +17,6 @@ include = [
 force-wrap-aliases = true
 combine-as-imports = true
 no-lines-before = ["local-folder"]
-extra-standard-library = ["tomllib"]
 
 [lint]
 preview = true
@@ -46,22 +42,18 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"benchmark/**.py" = [
-    "INP001", # Check for packages that are missing an __init__.py file.
-    "T201",
-    "T203",
+"{benchmark}/*.py" = [
+    "INP001", # Check for packages that are missing an `__init__.py` file
 ]
-"tests/**.py" = [
+"benchmark/*.py" = [
+    "T201", # Check for `print` statements
+    "T203", # Check for `pprint` statements
+]
+"tests/*.py" = [
     "DOC",     # Docstring's
-    ########
-    "S101",    # Check for uses of the assert keyword.
-    "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons.
-]
-".github/actions/build-pgo-wheel/**.py" = [
-    "S404",
-    "S603",
-    "S607",
-    "INP001",
+    ######
+    "S101",    # Check for uses of the `assert` keyword
+    "PLR2004", # Check for the use of unnamed numerical constants ("magic") values in comparisons
 ]
 
 [lint.mccabe]
@@ -69,7 +61,7 @@ ignore = [
 max-complexity = 15
 
 [lint.pycodestyle]
-# E501 reports lines that exceed the length of 100.
+# E501 reports lines that exceed the length of 100
 max-line-length = 320
 
 [lint.flake8-tidy-imports.banned-api]

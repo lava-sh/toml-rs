@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Any, Literal, Protocol, TypeAlias, TypedDict
 
-_VERSION: str
+__version__: str
 
 TomlVersion: TypeAlias = Literal["1.0.0", "1.1.0"]
 ParseFloat: TypeAlias = Callable[[str], Any]

@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.3.16"
+version = "0.4.1"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -15,7 +15,7 @@ pyo3-build-config = "=0.29.1"
 
 [dependencies]
 pyo3 = {
-    version = "=0.29.1",
+    version = "=0.29.2",
     features = ["num-bigint"],
 }
 num-bigint = "=0.4.8"
@@ -72,7 +72,7 @@ toml_edit_v1 = {
 ##############################################################
 toml = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    rev = "508504d54d4b23a672857b357d94f979707c772a",
     features = [
         "fast_hash", # uses `foldhash`
         "unbounded", # disables default recursion limit
@@ -81,7 +81,7 @@ toml = {
 }
 toml_parser = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    rev = "508504d54d4b23a672857b357d94f979707c772a",
     features = [
         "std",
         "simd",
@@ -90,54 +90,47 @@ toml_parser = {
 }
 toml_edit = {
     git = "https://github.com/lava-sh/toml",
-    rev = "b249d89fa447802bdde710943de1c4ce062b4181",
+    rev = "508504d54d4b23a672857b357d94f979707c772a",
     features = [
         "serde",
         "unbounded",
     ]
 }
-# mimalloc v3
-[target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies.mimalloc]
-optional = true
-version = "=0.1.52"
-features = [
-    "override",
-    "local_dynamic_tls",
-]
 
-[target.'cfg(target_os = "macos")'.dependencies.mimalloc]
-optional = true
-version = "=0.1.52"
-# Do not enable mimalloc's "override" feature on macOS.
-#
-# It installs process-wide malloc interposition and replaces macOS malloc zone/fork
-# hooks when the extension is imported via dlopen. That breaks fork-based subprocess
-# spawning, e.g., asyncio/playwright can fail.
-features = [
-    "local_dynamic_tls",
-]
+[target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    features = [
+        "override",
+        "local_dynamic_tls",
+    ]
+}
 
-[target.'cfg(target_os = "windows")'.dependencies.mimalloc]
-optional = true
-version = "=0.1.52"
-features = [
-    "win_direct_tls",
-]
+[target.'cfg(target_os = "macos")'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    # See: https://github.com/lava-sh/toml-rs/issues/229
+    #
+    # mimalloc "override" feature installs process-wide malloc interposition and
+    # replaces macOS malloc zone/fork hooks when the extension is imported via dlopen.
+    # That breaks fork-based subprocess spawning, e.g., asyncio/playwright can fail.
+    features = [
+        "local_dynamic_tls",
+    ]
+}
 
-[dependencies.snmalloc-rs]
-optional = true
-version = "=0.7.4"
-features = [
-    "lto",
-    "build_cc",
-    "native-cpu",
-    "local_dynamic_tls",
-]
+[target.'cfg(target_os = "windows")'.dependencies]
+mimalloc = {
+    optional = true,
+    version = "=0.1.52",
+    features = [],
+}
 
 [features]
 default = []
 mimalloc = ["dep:mimalloc"]
-snmalloc = ["dep:snmalloc-rs"]
 android = ["pyo3/abi3-py310"]
 ios = ["pyo3/abi3-py310"]
 
