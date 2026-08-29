@@ -69,11 +69,7 @@ tomli-1 = ["tomli == 2.3.1"]
 # https://pypi.org/project/tomli/2.4.1
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.4.1"]
-nox = [
-    "nox == 2026.8.17",
-    { include-group = "pytest" },
-    { include-group = "tomli-w" },
-]
+nox = ["nox == 2026.8.17"]
 ci = [
     "ty == 0.0.75",
     "ruff == 0.16.5",

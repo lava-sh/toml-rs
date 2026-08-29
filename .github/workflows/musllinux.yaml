@@ -4,6 +4,9 @@ on:
   workflow_call:
 
 env:
+  FORCE_COLOR: "1"
+  CARGO_TERM_COLOR: always
+  #
   ○_○: &interpreters "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
   #
   (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
@@ -83,13 +86,38 @@ jobs:
           manylinux: musllinux_1_2
           args: >-
             --release
-            --out dist
+            --out wheels
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
+
+      - name: "Test wheels"
+        if: matrix.platform.target != 'i686-unknown-linux-musl'
+        uses: uraimo/run-on-arch-action@40b42d17c62e10fdf2ddf38bd8734352ecef4b2f # v3
+        with:
+          distro: alpine_latest
+          githubToken: ${{ github.token }}
+          arch: >-
+            ${{
+              startsWith(matrix.platform.target, 'x86_64') && 'x86_64' ||
+              startsWith(matrix.platform.target, 'i686') && 'i686' ||
+              startsWith(matrix.platform.target, 'aarch64') && 'aarch64' ||
+              startsWith(matrix.platform.target, 'armv7') && 'armv7' ||
+              startsWith(matrix.platform.target, 'powerpc64le') && 'ppc64le' ||
+              startsWith(matrix.platform.target, 'riscv64gc') && 'riscv64'
+            }}
+          install: |
+            apk add --no-cache bash curl
+          env: |
+            _PYTHON_INTERPRETERS: ${{ matrix.platform.interpreter }}
+          run: |
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            export PATH="$HOME/.local/bin:$PATH"
+            uv python install 3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11
+            bash .github/scripts/test-wheels.sh
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: dist
+          path: wheels
