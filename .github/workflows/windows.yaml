@@ -18,10 +18,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # See: https://docs.github.com/en/actions/reference/runners/github-hosted-runners
         platform:
           - {
-            # AMD64
             runner: windows-latest,
             target: x86_64-pc-windows-msvc,
             interpreter: *interpreters,
@@ -29,7 +27,6 @@ jobs:
             use-pgo: true,
           }
           - {
-            # x86 (32-bit)
             runner: windows-latest,
             target: i686-pc-windows-msvc,
             interpreter: *interpreters_without_pypy,
@@ -37,7 +34,6 @@ jobs:
             use-pgo: true,
           }
           - {
-            # ARM64
             runner: windows-11-vs2026-arm,
             target: aarch64-pc-windows-msvc,
             interpreter: *interpreters_without_pypy,
@@ -83,6 +79,32 @@ jobs:
           maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
           python-interpreter: ${{ matrix.platform.interpreter }}
           pgo-training-command: "{python} benchmark/pgo.py"
+
+      - name: "Test wheels"
+        shell: pwsh
+        run: |
+          $interpreters = "${{ matrix.platform.interpreter }}" -split ' '
+          foreach ($py in $interpreters) {
+            Write-Host "Testing with Python $py"
+            
+            uv venv .venv --python $py
+            
+            $venvPath = ".venv\Scripts"
+            $env:PATH = "$venvPath;$env:PATH"
+            $env:PYO3_PYTHON = "$venvPath\python.exe"
+            
+            uv pip install --group ci
+            
+            $wheelFile = Get-ChildItem -Path dist -Filter "*$($py.Replace('.', '').Replace('t', ''))*win*.whl" | Select-Object -First 1
+            if ($wheelFile) {
+              uv pip install $wheelFile.FullName
+              nox --parallel 4
+            } else {
+              Write-Warning "No wheel found for Python $py"
+            }
+            
+            Remove-Item -Recurse -Force .venv -ErrorAction SilentlyContinue
+          }
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
