@@ -108,39 +108,39 @@ jobs:
           docker build -t alpine-test .github/scripts/alpine
           docker run --rm -v "$PWD":/app -w /app alpine-test
 
-  tests:
+  lint:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
 
-    uses: ./.github/workflows/tests.yaml
+    uses: ./.github/workflows/lint.yaml
 
   manylinux:
     if: ${{ always() && !failure() && !cancelled() }}
 
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    needs: [ lint, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/manylinux.yaml
 
   musllinux:
     if: ${{ always() && !failure() && !cancelled() }}
 
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    needs: [ lint, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/musllinux.yaml
 
   windows:
     if: ${{ always() && !failure() && !cancelled() }}
 
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    needs: [ lint, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/windows.yaml
 
   macos:
     if: ${{ always() && !failure() && !cancelled() }}
 
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    needs: [ lint, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/macos.yaml
 
   wasm:
     if: ${{ always() && !failure() && !cancelled() }}
 
-    needs: [ tests, tests-alpine, cargo-fmt, cargo-clippy, tools ]
+    needs: [ lint, tests-alpine, cargo-fmt, cargo-clippy, tools ]
     uses: ./.github/workflows/wasm.yaml
 
   build-sdist:

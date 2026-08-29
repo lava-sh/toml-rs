@@ -83,13 +83,31 @@ jobs:
           manylinux: musllinux_1_2
           args: >-
             --release
-            --out dist
+            --out wheels
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
+
+      - name: "Test wheels"
+        shell: bash
+        run: |
+          interpreters="${{ matrix.platform.interpreter }}"
+          
+          for py_version in $interpreters; do
+            uv venv .venv --python "$py_version"
+            uv pip install --group nox
+          
+            wheel_tag="${py_version//[.t]/}"
+            wheel=$(find wheels -maxdepth 1 -type f -name "*${wheel_tag}*.whl" | head -n 1)
+          
+            uv pip install "$wheel"
+            nox --parallel 4
+          
+            rm -rf .venv
+          done
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheels-musllinux-${{ matrix.platform.target }}
-          path: dist
+          path: wheels

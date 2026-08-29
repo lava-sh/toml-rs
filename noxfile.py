@@ -11,6 +11,6 @@ nox.options.allow_parallel = True
 @nox.parametrize("group_name", ["tomli-1", "tomli-1-1"])
 def test_compatibility(session: nox.Session, group_name: str) -> None:
     session.install("--group", "nox", "--group", f"{group_name}")
-    session.install(glob.glob("wheel/*.whl")[0])
+    session.install(glob.glob("wheels/*.whl")[0])
 
     session.run("pytest", "tests/")

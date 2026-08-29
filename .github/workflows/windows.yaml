@@ -58,7 +58,7 @@ jobs:
           sccache: *is_pull_request
           args: >-
             --release
-            --out dist
+            --out wheels
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
@@ -81,33 +81,25 @@ jobs:
           pgo-training-command: "{python} benchmark/pgo.py"
 
       - name: "Test wheels"
-        shell: pwsh
+        shell: bash
         run: |
-          $interpreters = "${{ matrix.platform.interpreter }}" -split ' '
-          foreach ($py in $interpreters) {
-            Write-Host "Testing with Python $py"
-            
-            uv venv .venv --python $py
-            
-            $venvPath = ".venv\Scripts"
-            $env:PATH = "$venvPath;$env:PATH"
-            $env:PYO3_PYTHON = "$venvPath\python.exe"
-            
-            uv pip install --group ci
-            
-            $wheelFile = Get-ChildItem -Path dist -Filter "*$($py.Replace('.', '').Replace('t', ''))*win*.whl" | Select-Object -First 1
-            if ($wheelFile) {
-              uv pip install $wheelFile.FullName
-              nox --parallel 4
-            } else {
-              Write-Warning "No wheel found for Python $py"
-            }
-            
-            Remove-Item -Recurse -Force .venv -ErrorAction SilentlyContinue
-          }
+          interpreters="${{ matrix.platform.interpreter }}"
+          
+          for py_version in $interpreters; do
+            uv venv .venv --python "$py_version"
+            uv pip install --group nox
+          
+            wheel_tag="${py_version//[.t]/}"
+            wheel=$(find wheels -maxdepth 1 -type f -name "*${wheel_tag}*.whl" | head -n 1)
+          
+            uv pip install "$wheel"
+            nox --parallel 4
+          
+            rm -rf .venv
+          done
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: wheels-windows-${{ matrix.platform.target }}
-          path: dist
+          path: wheels
