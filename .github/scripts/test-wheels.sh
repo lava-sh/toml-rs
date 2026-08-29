@@ -14,7 +14,6 @@ for interpreter in "${interpreters[@]}"; do
     uv pip install --group nox
 
     if ! nox --parallel 4; then
-        echo "❌ Tests failed for $interpreter"
         failed=1
     fi
 
