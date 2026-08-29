@@ -9,7 +9,12 @@ for interpreter in "${interpreters[@]}"; do
     venv=".venv-$interpreter"
 
     uv venv "$venv" --python "$interpreter"
-    source "$venv/bin/activate"
+
+    if [[ -d "$venv/Scripts" ]]; then
+        source "$venv/Scripts/activate"
+    else
+        source "$venv/bin/activate"
+    fi
 
     uv pip install --group nox
 
