@@ -84,7 +84,7 @@ jobs:
       - name: "Test wheels"
         shell: bash
         env:
-          INTERPRETERS: ${{ matrix.platform.interpreter }}
+          _PYTHON_INTERPRETERS: ${{ matrix.platform.interpreter }}
         run: bash .github/scripts/test-wheels.sh
 
       - name: "Upload wheels"
