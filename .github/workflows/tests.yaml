@@ -63,8 +63,7 @@ jobs:
         run: maturin build --out wheel --features mimalloc
 
       - name: "Install built wheel"
-        shell: bash
-        run: uv pip install wheel/*.whl
+        run: uv pip install toml-rs --no-index --find-links wheels --force-reinstall
 
       - name: "Run ruff"
         run: ruff check

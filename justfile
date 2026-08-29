@@ -4,7 +4,7 @@ alias i := install
 alias b := bump-python-dependencies
 alias l := lint
 
-WHEEL_DIR := "wheel/"
+WHEEL_DIR := "wheels/"
 
 [unix]
 _activate_venv := "source .venv/bin/activate"
@@ -30,14 +30,12 @@ install:
 
     maturin build --out {{ WHEEL_DIR }} --release --features mimalloc
 
-    $wheel = Get-ChildItem {{ WHEEL_DIR }}/*.whl | Select-Object -First 1
-
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         Write-Host "uv found, using uv"
-        uv pip install $wheel.FullName --force-reinstall
+        uv pip install toml-rs --no-index --find-links wheels --force-reinstall
     } else {
         Write-Host "uv not found, using pip"
-        pip install $wheel.FullName --force-reinstall
+        pip install toml-rs --no-index --find-links wheels --force-reinstall
     }
 
 [doc("Bump Python dependencies")]
