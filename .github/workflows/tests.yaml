@@ -10,7 +10,7 @@ env:
 jobs:
   tests:
     name: "ubuntu-latest / python ${{ matrix.python-version }}"
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
