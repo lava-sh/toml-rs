@@ -3,7 +3,7 @@ set -uo pipefail
 
 failed=0
 
-read -ra interpreters <<< "$PYTHON_INTERPRETERS"
+read -ra interpreters <<< "$INTERPRETERS"
 
 for interpreter in "${interpreters[@]}"; do
     venv=".venv-$interpreter"
