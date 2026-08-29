@@ -89,7 +89,14 @@ jobs:
             uv venv .venv --python "$py_version"
             uv pip install --group nox
           
-            wheel_tag="${py_version//[.t]/}"
+            if [[ "$py_version" == pypy* ]]; then
+              wheel_tag="pp${py_version#pypy}"
+            elif [[ "$py_version" == *t ]]; then
+              wheel_tag="cp${py_version%t//./}t"
+            else
+              wheel_tag="cp${py_version//./}"
+            fi
+
             wheel=$(find wheels -maxdepth 1 -type f -name "*${wheel_tag}*.whl" | head -n 1)
           
             uv pip install "$wheel"
