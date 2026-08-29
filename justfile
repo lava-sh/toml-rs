@@ -32,10 +32,10 @@ install:
 
     if (Get-Command uv -ErrorAction SilentlyContinue) {
         Write-Host "uv found, using uv"
-        uv pip install toml-rs --no-index --find-links wheels --force-reinstall
+        uv pip install toml-rs --no-index --find-links {{ WHEEL_DIR }} --force-reinstall
     } else {
         Write-Host "uv not found, using pip"
-        pip install toml-rs --no-index --find-links wheels --force-reinstall
+        pip install toml-rs --no-index --find-links {{ WHEEL_DIR }} --force-reinstall
     }
 
 [doc("Bump Python dependencies")]
