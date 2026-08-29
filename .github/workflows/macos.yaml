@@ -5,7 +5,7 @@ on:
 
 env:
   #○_○: &interpreters "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
-  ○_○: &interpreters "3.11"
+  ○_○: &interpreters "3.11 3.12 pypy3.11"
   #
   (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
 
@@ -75,6 +75,19 @@ jobs:
           python-interpreter: ${{ matrix.platform.interpreter }}
           pgo-training-command: "{python} benchmark/pgo.py"
           wheels-output-directory: wheels
+
+      - name: "Test wheels"
+        shell: bash
+        run: |
+          interpreters=(${{ matrix.platform.interpreter }})
+
+          for interpreter in "${interpreters[@]}"; do
+            venv=".venv-$interpreter"
+            uv venv "$venv" --python "$interpreter"
+            source "$venv/bin/activate"
+            uv pip install --group nox
+            nox --parallel 4
+          done
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
