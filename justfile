@@ -4,7 +4,7 @@ alias i := install
 alias b := bump-python-dependencies
 alias l := lint
 
-WHEEL_DIR := "wheel/"
+WHEEL_DIR := "wheels/"
 
 [unix]
 _activate_venv := "source .venv/bin/activate"
