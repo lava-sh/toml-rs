@@ -9,10 +9,10 @@ _A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust_
 [![PyPI version][pypi-version-badge]][pypi]
 [![PyPI downloads][pypi-downloads-badge]][pypistats]
 [![PyPI requires python][pypi-requires-python-badge]][pypi]
+[![PyPI licence][pypi-licence-badge]][pypi]
 
-<a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&animate=pulse&mode=light"></picture></a>
-<a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&font=geist&size=xs&mode=light"></picture></a>
-<a href="https://github.com/lava-sh/toml-rs/blob/main/UNLICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist&size=xs&mode=dark"><img alt="License" src="https://shieldcn.dev/github/lava-sh/toml-rs/license.svg?variant=outline&font=geist&size=xs&mode=light"></picture></a>
+<a href="https://github.com/lava-sh/toml-rs/actions?query=branch%3Amain"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?variant=outline&amp;font=geist&amp;size=xs&amp;animate=pulse&amp;logo=ri%3ABsGithub&amp;label=CI&amp;mode=dark"><img alt="CI" src="https://shieldcn.dev/github/ci/lava-sh/toml-rs.svg?workflow=codeql.yml&amp;variant=outline&amp;size=xs&amp;logo=ri%3ABsGithub&amp;label=CI&amp;mode=light"></picture></a>
+<a href="https://github.com/lava-sh/toml-rs/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&amp;font=geist&amp;size=xs&amp;logo=ri%3ABsGithub&amp;mode=dark"><img alt="Last Commit" src="https://shieldcn.dev/github/last-commit/lava-sh/toml-rs.svg?variant=outline&amp;font=geist&amp;size=xs&amp;logo=ri%3ABsGithub&amp;mode=light"></picture></a>
 
 </div>
 
@@ -173,5 +173,7 @@ toml_rs.dump(data, Path("example.toml"))
 
 [pypi-version-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.version&variant=branded&size=xs&mode=light&logo=python&label=pypi+version
 [pypi-downloads-badge]: https://shieldcn.dev/pypi/dm/toml-rs.svg?variant=branded&size=xs&logo=python&logoColor=ffffff
-[pypi-requires-python-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.requires_python&size=xs&mode=light&logo=python&logoColor=ffffff&label=requires+python&color=3775A9
+[pypi-requires-python-badge]: https://shieldcn.dev/pypi/python/toml-rs.svg?variant=branded&size=xs&logo=python&logoColor=ffffff&label=requires+python
+[pypi-licence-badge]: https://shieldcn.dev/badge/dynamic/json.svg?url=https%3A%2F%2Fpypi.org%2Fpypi%2Ftoml-rs%2Fjson&query=%24.info.license_expression&variant=branded&size=xs&mode=light&logo=python&logoColor=ffffff&label=license
+
 [contributors-badge]: https://shieldcn.dev/contributors/lava-sh/toml-rs.svg?title=false&theme=slate&size=80&bots=true&titleAlign=center&mode=light&font=geist&border=false&image=https%3A%2F%2Fimages.wallpaperscraft.ru%2Fimage%2Fsingle%2Foblaka_nebo_ogni_1647475_3840x2400.jpg&overlay=0.3
