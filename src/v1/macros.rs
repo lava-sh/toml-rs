@@ -19,18 +19,56 @@ macro_rules! create_py_datetime_v1 {
 macro_rules! toml_dt_v1 {
     (Date, $py_date:expr) => {
         toml_v1::value::Date {
-            year: u16::try_from($py_date.get_year())?,
-            month: $py_date.get_month(),
-            day: $py_date.get_day(),
+            year: u16::try_from(cfg_select! {
+                not(Py_LIMITED_API) => $py_date.get_year(),
+                Py_LIMITED_API => $py_date
+                    .getattr(pyo3::intern!($py_date.py(), "year"))?
+                    .extract::<i32>()?,
+            })?,
+            month: cfg_select! {
+                not(Py_LIMITED_API) => $py_date.get_month(),
+                Py_LIMITED_API => $py_date
+                    .getattr(pyo3::intern!($py_date.py(), "month"))?
+                    .extract::<u8>()?,
+            },
+            day: cfg_select! {
+                not(Py_LIMITED_API) => $py_date.get_day(),
+                Py_LIMITED_API => $py_date
+                    .getattr(pyo3::intern!($py_date.py(), "day"))?
+                    .extract::<u8>()?,
+            },
         }
     };
 
     (Time, $py_time:expr) => {
         toml_v1::value::Time {
-            hour: $py_time.get_hour(),
-            minute: $py_time.get_minute(),
-            second: $py_time.get_second(),
-            nanosecond: $py_time.get_microsecond() * 1000,
+            hour: cfg_select! {
+                not(Py_LIMITED_API) => $py_time.get_hour(),
+                Py_LIMITED_API => $py_time
+                    .getattr(pyo3::intern!($py_time.py(), "hour"))?
+                    .extract::<u8>()?,
+            },
+            minute: cfg_select! {
+                not(Py_LIMITED_API) => $py_time.get_minute(),
+                Py_LIMITED_API => $py_time
+                    .getattr(pyo3::intern!($py_time.py(), "minute"))?
+                    .extract::<u8>()?,
+            },
+            second: cfg_select! {
+                not(Py_LIMITED_API) => $py_time.get_second(),
+                Py_LIMITED_API => $py_time
+                    .getattr(pyo3::intern!($py_time.py(), "second"))?
+                    .extract::<u8>()?,
+            },
+            nanosecond: cfg_select! {
+                not(Py_LIMITED_API) => $py_time.get_microsecond() * 1000,
+                Py_LIMITED_API => {
+                    $py_time
+                        .getattr(pyo3::intern!($py_time.py(), "microsecond"))?
+                        .extract::<u32>()?
+                        * 1000
+                }
+            },
         }
     };
 
