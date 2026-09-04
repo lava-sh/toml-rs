@@ -6,7 +6,7 @@ on:
 env:
   (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
   #
-  ○_○: &rust-nightly "nightly-2026-08-09"
+  ○_○: &rust-nightly "nightly-2026-08-26"
 
 jobs:
   wasm:
@@ -33,10 +33,24 @@ jobs:
 
           - python-version: "3.14"
             # pyodide:
-            # 314.0.0a1 - 314.0.4 (emscripten 5.0.3)
-            pyodide-version: "314.0.4"
+            # 314.0.0a1 - 314.0.6 (emscripten 5.0.3)
+            pyodide-version: "314.0.6"
             pyemscripten-version: "2026_0"
             emsdk-version: "5.0.3"
+            rust-toolchain: *rust-nightly
+            rustflags: >-
+              -C link-arg=-sSIDE_MODULE=2
+              -C link-arg=-sWASM_BIGINT
+              -C relocation-model=pic
+              -Z link-native-libraries=no
+              -C symbol-mangling-version=v0
+
+          - python-version: "3.15"
+            # pyodide:
+            # 315.0.0a1 - 315.0.0a2 (emscripten 6.0.5)
+            pyodide-version: "315.0.0a2"
+            pyemscripten-version: "2026_0"
+            emsdk-version: "6.0.5"
             rust-toolchain: *rust-nightly
             rustflags: >-
               -C link-arg=-sSIDE_MODULE=2
