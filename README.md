@@ -1,7 +1,7 @@
 <!-- rumdl-disable MD036 MD041 -->
 <div align="center">
 
-# toml-rs
+# [toml-rs](https://lava-sh.github.io/toml-rs-online)
 
 _A High-Performance TOML v1.0.0 / v1.1.0 parser for Python written in Rust_
 <!-- rumdl-enable MD036 MD041 -->
