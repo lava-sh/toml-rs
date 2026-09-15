@@ -68,7 +68,7 @@ toml_edit_v1 = {
 ##############################################################
 toml = {
     git = "https://github.com/lava-sh/toml",
-    rev = "508504d54d4b23a672857b357d94f979707c772a",
+    rev = "483695cab74a7fe1bc6081a4c87e9c59380c1e4b",
     features = [
         "fast_hash", # uses `foldhash`
         "unbounded", # disables default recursion limit
@@ -77,7 +77,7 @@ toml = {
 }
 toml_parser = {
     git = "https://github.com/lava-sh/toml",
-    rev = "508504d54d4b23a672857b357d94f979707c772a",
+    rev = "483695cab74a7fe1bc6081a4c87e9c59380c1e4b",
     features = [
         "std",
         "simd",
@@ -86,7 +86,7 @@ toml_parser = {
 }
 toml_edit = {
     git = "https://github.com/lava-sh/toml",
-    rev = "508504d54d4b23a672857b357d94f979707c772a",
+    rev = "483695cab74a7fe1bc6081a4c87e9c59380c1e4b",
     features = [
         "serde",
         "unbounded",
