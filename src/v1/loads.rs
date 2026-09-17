@@ -7,7 +7,7 @@ use pyo3::{
 };
 use toml_v1::{Spanned, de::DeValue, value::Offset};
 
-use crate::{create_py_datetime_v1, error::TomlError, parse_int, toml_rs::TOMLDecodeError};
+use crate::{create_py_datetime_v1, error::DecodeError, parse_int};
 
 pub fn toml_to_python<'py>(
     py: Python<'py>,
@@ -43,21 +43,9 @@ fn to_python<'py>(
                 return big_int.into_bound_py_any(py);
             }
 
-            let error_start = span.start;
-            let mut err = TomlError::custom(
-                format!(
-                    "invalid integer '{}'",
-                    &doc[span.start..span.end.min(doc.len())]
-                ),
-                Some(span),
-            );
-            err.set_input(Some(doc));
+            let literal = &doc[span.start..span.end.min(doc.len())];
 
-            Err(TOMLDecodeError::new_err((
-                err.to_string(),
-                doc.to_string(),
-                error_start,
-            )))
+            Err(DecodeError::snippet(&format!("invalid integer '{literal}'"), doc, span).raised(py))
         }
         DeValue::Float(float) => {
             let float_str = float.as_str();
