@@ -52,7 +52,7 @@ def test_tomllib_tomlrs(valid: Path, expected: Path) -> None:
     toml_rs_ = normalize(convert(toml_rs.loads(
         toml_str,
         toml_version=TOML_VERSION,
-    )))
+    )))  # fmt: skip
 
     assert tomllib_ == toml_rs_, f"Mismatch between tomllib and toml_rs for {valid.name}"
 
@@ -86,4 +86,8 @@ def test_parse_float(parse_float: toml_rs._lib.ParseFloat) -> None:
 def test_custom_float() -> None:
     t = "x = 10_000.1_2"
 
-    assert toml_rs.loads(t, parse_float=str) == tomllib.loads(t, parse_float=str)
+    assert (
+        toml_rs.loads(t, parse_float=str, toml_version=TOML_VERSION)
+        ==
+        tomllib.loads(t, parse_float=str)
+    )  # fmt: skip
