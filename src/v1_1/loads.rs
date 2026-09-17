@@ -52,12 +52,11 @@ trait PyBuild<'py>: Copy {
     }
 
     #[inline]
-    fn float(self, value: f64) -> Bound<'py, PyAny> {
+    fn float(self, value: f64) -> PyResult<Bound<'py, PyAny>> {
         let py = self.py();
 
-        // SAFETY: `PyFloat_FromDouble` returns a new reference and never sets an
-        // exception.
-        unsafe { Bound::from_owned_ptr(py, ffi::PyFloat_FromDouble(value)) }
+        // SAFETY: `PyFloat_FromDouble` returns a new reference or NULL.
+        unsafe { Bound::from_owned_ptr_or_err(py, ffi::PyFloat_FromDouble(value)) }
     }
 
     #[inline]
@@ -747,17 +746,17 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
             ScalarKind::String => Ok(Some(self.py.string(decoded))),
             ScalarKind::Boolean(value) => Ok(Some(self.py.flag(value))),
             ScalarKind::Integer(radix) => self.build_integer(decoded, radix.value(), span),
-            ScalarKind::Float => Ok(self.build_float(decoded)),
+            ScalarKind::Float => self.build_float(decoded),
             ScalarKind::DateTime => self.build_datetime(decoded, span),
         }
     }
 
-    fn build_float(&mut self, decoded: &str) -> Option<Bound<'py, PyAny>> {
+    fn build_float(&mut self, decoded: &str) -> PyResult<Option<Bound<'py, PyAny>>> {
         // fast path for default value in signature
         if self.parse_float.is(self.py.get_type::<PyFloat>())
             && let Ok(value) = decoded.parse::<f64>()
         {
-            return Some(self.py.float(value));
+            return Ok(Some(self.py.float(value)?));
         }
 
         let value = match self.parse_float.call1((decoded,)) {
@@ -765,7 +764,7 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
             Err(error) => {
                 self.failed(error);
 
-                return None;
+                return Ok(None);
             }
         };
 
@@ -775,10 +774,10 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
                 "parse_float must not return dicts or lists",
             ));
 
-            return None;
+            return Ok(None);
         }
 
-        Some(value)
+        Ok(Some(value))
     }
 
     fn build_integer(
