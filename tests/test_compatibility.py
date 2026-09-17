@@ -81,3 +81,9 @@ def test_parse_float(parse_float: toml_rs._lib.ParseFloat) -> None:
     )
 
     assert tomllib_ == toml_rs_
+
+
+def test_custom_float() -> None:
+    t = "x = 10_000.1_2"
+
+    assert toml_rs.loads(t, parse_float=str) == tomllib.loads(t, parse_float=str)
