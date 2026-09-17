@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
+### Changed
+
+- Optimize `toml_ts.loads()`
+
 ## [0.4.1] - 23.08.2026
 
 ### Fixes

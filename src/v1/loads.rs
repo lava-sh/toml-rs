@@ -197,33 +197,18 @@ fn to_py_error(py: Python<'_>, input: &str, error: &ParseError) -> PyErr {
     )
 }
 
-/// A `datetime.timezone` and its `datetime.timedelta` are immutable, so they can be shared.
-static TZINFO_CACHE: PyOnceLock<Py<PyDict>> = PyOnceLock::new();
-
 #[inline]
-pub fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
+pub fn create_timezone_from_offset(py: Python, offset: toml::value::Offset) -> PyResult<Bound<PyTzInfo>> {
     const SECS_IN_DAY: i32 = 86_400;
 
     match offset {
-        Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
-        Offset::Custom { minutes } => {
-            let cache = TZINFO_CACHE
-                .get_or_init(py, || PyDict::new(py).unbind())
-                .bind(py);
-
-            if let Some(cached) = cache.get_item(minutes)? {
-                return cached.cast_into::<PyTzInfo>().map_err(PyErr::from);
-            }
-
+        toml::value::Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
+        toml::value::Offset::Custom { minutes } => {
             let seconds = i32::from(minutes) * 60;
             let days = seconds.div_euclid(SECS_IN_DAY);
             let seconds = seconds.rem_euclid(SECS_IN_DAY);
             let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
-            let tzinfo = PyTzInfo::fixed_offset(py, py_delta)?.into_any();
-
-            cache.set_item(minutes, &tzinfo)?;
-
-            tzinfo.cast_into::<PyTzInfo>().map_err(PyErr::from)
+            PyTzInfo::fixed_offset(py, py_delta)
         }
     }
 }

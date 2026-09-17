@@ -6,7 +6,6 @@ use pyo3::{
     exceptions::PyValueError,
     ffi,
     prelude::*,
-    sync::PyOnceLock,
     types::{PyBool, PyDate, PyDelta, PyDict, PyFloat, PyInt, PyList, PyString, PyTime, PyTzInfo},
 };
 use rustc_hash::FxHashMap;
@@ -142,8 +141,10 @@ fn type_str(value: &Bound<'_, PyAny>) -> &'static str {
         "array"
     } else if value.is_exact_instance_of::<PyDict>() {
         "table"
-    } else {
+    } else if value.is_instance_of::<PyDate>() || value.is_instance_of::<PyTime>() {
         "datetime"
+    } else {
+        "value"
     }
 }
 
@@ -195,9 +196,6 @@ fn to_py_error(py: Python<'_>, input: &str, error: &ParseError) -> PyErr {
     )
 }
 
-/// A `datetime.timezone` and its `datetime.timedelta` are immutable, so they can be shared.
-static TZINFO_CACHE: PyOnceLock<Py<PyDict>> = PyOnceLock::new();
-
 #[inline]
 pub fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
     const SECS_IN_DAY: i32 = 86_400;
@@ -205,23 +203,11 @@ pub fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound
     match offset {
         Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
         Offset::Custom { minutes } => {
-            let cache = TZINFO_CACHE
-                .get_or_init(py, || PyDict::new(py).unbind())
-                .bind(py);
-
-            if let Some(cached) = cache.get_item(minutes)? {
-                return cached.cast_into::<PyTzInfo>().map_err(PyErr::from);
-            }
-
             let seconds = i32::from(minutes) * 60;
             let days = seconds.div_euclid(SECS_IN_DAY);
             let seconds = seconds.rem_euclid(SECS_IN_DAY);
             let py_delta = PyDelta::new(py, days, seconds, 0, false)?;
-            let tzinfo = PyTzInfo::fixed_offset(py, py_delta)?.into_any();
-
-            cache.set_item(minutes, &tzinfo)?;
-
-            tzinfo.cast_into::<PyTzInfo>().map_err(PyErr::from)
+            PyTzInfo::fixed_offset(py, py_delta)
         }
     }
 }
