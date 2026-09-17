@@ -22,9 +22,8 @@ use crate::{
         empty_value_loc, raw_slice, set_key_fields, set_value_metadata_fields, table_needs_wrapper,
     },
     create_py_datetime_v1,
-    error::TomlError,
+    error::DecodeError,
     parse_int,
-    toml_rs::TOMLDecodeError,
     v1::loads::create_timezone_from_offset,
 };
 
@@ -78,29 +77,22 @@ fn scalar_to_py_obj<'py>(
                 return big_int.into_py_any(py);
             }
 
-            let error_start = raw_span.start;
-            let mut err = TomlError::custom(
-                format!(
-                    "invalid integer '{}'",
-                    &doc[raw_span.start..raw_span.end.min(doc.len())]
-                ),
-                Some(raw_span),
-            );
-            err.set_input(Some(doc));
-            Err(TOMLDecodeError::new_err((
-                err.to_string(),
-                doc.to_string(),
-                error_start,
-            )))
+            let literal = &doc[raw_span.start..raw_span.end.min(doc.len())];
+
+            Err(
+                DecodeError::snippet(&format!("invalid integer '{literal}'"), doc, raw_span)
+                    .raised(py),
+            )
         }
         DeValue::Float(float) => {
             let float_bytes = float.as_str().as_bytes();
             let parsed: f64 = lexical_core::parse(float_bytes).map_err(|err| {
-                TOMLDecodeError::new_err((
+                DecodeError::raw(
                     format!("invalid float '{}': {err}", float.as_str()),
-                    doc.to_string(),
+                    doc,
                     raw_span.start,
-                ))
+                )
+                .raised(py)
             })?;
             parsed.into_py_any(py)
         }
@@ -272,30 +264,19 @@ pub fn to_python<'py>(
                 return big_int.into_bound_py_any(py);
             }
 
-            let error_start = span.start;
-            let mut err = TomlError::custom(
-                format!(
-                    "invalid integer '{}'",
-                    &doc[span.start..span.end.min(doc.len())]
-                ),
-                Some(span),
-            );
-            err.set_input(Some(doc));
+            let literal = &doc[span.start..span.end.min(doc.len())];
 
-            Err(TOMLDecodeError::new_err((
-                err.to_string(),
-                doc.to_string(),
-                error_start,
-            )))
+            Err(DecodeError::snippet(&format!("invalid integer '{literal}'"), doc, span).raised(py))
         }
         DeValue::Float(float) => {
             let float_bytes = float.as_str().as_bytes();
             let parsed: f64 = lexical_core::parse(float_bytes).map_err(|err| {
-                TOMLDecodeError::new_err((
+                DecodeError::raw(
                     format!("invalid float '{}': {err}", float.as_str()),
-                    doc.to_string(),
+                    doc,
                     span.start,
-                ))
+                )
+                .raised(py)
             })?;
             parsed.into_bound_py_any(py)
         }
