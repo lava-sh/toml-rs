@@ -6,7 +6,6 @@ use pyo3::{
     exceptions::PyValueError,
     ffi,
     prelude::*,
-    sync::PyOnceLock,
     types::{PyBool, PyDate, PyDelta, PyDict, PyFloat, PyInt, PyList, PyString, PyTime, PyTzInfo},
 };
 use rustc_hash::FxHashMap;
@@ -198,12 +197,12 @@ fn to_py_error(py: Python<'_>, input: &str, error: &ParseError) -> PyErr {
 }
 
 #[inline]
-pub fn create_timezone_from_offset(py: Python, offset: toml::value::Offset) -> PyResult<Bound<PyTzInfo>> {
+pub fn create_timezone_from_offset(py: Python, offset: Offset) -> PyResult<Bound<PyTzInfo>> {
     const SECS_IN_DAY: i32 = 86_400;
 
     match offset {
-        toml::value::Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
-        toml::value::Offset::Custom { minutes } => {
+        Offset::Z => PyTzInfo::utc(py).map(Borrowed::to_owned),
+        Offset::Custom { minutes } => {
             let seconds = i32::from(minutes) * 60;
             let days = seconds.div_euclid(SECS_IN_DAY);
             let seconds = seconds.rem_euclid(SECS_IN_DAY);
