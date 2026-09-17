@@ -746,12 +746,12 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
             ScalarKind::String => Ok(Some(self.py.string(decoded))),
             ScalarKind::Boolean(value) => Ok(Some(self.py.flag(value))),
             ScalarKind::Integer(radix) => self.build_integer(decoded, radix.value(), span),
-            ScalarKind::Float => self.build_float(decoded),
+            ScalarKind::Float => self.build_float(decoded, span),
             ScalarKind::DateTime => self.build_datetime(decoded, span),
         }
     }
 
-    fn build_float(&mut self, decoded: &str) -> PyResult<Option<Bound<'py, PyAny>>> {
+    fn build_float(&mut self, decoded: &str, span: Span) -> PyResult<Option<Bound<'py, PyAny>>> {
         // fast path for default value in signature
         if self.parse_float.is(self.py.get_type::<PyFloat>())
             && let Ok(value) = decoded.parse::<f64>()
@@ -759,12 +759,21 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
             return Ok(Some(self.py.float(value)?));
         }
 
-        let value = match self.parse_float.call1((decoded,)) {
+        Ok(self.custom_float(span))
+    }
+
+    #[cold]
+    fn custom_float(&mut self, span: Span) -> Option<Bound<'py, PyAny>> {
+        // the callback sees the document's own text, separators included
+        let input = self.source.input();
+        let literal = &input[span.start()..span.end().min(input.len())];
+
+        let value = match self.parse_float.call1((literal,)) {
             Ok(value) => value,
             Err(error) => {
                 self.failed(error);
 
-                return Ok(None);
+                return None;
             }
         };
 
@@ -774,10 +783,10 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
                 "parse_float must not return dicts or lists",
             ));
 
-            return Ok(None);
+            return None;
         }
 
-        Ok(Some(value))
+        Some(value)
     }
 
     fn build_integer(
