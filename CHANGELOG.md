@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [0.4.2] - 17.09.2026
 
+### Added
+
+- Add an online [playground](https://lava-sh.github.io/toml-rs-online).
+
 ### Changed
 
 - Optimize `toml_rs.loads()`
