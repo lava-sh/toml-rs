@@ -142,8 +142,10 @@ fn type_str(value: &Bound<'_, PyAny>) -> &'static str {
         "array"
     } else if value.is_exact_instance_of::<PyDict>() {
         "table"
-    } else {
+    } else if value.is_instance_of::<PyDate>() || value.is_instance_of::<PyTime>() {
         "datetime"
+    } else {
+        "value"
     }
 }
 
