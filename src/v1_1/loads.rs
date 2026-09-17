@@ -454,7 +454,7 @@ impl<'py, 'i> RawReceiver<'py, 'i, '_> {
 
         Ok(Some(current))
     }
-    
+
     fn step(
         &mut self,
         from: &Bound<'py, PyDict>,
