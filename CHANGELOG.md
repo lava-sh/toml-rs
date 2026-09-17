@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ### Changed
 
-- Optimize `toml_ts.loads()`
+- Optimize `toml_rs.loads()`
 
 ## [0.4.1] - 23.08.2026
 
