@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.2] - 17.09.2026
+
+### Added
+
+- Add an online [playground](https://lava-sh.github.io/toml-rs-online).
+
 ### Changed
 
 - Optimize `toml_rs.loads()`
@@ -69,9 +75,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 [site-toml]: https://toml.io/en
 
-[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.2...HEAD
 
-
+[0.4.2]: https://github.com/lava-sh/toml-rs/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/lava-sh/toml-rs/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/lava-sh/toml-rs/compare/0.3.16...0.4.0
 [0.3.16]: https://github.com/lava-sh/toml-rs/compare/0.3.15...0.3.16
