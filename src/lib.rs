@@ -35,27 +35,9 @@ mod toml_rs {
     ) -> PyResult<Py<PyAny>> {
         match toml_version {
             "1.0.0" => {
-                use toml_v1::{
-                    Spanned,
-                    de::{DeTable, DeValue},
-                };
+                let parsed = crate::v1::loads::load(py, toml_string, parse_float)?;
 
-                let parsed = DeTable::parse(toml_string).map_err(|err| {
-                    TOMLDecodeError::new_err((
-                        err.to_string(),
-                        toml_string.to_string(),
-                        err.span().map_or(0, |s| s.start),
-                    ))
-                })?;
-
-                let toml = crate::v1::loads::toml_to_python(
-                    py,
-                    &Spanned::new(parsed.span(), DeValue::Table(parsed.into_inner())),
-                    parse_float,
-                    toml_string,
-                )?;
-
-                Ok(toml.unbind())
+                Ok(parsed.into_any().unbind())
             }
             "1.1.0" => {
                 let parsed = crate::v1_1::loads::load(py, toml_string, parse_float)?;
