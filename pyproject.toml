@@ -61,7 +61,7 @@ tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
     { include-group = "pytest" },
     "pytest-pyodide == 0.59.2",
-    "pytest-httpserver == 1.1.5",
+    "pytest-httpserver == 1.2.0",
 ]
 # https://pypi.org/project/tomli/2.3.1
 # It is fully compatible with TOML v1.0.0
@@ -96,7 +96,7 @@ bench = [
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars[plot] == 1.44.2",
+    "polars[plot] == 2.0.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]
