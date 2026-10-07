@@ -1,7 +1,8 @@
 use pyo3::types::{
-    PyAnyMethods, PyBoolMethods, PyDateAccess, PyDeltaAccess, PyListMethods, PyStringMethods,
-    PyTimeAccess, PyTupleMethods, PyTzInfoAccess,
+    PyAnyMethods, PyBoolMethods, PyListMethods, PyStringMethods, PyTupleMethods, PyTzInfoAccess,
 };
+#[cfg(not(Py_LIMITED_API))]
+use pyo3::types::{PyDateAccess, PyDeltaAccess, PyTimeAccess};
 use toml_edit::{Array, InlineTable, Item, Offset, Table, Value};
 
 use crate::{impl_dumps, to_toml, toml_dt};

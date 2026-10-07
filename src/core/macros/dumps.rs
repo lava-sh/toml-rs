@@ -338,7 +338,25 @@ macro_rules! impl_dumps {
                         return None;
                     }
                     let delta = utc_offset.cast::<pyo3::types::PyDelta>().ok()?;
-                    let seconds = delta.get_days() * 86400 + delta.get_seconds();
+
+                    #[rustfmt::skip]
+                    let seconds = cfg_select! {
+                        not(Py_LIMITED_API) => delta.get_days() * 86400 + delta.get_seconds(),
+                        Py_LIMITED_API => {
+                            // days * 86400 + seconds
+                            delta
+                                .getattr(pyo3::intern!(delta.py(), "days"))
+                                .ok()?
+                                .extract::<i32>()
+                                .ok()? * 86400
+                            + delta
+                                .getattr(pyo3::intern!(delta.py(), "seconds"))
+                                .ok()?
+                                .extract::<i32>()
+                                .ok()?
+                        }
+                    };
+
                     Some(Offset::Custom {
                         minutes: i16::try_from(seconds / 60).ok()?,
                     })
