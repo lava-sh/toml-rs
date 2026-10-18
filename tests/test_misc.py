@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Unlicense
 # SPDX-FileCopyrightText: 2026 chirizxc
 import copy
-import datetime
+import datetime as dt
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -85,7 +85,7 @@ def test_deepcopy() -> None:
         "bliibaa": {
             "diibaa": {
                 "offsettime": [
-                    datetime.datetime(
+                    dt.datetime(
                         1979,
                         5,
                         27,
@@ -93,7 +93,7 @@ def test_deepcopy() -> None:
                         32,
                         0,
                         999999,
-                        tzinfo=datetime.timezone(datetime.timedelta(hours=-7)),
+                        tzinfo=dt.timezone(dt.timedelta(hours=-7)),
                     ),
                 ],
             },

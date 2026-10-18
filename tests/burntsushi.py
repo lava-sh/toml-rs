@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Unlicense
 # SPDX-FileCopyrightText: 2026 chirizxc
 
-import datetime
+import datetime as dt
 from typing import Any
 
 
@@ -18,17 +18,17 @@ def convert(obj: Any) -> Any:  # noqa: PLR0911
         return {"type": "integer", "value": str(obj)}
     if isinstance(obj, float):
         return {"type": "float", "value": _normalize_float_str(str(obj))}
-    if isinstance(obj, datetime.datetime):
+    if isinstance(obj, dt.datetime):
         val = _normalize_datetime_str(obj.isoformat())
         if obj.tzinfo:
             return {"type": "datetime", "value": val}
         return {"type": "datetime-local", "value": val}
-    if isinstance(obj, datetime.time):
+    if isinstance(obj, dt.time):
         return {
             "type": "time-local",
             "value": _normalize_localtime_str(str(obj)),
         }
-    if isinstance(obj, datetime.date):
+    if isinstance(obj, dt.date):
         return {
             "type": "date-local",
             "value": str(obj),
