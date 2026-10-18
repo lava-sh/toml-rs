@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 import pytest
 import toml_rs
@@ -330,14 +330,14 @@ def test_metadata(toml_version: toml_rs._lib.TomlVersion) -> None:
                     "key_col": (1, 3),
                     "key_line": 5,
                     "key_raw": "dob",
-                    "value": datetime.datetime(
+                    "value": dt.datetime(
                         1979,
                         5,
                         27,
                         7,
                         32,
-                        tzinfo=datetime.timezone(
-                            datetime.timedelta(days=-1, seconds=57600),
+                        tzinfo=dt.timezone(
+                            dt.timedelta(days=-1, seconds=57600),
                         ),
                     ),
                     "value_col": (7, 31),
