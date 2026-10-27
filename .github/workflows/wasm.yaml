@@ -68,6 +68,7 @@ jobs:
           MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ matrix.platform.pyemscripten-version }}
         with:
           container: off
+          rust-toolchain: nightly
           sccache: *is_pull_request
           args: >-
             --out dist
