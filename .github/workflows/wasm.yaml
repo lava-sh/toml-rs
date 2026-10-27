@@ -19,8 +19,8 @@ jobs:
         platform:
           - python-version: "3.13"
             # pyodide:
-            # 0.28.0a3 - 0.29.4 (emscripten 4.0.9)
-            pyodide-version: "0.29.4"
+            # 0.28.0a3 - 0.29.5 (emscripten 4.0.9)
+            pyodide-version: "0.29.5"
             pyemscripten-version: "2025_0"
             emsdk-version: "4.0.9"
             rust-toolchain: *rust-nightly
