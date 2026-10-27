@@ -1,4 +1,6 @@
 [alias]
 fmt-nightly = [
-    "fmt", "--all", "--", "--config-path", ".rustfmt.nightly.toml",
+    "fmt", "--all",
+    "--",
+    "--config-path", ".rustfmt.nightly.toml",
 ]

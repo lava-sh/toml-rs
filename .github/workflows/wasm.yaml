@@ -4,7 +4,6 @@ on:
   workflow_call:
 
 env:
-  __rust_nightly: &rust-nightly "nightly-2026-10-17"
   __is_pull_request: &is_pull_request ${{ github.event_name == 'pull_request' }}
 
 jobs:
@@ -18,11 +17,10 @@ jobs:
         platform:
           - python-version: "3.13"
             # pyodide:
-            # 0.28.0a3 - 0.29.4 (emscripten 4.0.9)
-            pyodide-version: "0.29.4"
+            # 0.28.0a3 - 0.29.5 (emscripten 4.0.9)
+            pyodide-version: "0.29.5"
             pyemscripten-version: "2025_0"
             emsdk-version: "4.0.9"
-            rust-toolchain: *rust-nightly
             rustflags: >-
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
@@ -36,7 +34,6 @@ jobs:
             pyodide-version: "314.0.7"
             pyemscripten-version: "2026_0"
             emsdk-version: "5.0.3"
-            rust-toolchain: *rust-nightly
             rustflags: >-
               -C link-arg=-sSIDE_MODULE=2
               -C link-arg=-sWASM_BIGINT
@@ -81,7 +78,7 @@ jobs:
           MATURIN_PYEMSCRIPTEN_PLATFORM_VERSION: ${{ matrix.platform.pyemscripten-version }}
         with:
           container: off
-          rust-toolchain: ${{ matrix.platform.rust-toolchain }}
+          rust-toolchain: nightly
           args: >-
             --out dist
             --release
