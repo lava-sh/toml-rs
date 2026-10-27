@@ -6,10 +6,10 @@ on:
 env:
   UV_LINK_MODE: copy
   #
-  (^_^): &interpreters            "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
-  ○_○: &interpreters_without_pypy "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t"
+  __interpreters_without_pypy: &interpreters_without_pypy "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t"
+  __interpreters:              &interpreters              "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
   #
-  \^_^\: &is_pull_request ${{ github.event_name == 'pull_request' }}
+  __is_pull_request: &is_pull_request ${{ github.event_name == 'pull_request' }}
 
 jobs:
   windows:
@@ -54,18 +54,32 @@ jobs:
         with:
           enable-cache: *is_pull_request
 
+      - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
+        if: *is_pull_request
+        with:
+          version: "v2.0.0-rc.1"
+          pr-comment: false
+          github-cache: true
+          cache-executables: true
+          cache-dir: ${{ runner.temp }}/kache
+          cache-key-prefix: kache-${{ matrix.platform.target }}
+
       - name: "Build wheels"
         if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
+          container: off
           target: ${{ matrix.platform.target }}
-          sccache: *is_pull_request
           args: >-
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
+
+      - name: "kache stats"
+        if: *is_pull_request
+        run: kache stats --full
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true
