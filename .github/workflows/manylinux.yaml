@@ -32,7 +32,7 @@ jobs:
             runner: ubuntu-latest,
             target: i686-unknown-linux-gnu,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
+            maturin-build-args: "--features mimalloc --zig",
           }
           - {
             # ARM64
