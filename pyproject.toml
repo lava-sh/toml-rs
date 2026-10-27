@@ -69,10 +69,10 @@ tomli-1 = ["tomli == 2.3.1"]
 # https://pypi.org/project/tomli/2.4.1
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.5.0"]
-nox = ["nox == 2026.8.17"]
+nox = ["nox == 2026.10.20"]
 ci = [
-    "ty == 0.0.89",
-    "ruff == 0.17.1",
+    "ty == 0.0.92",
+    "ruff == 0.17.3",
     { include-group = "nox" },
     { include-group = "pytest" },
     { include-group = "maturin" },
@@ -96,7 +96,7 @@ bench = [
     "rtoml",
     { include-group = "tomli-1-1" },
     "tomli-w",
-    "polars[plot] == 2.0.0",
+    "polars[plot] == 2.1.0",
     "vl-convert-python == 1.9.0.post1",
     "py-cpuinfo2 == 10.1.1",
 ]
