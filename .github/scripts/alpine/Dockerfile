@@ -2,8 +2,8 @@ FROM docker.io/library/python:3.14-alpine
 
 RUN apk add --no-cache build-base
 
-COPY --from=rustlang/rust:stable-alpine /usr/local/cargo /root/.cargo
-COPY --from=rustlang/rust:stable-alpine /usr/local/rustup /root/.rustup
+COPY --from=rustlang/rust:alpine /usr/local/cargo /root/.cargo
+COPY --from=rustlang/rust:alpine /usr/local/rustup /root/.rustup
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
