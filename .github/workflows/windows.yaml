@@ -25,16 +25,14 @@ jobs:
             runner: windows-latest,
             target: x86_64-pc-windows-msvc,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # x86 (32-bit)
             runner: windows-latest,
             target: i686-pc-windows-msvc,
             interpreter: *interpreters_without_pypy,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # ARM64
@@ -65,7 +63,6 @@ jobs:
           cache-key-prefix: kache-${{ matrix.platform.target }}
 
       - name: "Build wheels"
-        if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           container: off
@@ -80,16 +77,6 @@ jobs:
       - name: "kache stats"
         if: *is_pull_request
         run: kache stats --full
-
-      - name: "Build PGO wheel"
-        if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel@main # zizmor: ignore[unpinned-uses]
-        with:
-          target: ${{ matrix.platform.target }}
-          rust-toolchain: stable
-          maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
-          python-interpreter: ${{ matrix.platform.interpreter }}
-          pgo-training-command: "{python} benchmark/pgo.py"
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
