@@ -2,5 +2,5 @@
 fmt-nightly = [
     "fmt", "--all",
     "--",
-    "--config-path", "rustfmt.toml",
+    "--config-path", ".rustfmt.nightly.toml",
 ]
