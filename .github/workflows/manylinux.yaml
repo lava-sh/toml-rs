@@ -4,9 +4,9 @@ on:
   workflow_call:
 
 env:
-  ○_○: &interpreters "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
+  __interpreters: &interpreters "3.11 3.12 3.13 3.14 3.14t 3.15 3.15t pypy3.11"
   #
-  (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
+  __is_pull_request: &is_pull_request ${{ github.event_name == 'pull_request' }}
 
 jobs:
   linux:
@@ -84,19 +84,61 @@ jobs:
         with:
           enable-cache: *is_pull_request
 
+      - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
+        if: *is_pull_request
+        with:
+          version: "v2.0.0-rc.1"
+          pr-comment: false
+          github-cache: true
+          cache-executables: true
+          cache-dir: ${{ github.workspace }}/.kache-store
+          cache-key-prefix: kache-${{ matrix.platform.target }}
+
+      - name: "Configure Docker options"
+        env:
+          IS_PULL_REQUEST: *is_pull_request
+        run: |
+          options=(-e CI)
+          if [ "$IS_PULL_REQUEST" = "true" ]; then
+            options+=(
+              -e RUSTC_WRAPPER=/kache-bin/kache
+              -e "KACHE_CACHE_DIR=$GITHUB_WORKSPACE/.kache-store"
+              -e "KACHE_RUNTIME_DIR=/kache-run"
+              -e KACHE_CACHE_EXECUTABLES
+              -e KACHE_LOG
+              -v "$(dirname "$(command -v kache)"):/kache-bin:ro"
+              -v "$KACHE_RUNTIME_DIR:/kache-run"
+            )
+          fi
+          printf 'DOCKER_OPTIONS=%s\n' "${options[*]}" >> "$GITHUB_ENV"
+
       - name: "Build wheels"
         if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
-          sccache: *is_pull_request
           manylinux: auto
+          docker-options: ${{ env.DOCKER_OPTIONS }}
           args: >-
             --release
             --out dist
             --interpreter ${{ matrix.platform.interpreter }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
+
+      - name: "Fix store ownership"
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          owner="$(id -u):$(id -g)"
+          for dir in "$GITHUB_WORKSPACE/.kache-store" "$KACHE_RUNTIME_DIR"; do
+            if [ -d "$dir" ]; then
+              sudo chown -R "$owner" "$dir"
+            fi
+          done
+
+      - name: "kache stats"
+        if: always() && github.event_name == 'pull_request'
+        run: kache stats --full || true
 
       - name: "Build PGO wheel"
         if: matrix.platform.use-pgo == true

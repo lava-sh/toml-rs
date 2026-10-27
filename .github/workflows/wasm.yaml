@@ -4,7 +4,7 @@ on:
   workflow_call:
 
 env:
-  (^_^): &is_pull_request ${{ github.event_name == 'pull_request' }}
+  __is_pull_request: &is_pull_request ${{ github.event_name == 'pull_request' }}
 
 jobs:
   wasm:
@@ -61,6 +61,16 @@ jobs:
         with:
           enable-cache: *is_pull_request
 
+      - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
+        if: *is_pull_request
+        with:
+          version: "v2.0.0-rc.1"
+          pr-comment: false
+          github-cache: true
+          cache-executables: true
+          cache-dir: ${{ runner.temp }}/kache
+          cache-key-prefix: kache-${{ matrix.platform.emsdk-version }}
+
       - name: "Build WASM wheel"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         env:
@@ -69,13 +79,16 @@ jobs:
         with:
           container: off
           rust-toolchain: nightly
-          sccache: *is_pull_request
           args: >-
             --out dist
             --release
             --target wasm32-unknown-emscripten
             --interpreter python${{ matrix.platform.python-version }}
             --compatibility pypi
+
+      - name: "kache stats"
+        if: *is_pull_request
+        run: kache stats --full
 
       - name: "Download pyodide"
         uses: pyodide/pyodide-actions/download-pyodide@012fa537869d343726d01863a34b773fc4d96a14 # v2
