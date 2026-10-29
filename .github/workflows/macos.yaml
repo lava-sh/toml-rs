@@ -27,7 +27,7 @@ jobs:
           }
           - {
             # Apple Silicon M1-M4
-            runner: macos-latest,
+            runner: xcode-27,
             target: aarch64-apple-darwin,
             interpreter: *interpreters,
             python-arch: aarch64,
@@ -35,7 +35,7 @@ jobs:
           }
           - {
             # Universal binary (Intel + Apple Silicon)
-            runner: macos-latest,
+            runner: xcode-27,
             target: universal2-apple-darwin,
             interpreter: *interpreters,
             python-arch: aarch64,

@@ -18,7 +18,7 @@ concurrency:
 jobs:
   notify:
     name: "Telegram notification"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: "Send Telegram notification for new issue or pull request"
         uses: reagento/relator@879d895c8d7f44cfe7471bda4f5449c233e6f986 # v1.7.1

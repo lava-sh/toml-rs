@@ -23,8 +23,8 @@ jobs:
           "pypy3.11",
         ]
         os: [
-          "ubuntu-latest",
-          "windows-latest",
+          "ubuntu-26.04",
+          "windows-2025",
         ]
 
     steps:
@@ -47,7 +47,7 @@ jobs:
         shell: bash
         run: |
           uv venv .venv --python ${{ matrix.python-version }}
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
             echo ".venv/Scripts" >> "$GITHUB_PATH"
             echo "PYO3_PYTHON=.venv/Scripts/python" >> "$GITHUB_ENV"
             echo "UV_LINK_MODE=copy" >> "$GITHUB_ENV"

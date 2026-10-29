@@ -9,7 +9,7 @@ env:
 jobs:
   wasm:
     name: "wasm32-unknown-emscripten / python ${{ matrix.platform.python-version }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:

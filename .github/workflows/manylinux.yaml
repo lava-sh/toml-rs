@@ -21,14 +21,14 @@ jobs:
         platform:
           - {
             # AMD64
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: x86_64-unknown-linux-gnu,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # x86 (32-bit)
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: i686-unknown-linux-gnu,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc --zig",
@@ -42,31 +42,31 @@ jobs:
           }
           - {
             # ARMv7 (32-bit)
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: armv7-unknown-linux-gnueabihf,
             interpreter: *interpreters,
           }
           - {
             # IBM System z (s390x)
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: s390x-unknown-linux-gnu,
             interpreter: *interpreters,
           }
           - {
             # PowerPC64 Little Endian
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: powerpc64le-unknown-linux-gnu,
             interpreter: *interpreters,
           }
           - {
             # PowerPC64 Big Endian
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: powerpc64-unknown-linux-gnu,
             interpreter: *interpreters,
           }
           - {
             # RISC-V 64-bit
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: riscv64gc-unknown-linux-gnu,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc",

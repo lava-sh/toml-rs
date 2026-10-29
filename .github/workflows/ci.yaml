@@ -33,7 +33,7 @@ jobs:
   cargo-fmt:
     name: "cargo fmt"
     if: *skip_lints
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -49,7 +49,7 @@ jobs:
   cargo-clippy:
     name: "cargo clippy"
     if: *skip_lints
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,7 +70,7 @@ jobs:
   tools:
     name: ${{ matrix.name }}
     if: *skip_lints
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     strategy:
       matrix:
@@ -108,7 +108,7 @@ jobs:
   tests-alpine:
     name: "tests / alpine / python 3.14"
     if: *skip_tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -173,7 +173,7 @@ jobs:
     name: "build sdist"
     if: >-
       ${{ !contains(github.event.pull_request.labels.*.name, 'skip: wheels build') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -200,7 +200,7 @@ jobs:
       }}
 
     name: "Publish to PyPI"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [
       build-sdist,
       manylinux,
@@ -240,7 +240,7 @@ jobs:
     if: ${{ github.ref_type == 'tag' && always() && !failure() && !cancelled() }}
 
     name: "Publish to GitHub Release"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: [
       build-sdist,
       manylinux,
