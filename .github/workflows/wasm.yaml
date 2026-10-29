@@ -64,7 +64,7 @@ jobs:
       - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
         if: *is_pull_request
         with:
-          version: "v2.0.0-rc.1"
+          version: "v2.0.0-rc.3"
           pr-comment: false
           github-cache: true
           cache-executables: true
