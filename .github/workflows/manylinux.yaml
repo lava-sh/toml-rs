@@ -24,8 +24,7 @@ jobs:
             runner: ubuntu-latest,
             target: x86_64-unknown-linux-gnu,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # x86 (32-bit)
@@ -39,8 +38,7 @@ jobs:
             runner: ubuntu-26.04-arm,
             target: aarch64-unknown-linux-gnu,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # ARMv7 (32-bit)
@@ -87,7 +85,7 @@ jobs:
       - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
         if: *is_pull_request
         with:
-          version: "v2.0.0-rc.1"
+          version: "v2.0.0-rc.3"
           pr-comment: false
           github-cache: true
           cache-executables: true
@@ -113,7 +111,6 @@ jobs:
           printf 'DOCKER_OPTIONS=%s\n' "${options[*]}" >> "$GITHUB_ENV"
 
       - name: "Build wheels"
-        if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
           target: ${{ matrix.platform.target }}
@@ -139,16 +136,6 @@ jobs:
       - name: "kache stats"
         if: always() && github.event_name == 'pull_request'
         run: kache stats --full || true
-
-      - name: "Build PGO wheel"
-        if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel@main # zizmor: ignore[unpinned-uses]
-        with:
-          target: ${{ matrix.platform.target }}
-          rust-toolchain: stable
-          maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
-          python-interpreter: ${{ matrix.platform.interpreter }}
-          pgo-training-command: "{python} benchmark/pgo.py"
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

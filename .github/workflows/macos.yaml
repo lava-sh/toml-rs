@@ -22,22 +22,23 @@ jobs:
             runner: macos-26-intel,
             target: x86_64-apple-darwin,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            python-arch: x86_64,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # Apple Silicon M1-M4
             runner: macos-latest,
             target: aarch64-apple-darwin,
             interpreter: *interpreters,
-            maturin-build-args: "--features mimalloc",
-            use-pgo: true,
+            python-arch: aarch64,
+            maturin-build-args: "--features mimalloc --pgo",
           }
           - {
             # Universal binary (Intel + Apple Silicon)
             runner: macos-latest,
             target: universal2-apple-darwin,
             interpreter: *interpreters,
+            python-arch: aarch64,
             maturin-build-args: "--features mimalloc",
           }
 
@@ -46,47 +47,46 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: "Install uv"
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: *is_pull_request
-
       - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
         if: *is_pull_request
         with:
-          version: "v2.0.0-rc.1"
+          version: "v2.0.0-rc.3"
           pr-comment: false
           github-cache: true
           cache-executables: true
           cache-dir: ${{ runner.temp }}/kache
           cache-key-prefix: kache-${{ matrix.platform.target }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          enable-cache: *is_pull_request
+
+      - name: "Install Python interpreters"
+        id: interpreters
+        shell: bash
+        env:
+          PYTHON_VERSIONS: ${{ matrix.platform.interpreter }}
+          UV_PYTHON_ARCH: ${{ matrix.platform.python-arch }}
+        run: bash .github/scripts/install-python.sh
+
       - name: "Build wheels"
-        if: matrix.platform.use-pgo != true
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        env:
+          KACHE_LOG: "kache::path_normalizer=off"
         with:
           container: off
           target: ${{ matrix.platform.target }}
           args: >-
             --release
             --out dist
-            --interpreter ${{ matrix.platform.interpreter }}
+            --interpreter ${{ steps.interpreters.outputs.paths }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
 
       - name: "kache stats"
         if: *is_pull_request
         run: kache stats --full
-
-      - name: "Build PGO wheel"
-        if: matrix.platform.use-pgo == true
-        uses: lava-sh/build-pgo-wheel@main # zizmor: ignore[unpinned-uses]
-        with:
-          target: ${{ matrix.platform.target }}
-          rust-toolchain: 1.98.1
-          maturin-build-args: ${{ matrix.platform.maturin-build-args || '' }}
-          python-interpreter: ${{ matrix.platform.interpreter }}
-          pgo-training-command: "{python} benchmark/pgo.py"
 
       - name: "Upload wheels"
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
