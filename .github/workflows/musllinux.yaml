@@ -24,14 +24,14 @@ jobs:
         platform:
           - {
             # AMD64
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: x86_64-unknown-linux-musl,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # x86 (32-bit)
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: i686-unknown-linux-musl,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
@@ -45,21 +45,21 @@ jobs:
           }
           - {
             # ARMv7 (32-bit)
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: armv7-unknown-linux-musleabihf,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # PowerPC64 Little Endian
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: powerpc64le-unknown-linux-musl,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
           }
           - {
             # RISC-V 64-bit
-            runner: ubuntu-latest,
+            runner: ubuntu-26.04,
             target: riscv64gc-unknown-linux-musl,
             interpreter: *interpreters,
             maturin-build-args: "--features mimalloc"
