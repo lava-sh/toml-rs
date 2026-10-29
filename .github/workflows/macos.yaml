@@ -22,6 +22,7 @@ jobs:
             runner: macos-26-intel,
             target: x86_64-apple-darwin,
             interpreter: *interpreters,
+            python-arch: x86_64,
             maturin-build-args: "--features mimalloc --pgo",
           }
           - {
@@ -29,6 +30,7 @@ jobs:
             runner: macos-latest,
             target: aarch64-apple-darwin,
             interpreter: *interpreters,
+            python-arch: aarch64,
             maturin-build-args: "--features mimalloc --pgo",
           }
           - {
@@ -36,6 +38,7 @@ jobs:
             runner: macos-latest,
             target: universal2-apple-darwin,
             interpreter: *interpreters,
+            python-arch: aarch64,
             maturin-build-args: "--features mimalloc",
           }
 
@@ -43,11 +46,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: "Install uv"
-        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
-        with:
-          enable-cache: *is_pull_request
 
       - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
         if: *is_pull_request
@@ -59,6 +57,19 @@ jobs:
           cache-dir: ${{ runner.temp }}/kache
           cache-key-prefix: kache-${{ matrix.platform.target }}
 
+      - name: "Install uv"
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          enable-cache: *is_pull_request
+
+      - name: "Install Python interpreters"
+        id: interpreters
+        shell: bash
+        env:
+          PYTHON_VERSIONS: ${{ matrix.platform.interpreter }}
+          UV_PYTHON_ARCH: ${{ matrix.platform.python-arch }}
+        run: bash .github/scripts/install-python.sh
+
       - name: "Build wheels"
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         env:
@@ -69,7 +80,7 @@ jobs:
           args: >-
             --release
             --out dist
-            --interpreter ${{ matrix.platform.interpreter }}
+            --interpreter ${{ steps.interpreters.outputs.paths }}
             ${{ matrix.platform.maturin-build-args || '' }}
             --compatibility pypi
 
