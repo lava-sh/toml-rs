@@ -6,6 +6,8 @@ on:
 env:
   FORCE_COLOR: "1"
   CARGO_TERM_COLOR: always
+  #
+  __is_pull_request: &is_pull_request ${{ github.event_name == 'pull_request' }}
 
 jobs:
   tests:
@@ -22,7 +24,7 @@ jobs:
           "3.15", "3.15t",
           "pypy3.11",
         ]
-        os: [
+        runner: [
           "ubuntu-26.04",
           "windows-2025",
         ]
@@ -35,13 +37,16 @@ jobs:
       - name: "Install uv"
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          enable-cache: false
+          enable-cache: *is_pull_request
 
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-        if: github.event_name == 'pull_request' && github.run_attempt == 1
+      - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
+        if: *is_pull_request
         with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
-          shared-key: ${{ matrix.os }}-${{ matrix.python-version }}
+          pr-comment: false
+          github-cache: true
+          cache-executables: true
+          cache-dir: ${{ runner.temp }}/kache
+          cache-key-prefix: kache-${{ matrix.runner }}-${{ matrix.python-version }}
 
       - name: "Create and activate .venv"
         shell: bash
@@ -61,6 +66,10 @@ jobs:
 
       - name: "Run maturin"
         run: maturin build --out wheels --features mimalloc
+
+      - name: "kache stats"
+        if: *is_pull_request
+        run: kache stats --full
 
       - name: "Install built wheel"
         run: uv pip install toml-rs --no-index --find-links wheels --force-reinstall
