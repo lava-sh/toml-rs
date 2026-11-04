@@ -56,10 +56,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: kunobi-ninja/kache-action@ad7317540dcdd71c904f7a60a87b620a0c0e67ed # v1
         if: *is_pull_request
         with:
-          lookup-only: false # zizmor: ignore[cache-poisoning]
+          pr-comment: false
+          github-cache: true
+          cache-executables: true
+          cache-dir: ${{ runner.temp }}/kache
+          cache-key-prefix: kache-${{ matrix.target }}
 
       - uses: dtolnay/rust-toolchain@nightly # zizmor: ignore[unpinned-uses]
         with:
@@ -195,8 +199,8 @@ jobs:
     # if the python wheel build jobs are skipped, there are no artifacts to validate
     if: >-
       ${{
-        always() && !failure() && !cancelled() &&
-        !contains(github.event.pull_request.labels.*.name, 'skip: wheels build')
+        !contains(github.event.pull_request.labels.*.name, 'skip: wheels build') &&
+        always() && !failure() && !cancelled()
       }}
 
     name: "Publish to PyPI"
@@ -237,7 +241,11 @@ jobs:
         run: uv publish --trusted-publishing=always 'wheels-*/*'
 
   release-github:
-    if: ${{ github.ref_type == 'tag' && always() && !failure() && !cancelled() }}
+    if: >-
+      ${{
+        github.ref_type == 'tag' &&
+        always() && !failure() && !cancelled()
+      }}
 
     name: "Publish to GitHub Release"
     runs-on: ubuntu-26.04
