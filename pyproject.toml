@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin == 1.15.0"]
+requires = ["maturin == 1.16.0"]
 build-backend = "maturin"
 
 [tool.maturin]
@@ -50,29 +50,29 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-typos = ["typos == 1.51.1"]
-zizmor = ["zizmor == 1.31.1"]
-rumdl = ["rumdl == 0.3.0"]
+typos = ["typos == 1.52.0"]
+zizmor = ["zizmor == 1.32.0"]
+rumdl = ["rumdl == 0.3.2"]
 maturin = [
-    "maturin == 1.15.0 ; sys_platform != 'linux'",
-    "maturin[patchelf] == 1.15.0 ; sys_platform == 'linux'",
+    "maturin == 1.16.0 ; sys_platform != 'linux'",
+    "maturin[patchelf] == 1.16.0 ; sys_platform == 'linux'",
 ]
-pytest = ["pytest == 9.1.1"]
+pytest = ["pytest == 9.2.0"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
     { include-group = "pytest" },
-    "pytest-pyodide == 0.59.2",
+    "pytest-pyodide == 0.59.4",
     "pytest-httpserver == 1.2.0",
 ]
-# https://pypi.org/project/tomli/2.3.1
+# https://pypi.org/project/tomli/2.3.2
 # It is fully compatible with TOML v1.0.0
-tomli-1 = ["tomli == 2.3.1"]
-# https://pypi.org/project/tomli/2.4.1
+tomli-1 = ["tomli == 2.3.2"]
+# https://pypi.org/project/tomli/2.5.0
 # Version 2.4.1 and later are compatible with TOML v1.1.0
 tomli-1-1 = ["tomli == 2.5.0"]
 nox = ["nox == 2026.10.20"]
 ci = [
-    "ty == 0.0.92",
+    "ty == 0.0.97",
     "ruff == 0.17.3",
     { include-group = "nox" },
     { include-group = "pytest" },
