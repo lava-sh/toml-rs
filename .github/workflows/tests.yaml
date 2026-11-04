@@ -11,8 +11,8 @@ env:
 
 jobs:
   tests:
-    name: "${{ matrix.os }} / python ${{ matrix.python-version }}"
-    runs-on: ${{ matrix.os }}
+    name: "${{ matrix.runner }} / python ${{ matrix.python-version }}"
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
