@@ -178,3 +178,13 @@ def test_incorrect_suffix(toml_version: toml_rs._lib.TomlVersion) -> None:
             match="`_` may only go between digits, expected nothing",
     ):
         tomllib.loads(t1, toml_version=toml_version)
+
+
+def test_recursion_limit() -> None:
+    depth = 8000
+    t = "a = " + "[" * depth + "]" * depth
+
+    with pytest.raises(tomllib.TOMLDecodeError) as exc:
+        tomllib.loads(t)
+
+    assert "max recursion depth met" in str(exc.value)
