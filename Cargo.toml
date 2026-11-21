@@ -1,6 +1,6 @@
 [package]
 name = "toml-rs"
-version = "0.4.3"
+version = "0.4.4"
 edition = "2024"
 license = "Unlicense"
 repository = "https://github.com/lava-sh/toml-rs"
@@ -68,7 +68,7 @@ toml_edit_v1 = {
 ##############################################################
 toml = {
     git = "https://github.com/lava-sh/toml",
-    rev = "37be28f1d54fd44fd3cf8c02ea5fbed91011988c",
+    rev = "451c87c134ed523be81d420271e18e4d59ee37a9",
     features = [
         "fast_hash", # uses `foldhash`
         "unbounded", # disables default recursion limit
@@ -77,7 +77,7 @@ toml = {
 }
 toml_parser = {
     git = "https://github.com/lava-sh/toml",
-    rev = "37be28f1d54fd44fd3cf8c02ea5fbed91011988c",
+    rev = "451c87c134ed523be81d420271e18e4d59ee37a9",
     features = [
         "std",
         "simd",
@@ -86,7 +86,7 @@ toml_parser = {
 }
 toml_edit = {
     git = "https://github.com/lava-sh/toml",
-    rev = "37be28f1d54fd44fd3cf8c02ea5fbed91011988c",
+    rev = "451c87c134ed523be81d420271e18e4d59ee37a9",
     features = [
         "serde",
         "unbounded",
