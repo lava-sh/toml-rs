@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 ## [Unreleased] - ReleaseDate
 
+## [0.4.4] - 23.11.2026
+- Enforce a maximum nesting depth (240) in the parser; deeper documents now yield `TOMLDecodeError` instead of a stack overflow (`SIGSEGV`).
+  ([#322][gh-pull-322] by [@chirizxc][gh-chirizxc], reported by [@tomerblum][gh-tomerblum] via email)
+
 ## [0.4.3] - 18.10.2026
 
 ### Added
@@ -72,10 +76,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 [gh-pull-231]: https://github.com/lava-sh/toml-rs/pull/231
 [gh-pull-245]: https://github.com/lava-sh/toml-rs/pull/245
 [gh-pull-274]: https://github.com/lava-sh/toml-rs/pull/274
+[gh-pull-322]: https://github.com/lava-sh/toml-rs/pull/322
 
 [gh-chirizxc]: https://github.com/chirizxc
 [gh-dimbleby]: https://github.com/dimbleby
 [gh-mermyly]: https://github.com/mermyly
+[gh-tomerblum]: https://github.com/tomerblum
 
 [gh-pyodide]: https://github.com/pyodide/pyodide
 [gh-pyo3]: https://github.com/pyo3/pyo3
@@ -85,8 +91,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0).
 
 [site-toml]: https://toml.io/en
 
-[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.3...HEAD
+[Unreleased]: https://github.com/lava-sh/toml-rs/compare/0.4.4...HEAD
 
+[0.4.4]: https://github.com/lava-sh/toml-rs/compare/0.4.3...0.4.4
 [0.4.3]: https://github.com/lava-sh/toml-rs/compare/0.4.2...0.4.3
 [0.4.2]: https://github.com/lava-sh/toml-rs/compare/0.4.1...0.4.2
 [0.4.1]: https://github.com/lava-sh/toml-rs/compare/0.4.0...0.4.1
