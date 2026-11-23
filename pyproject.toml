@@ -50,9 +50,9 @@ Issues = "https://github.com/lava-sh/toml-rs/issues"
 Changelog = "https://github.com/lava-sh/toml-rs/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-typos = ["typos == 1.52.0"]
+typos = ["typos == 1.52.2"]
 zizmor = ["zizmor == 1.32.0"]
-rumdl = ["rumdl == 0.3.2"]
+rumdl = ["rumdl == 0.3.5"]
 maturin = [
     "maturin == 1.16.0 ; sys_platform != 'linux'",
     "maturin[patchelf] == 1.16.0 ; sys_platform == 'linux'",
@@ -61,8 +61,8 @@ pytest = ["pytest == 9.2.0"]
 tomli-w = ["tomli-w == 1.2.0"]
 wasm-test = [
     { include-group = "pytest" },
-    "pytest-pyodide == 0.59.4",
-    "pytest-httpserver == 1.2.0",
+    "pytest-pyodide == 0.60.0",
+    "pytest-httpserver == 1.2.1",
 ]
 # https://pypi.org/project/tomli/2.3.2
 # It is fully compatible with TOML v1.0.0
@@ -72,8 +72,8 @@ tomli-1 = ["tomli == 2.3.2"]
 tomli-1-1 = ["tomli == 2.5.0"]
 nox = ["nox == 2026.10.20"]
 ci = [
-    "ty == 0.0.97",
-    "ruff == 0.17.3",
+    "ty == 0.0.107",
+    "ruff == 0.17.6",
     { include-group = "nox" },
     { include-group = "pytest" },
     { include-group = "maturin" },

@@ -13,10 +13,12 @@ use toml::value::Offset;
 use toml_parser::{
     ErrorSink, Expected, ParseError, Raw, Source, Span,
     decoder::{Encoding, ScalarKind},
-    parser::{EventReceiver, ValidateWhitespace},
+    parser::{EventReceiver, RecursionGuard, ValidateWhitespace},
 };
 
 use crate::{create_py_datetime, error::DecodeError, parse_int};
+
+const MAX_DEPTH: u32 = 240;
 
 trait PyBuild<'py>: Copy {
     fn py(self) -> Python<'py>;
@@ -982,10 +984,9 @@ pub fn load<'py>(
     };
     let mut errors = Option::<ParseError>::None;
     {
-        let mut validated =
-            ValidateWhitespace::new(&mut receiver as &mut dyn EventReceiver, parsed);
-
-        toml_parser::parser::parse_document(&tokens, &mut validated, &mut errors);
+        let mut receiver = ValidateWhitespace::new(&mut receiver as &mut dyn EventReceiver, parsed);
+        let mut recursion = RecursionGuard::new(&mut receiver, MAX_DEPTH);
+        toml_parser::parser::parse_document(&tokens, &mut recursion, &mut errors);
     }
 
     receiver.flush_deferred();
