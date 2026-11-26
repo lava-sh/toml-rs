@@ -93,10 +93,12 @@ toml_edit = {
     ]
 }
 
+# mimalloc v3
 [target.'cfg(not(any(target_os = "macos", target_os = "windows")))'.dependencies]
 mimalloc = {
     optional = true,
-    version = "=0.1.52",
+    tag = "v3.7.1",
+    git = "https://github.com/microsoft/mimalloc.git",
     features = [
         "override",
         "local_dynamic_tls",
@@ -106,21 +108,21 @@ mimalloc = {
 [target.'cfg(target_os = "macos")'.dependencies]
 mimalloc = {
     optional = true,
-    version = "=0.1.52",
+    tag = "v3.7.1",
+    git = "https://github.com/microsoft/mimalloc.git",
     # See: https://github.com/lava-sh/toml-rs/issues/229
     #
     # mimalloc "override" feature installs process-wide malloc interposition and
     # replaces macOS malloc zone/fork hooks when the extension is imported via dlopen.
     # That breaks fork-based subprocess spawning, e.g., asyncio/playwright can fail.
-    features = [
-        "local_dynamic_tls",
-    ]
+    features = ["local_dynamic_tls"]
 }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 mimalloc = {
     optional = true,
-    version = "=0.1.52",
+    tag = "v3.7.1",
+    git = "https://github.com/microsoft/mimalloc.git",
     features = [],
 }
 
